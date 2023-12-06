@@ -13,6 +13,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "slate": "^0.101.1",
+    "slate-history": "^0.100.0",
+    "slate-react": "^0.101.2",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },

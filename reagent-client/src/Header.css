@@ -1,0 +1,12 @@
+header {
+  font-size: 24pt;
+  padding: 20px 60px;
+}
+
+.header-re {
+  color: #666;
+}
+
+.header-agent {
+  color: var(--reagent-purple);
+}

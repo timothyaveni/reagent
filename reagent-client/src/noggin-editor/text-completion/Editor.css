@@ -1,0 +1,26 @@
+/* todo hm, maybe we cycle through colors per parameter. same list every time though? */
+.parameter {
+  /* material blue */
+  background-color: #2196f3;
+  /* border: 1px solid #0c2336; */
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.slate-wrapper [role=textbox] {
+  border: 1px solid #ccc;
+  padding: 24px;
+  min-height: 400px;
+  border-radius: 0;
+
+  & > p {
+    padding: 0;
+    margin: 0;
+  }
+
+  /* active */
+  &:focus {
+    outline-color: var(--reagent-purple);
+  }
+}
