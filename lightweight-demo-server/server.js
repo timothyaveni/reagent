@@ -13,6 +13,7 @@ let lastSave = null;
 app.post('/save', (req, res) => {
   console.log(req.body);
   lastSave = req.body;
+  res.json({ ok: true });
 });
 
 app.get('/complete', async (req, res) => {
@@ -30,7 +31,7 @@ app.get('/complete', async (req, res) => {
       const paragraph = lastSave.editorValue[i];
       let messageText = '';
       for (const part of paragraph.children) {
-        console.log(part);
+        // console.log(part);
         if (part.text) { // ok could be a top level empty text node but ok to skip anyway
           messageText += part.text;
         } else if (part.type === 'parameter') {
@@ -44,7 +45,7 @@ app.get('/complete', async (req, res) => {
     }
   }
 
-  // console.log(prompt);
+  console.log(prompt);
 
   const openai = new OpenAI(process.env.OPENAI_API_KEY);
 

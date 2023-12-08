@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Editor as SlateEditor,
   Node,
@@ -20,7 +20,7 @@ import { getYjsDoc, syncedStore } from '@syncedstore/core';
 import { useSyncedStore } from '@syncedstore/react';
 import { WebsocketProvider } from 'y-websocket';
 
-import { withYjs, YjsEditor } from '@slate-yjs/core';
+import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 
 import * as Y from 'yjs';
 
@@ -28,6 +28,7 @@ import { v4 as uuid } from 'uuid';
 import { debounce } from 'underscore';
 
 import './Editor.css';
+import { Cursors } from './Cursors';
 
 const store = syncedStore({
   // promptDocument: 'xml',
@@ -458,10 +459,16 @@ const addNewParameter = (editor: ReactEditor) => {
   } as unknown as Node); // todo hehe
   console.log('post', [...Node.nodes(editor)]);
   Transforms.move(editor);
-  syncAllParams(editor);
+  // syncAllParams(editor);
 };
 
-const ParameterOptionControls = ({ parameterOptions }: { parameterOptions: any }) => {
+const ParameterOptionControls = ({
+  parameterOptions,
+  onChange,
+}: {
+  parameterOptions: any;
+  onChange?: any;
+}) => {
   console.log('damn', parameterOptions);
 
   return (
@@ -487,6 +494,7 @@ const ParameterOptionControls = ({ parameterOptions }: { parameterOptions: any }
                 // @ts-ignore
                 parameterOptions[parameterId].parameterName =
                   event.target.value;
+                onChange();
               }}
             />
             <br />
@@ -501,6 +509,7 @@ const ParameterOptionControls = ({ parameterOptions }: { parameterOptions: any }
                 parameterOptions[parameterId].maxLength = parseInt(
                   event.target.value,
                 );
+                onChange();
               }}
             />
           </div>
@@ -533,13 +542,28 @@ const Editor = () => {
   const options = useSyncedStore(store.options);
   const promptDocumentContainer = useSyncedStore(store.promptDocumentContainer);
   const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
+  // hm, it looks like it might still not be rerendering, especially when there are other (cross-tab comms?) users. it's okay, we're planning to put all this in slate soon. we'll revisit if there are still problems
+
+  const cursorName = localStorage.getItem('cursor-name');
+  const cursorColor = localStorage.getItem('cursor-color');
 
   const editor = useMemo(() => {
     const e = withSoftBreak(
       withChatCompletionsElements(
         withReact(
-          withParameterSyncing(
-            withHistory(withYjs(createEditor(), promptDocumentContainer.xml!)),
+          withCursors(
+            withParameterSyncing(
+              withHistory(
+                withYjs(createEditor(), promptDocumentContainer.xml!),
+              ),
+            ),
+            websocketProvider.awareness,
+            {
+              data: {
+                name: cursorName || 'Anonymous',
+                color: cursorColor || '#000000',
+              },
+            },
           ),
         ),
       ),
@@ -590,20 +614,22 @@ const Editor = () => {
         editor={editor}
         initialValue={initialValue}
         onChange={(value) => {
-          // console.log(value);
+          console.log('onchange', value);
           syncAllParams(editor);
           debouncedSave(value);
         }}
       >
-        <Editable
-          renderElement={renderElement}
-          onKeyDown={(event) => {
-            if (event.key === '@') {
-              event.preventDefault();
-              addNewParameter(editor);
-            }
-          }}
-        />
+        <Cursors>
+          <Editable
+            renderElement={renderElement}
+            onKeyDown={(event) => {
+              if (event.key === '@') {
+                event.preventDefault();
+                addNewParameter(editor);
+              }
+            }}
+          />
+        </Cursors>
       </Slate>
       {/* Settings:
       <br />
@@ -615,15 +641,17 @@ const Editor = () => {
           options.jsonMode = event.target.checked;
         }}
       /> */}
-      <ParameterOptionControls parameterOptions={parameterOptions} />
+      <ParameterOptionControls
+        parameterOptions={parameterOptions}
+        onChange={() => debouncedSave(editor.children)}
+      />
       <div>
         <h3>API URL</h3>
-        http://localhost:2348/complete?apiKey=1234{
-          Object.keys(parameterOptions).map((parameterId) => {
-            // @ts-ignore
-            return `&${parameterOptions[parameterId].parameterName}=`;
-          })
-        }
+        http://localhost:2348/complete?apiKey=1234
+        {Object.keys(parameterOptions).map((parameterId) => {
+          // @ts-ignore
+          return `&${parameterOptions[parameterId].parameterName}=`;
+        })}
       </div>
     </div>
   );

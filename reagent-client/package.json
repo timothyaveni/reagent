@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@slate-yjs/core": "^1.0.2",
+    "@slate-yjs/react": "^1.1.0",
     "@syncedstore/core": "^0.6.0",
     "@syncedstore/react": "^0.6.0",
     "@testing-library/jest-dom": "^5.17.0",
@@ -27,9 +28,9 @@
     "yjs": "^13.6.10"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "@types/underscore": "^1.11.15",
-    "@types/uuid": "^9.0.7"
+    "@types/uuid": "^9.0.7",
+    "react-app-rewired": "^2.2.1"
   }
 }
