@@ -5,6 +5,7 @@ import {
   Transforms,
   createEditor,
   Range,
+  BaseElement,
 } from 'slate';
 import {
   Editable,
@@ -24,26 +25,32 @@ import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 
 import * as Y from 'yjs';
 
-import { v4 as uuid } from 'uuid';
 import { debounce } from 'underscore';
 
 import './Editor.css';
 import { Cursors } from './Cursors';
 
+type ParameterOptions = {
+  maxLength: number;
+};
+
+interface ParameterNode extends BaseElement {
+  type: 'parameter';
+  parameterName: string;
+  parameterOptions: ParameterOptions;
+}
+
+interface ChatTurnNode extends BaseElement {
+  type: 'chat-turn';
+  speaker: 'user' | 'assistant';
+}
+
 const store = syncedStore({
-  // promptDocument: 'xml',
   promptDocumentContainer: {} as {
     xml: Y.XmlText;
   },
   options: {} as {
     jsonMode: boolean;
-  },
-  parameterOptions: {} as {
-    // todo: actually, we really should just make this part of the slate state so it's cut-and-pastable
-    [parameterId: string]: Y.Map<{
-      parameterName: string;
-      maxLength: number;
-    }>;
   },
 });
 
@@ -75,12 +82,6 @@ const Parameter = ({
   element: any;
 }) => {
   const selected = useSelected();
-  const parameterOptions = useSyncedStore(store.parameterOptions);
-  const parameter = parameterOptions[element.parameterId];
-
-  if (!parameter) {
-    return <span {...attributes}>{children}</span>;
-  }
 
   return (
     <span
@@ -88,8 +89,7 @@ const Parameter = ({
       className={'parameter' + (selected ? ' selected' : '')}
       contentEditable={false}
     >
-      {/* @ts-ignore */}
-      {parameter.parameterName}
+      {element.parameterName}
       {children}
     </span>
   );
@@ -106,11 +106,14 @@ const ChatTurn = ({
 }) => {
   const selected = useSelected();
 
-  const editor = useSlate() as unknown as ReactEditor; // i really think this will work...
+  const editor = useSlate() as ReactEditor; // i really think this will work...
 
   const setSpeaker = (speaker: 'user' | 'assistant') => {
     const path = ReactEditor.findPath(editor, element);
-    Transforms.setNodes(editor, { speaker } as unknown as any, { at: path }); // yikers
+    const update: Partial<ChatTurnNode> = {
+      speaker,
+    };
+    Transforms.setNodes(editor, update, { at: path });
     // force slate rerender on paragraphs
   };
 
@@ -131,7 +134,6 @@ const ChatTurn = ({
             role="button"
             onClick={setAssistant}
           >
-            {/* « User */}
             User
           </div>
         ) : (
@@ -140,7 +142,6 @@ const ChatTurn = ({
             role="button"
             onClick={setUser}
           >
-            {/* Assistant » */}
             Assistant
           </div>
         )}
@@ -159,20 +160,19 @@ const TextFragment = ({
   children: any;
   element: any;
 }) => {
-  const editor = useSlate() as unknown as ReactEditor; // todo
+  const editor = useSlate() as ReactEditor;
   const path = ReactEditor.findPath(editor, element);
 
   const previousTopLevelElement = [path[0] - 1];
 
-  const previousTopLevelElementNode = Node.get(editor, previousTopLevelElement);
+  // todo: i thiink the normalization means this is never undefined but it's a risky typecast
+  const previousTopLevelElementNode = Node.get(editor, previousTopLevelElement) as ChatTurnNode;
 
   let className;
 
-  // @ts-ignore
-  if (previousTopLevelElementNode?.speaker === 'user') {
+  if (previousTopLevelElementNode.speaker === 'user') {
     className = 'text-paragraph-user';
-    // @ts-ignore
-  } else if (previousTopLevelElementNode?.speaker === 'assistant') {
+  } else if (previousTopLevelElementNode.speaker === 'assistant') {
     className = 'text-paragraph-assistant';
   }
 
@@ -183,103 +183,8 @@ const TextFragment = ({
   );
 };
 
-const withParameterSyncing = (editor: any) => {
-  const {
-    insertFragment,
-    insertBreak,
-    insertSoftBreak,
-    insertNode,
-    insertText,
-
-    deleteForward,
-    deleteBackward,
-    deleteFragment,
-  } = editor;
-
-  // if there's a selection, inserts can delete text
-  // let's only do this for insertText for now -- this is where we need the optimization, and others get called e.g. on ctrl+z or ctrl+v where we might get new params
-  // ugh, that didn't fix it... screw it, we'll do it in onChange for now but def an optimization issue
-  const hasSelection = () => {
-    console.log('hasSelection', editor.selection);
-    if (editor.selection) {
-      // if range is empty
-      if (!Range.isCollapsed(editor.selection)) {
-        console.log('hasSelection true');
-        return true;
-      }
-    }
-
-    console.log('hasSelection false');
-    return false;
-  };
-
-  editor.deleteForward = (...args: any) => {
-    deleteForward(...args);
-    syncAllParams(editor);
-  };
-
-  editor.deleteBackward = (...args: any) => {
-    deleteBackward(...args);
-    syncAllParams(editor);
-  };
-
-  editor.deleteFragment = (...args: any) => {
-    deleteFragment(...args);
-    syncAllParams(editor);
-  };
-
-  editor.insertFragment = (...args: any) => {
-    // const nowHasSelection = hasSelection();
-    insertFragment(...args);
-    // if (nowHasSelection) {
-    syncAllParams(editor);
-    // }
-  };
-
-  editor.insertBreak = (...args: any) => {
-    // const nowHasSelection = hasSelection();
-    insertBreak(...args);
-    // if (nowHasSelection) {
-    syncAllParams(editor);
-    // }
-  };
-
-  editor.insertSoftBreak = (...args: any) => {
-    // const nowHasSelection = hasSelection();
-    insertSoftBreak(...args);
-    // if (nowHasSelection) {
-    syncAllParams(editor);
-    // }
-  };
-
-  editor.insertNode = (...args: any) => {
-    // const nowHasSelection = hasSelection();
-    insertNode(...args);
-    // if (nowHasSelection) {
-    syncAllParams(editor);
-    // }
-  };
-
-  editor.insertText = (...args: any) => {
-    const nowHasSelection = hasSelection();
-    insertText(...args);
-    if (nowHasSelection) {
-      syncAllParams(editor);
-    }
-  };
-
-  return editor;
-};
-
 const withChatCompletionsElements = (editor: any) => {
-  const {
-    isInline,
-    isVoid,
-    normalizeNode,
-    deleteForward,
-    deleteBackward,
-    deleteFragment,
-  } = editor;
+  const { isInline, isVoid, normalizeNode } = editor;
 
   editor.isInline = (element: any) => {
     if (element.type === 'parameter') {
@@ -316,7 +221,7 @@ const withChatCompletionsElements = (editor: any) => {
             type: 'chat-turn',
             speaker: 'user',
             children: [{ text: '' }],
-          } as unknown as Node,
+          } as ChatTurnNode,
           { at: [0] },
         );
       };
@@ -405,79 +310,54 @@ const withSoftBreak = (editor: any) => {
       type: 'chat-turn',
       speaker,
       children: [{ text: '' }],
-    } as unknown as Node); // todo hehe
+    } as ChatTurnNode);
     Transforms.move(editor);
   };
 
   return editor;
 };
 
-const syncAllParams = (editor: ReactEditor) => {
-  const parameterIds = [...Node.nodes(editor)]
+const getParameterElements = (editor: ReactEditor) => {
+  return [...Node.nodes(editor)]
     .filter(([node, path]: [any, number[]]) => {
       return node.type === 'parameter';
     })
-    .map(([node]: [any, any]) => node.parameterId);
-
-  const storeParameterIds = Object.keys(store.parameterOptions);
-  console.log({ storeParameterIds, parameterIds });
-
-  for (const parameterId of storeParameterIds) {
-    if (!parameterIds.includes(parameterId)) {
-      delete store.parameterOptions[parameterId];
-    }
-  }
-
-  let nextParamNumber = storeParameterIds.length + 1;
-
-  for (const parameterId of parameterIds) {
-    console.log(store.parameterOptions, Object.values(store.parameterOptions));
-    while (
-      Object.values(store.parameterOptions).some(
-        // @ts-ignore you are KILLING me here typescript
-        (p) => p.parameterName === `param${nextParamNumber}`,
-      )
-    ) {
-      nextParamNumber++;
-    }
-
-    if (!storeParameterIds.includes(parameterId)) {
-      store.parameterOptions[parameterId] = new Y.Map([
-        ['parameterName', `param${nextParamNumber}`],
-        ['maxLength', 500],
-      ]);
-    }
-  }
+    .map(([node, path]: [any, number[]]) => {
+      return node as ParameterNode;
+    });
 };
 
 const addNewParameter = (editor: ReactEditor) => {
-  console.log('pre', [...Node.nodes(editor)]);
+  const existingParameters = getParameterElements(editor);
+  let newIndex = existingParameters.length + 1;
+  while (existingParameters.some((p) => p.parameterName === `param${newIndex}`)) {
+    newIndex++;
+  }
+
   Transforms.insertNodes(editor, {
     type: 'parameter',
-    parameterId: uuid(),
+    parameterName: `param${newIndex}`,
     children: [{ text: '' }],
-  } as unknown as Node); // todo hehe
-  console.log('post', [...Node.nodes(editor)]);
+    parameterOptions: {
+      maxLength: 500,
+    },
+  } as ParameterNode);
+
   Transforms.move(editor);
-  // syncAllParams(editor);
 };
 
-const ParameterOptionControls = ({
-  parameterOptions,
-  onChange,
-}: {
-  parameterOptions: any;
-  onChange?: any;
-}) => {
-  console.log('damn', parameterOptions);
+const ParameterOptionControls = () => {
+  const editor = useSlate() as ReactEditor;
+  // todo we can bring this into a hook to make it more efficient, probably... and debounce it
+  const parameterElements = getParameterElements(editor);
 
   return (
     <div>
       <h3>Parameter Options</h3>
-      {Object.keys(parameterOptions).map((parameterId) => {
+      {parameterElements.map((element, i) => {
         return (
           <div
-            key={parameterId}
+            key={i} // always a little rough to use the index but there's no id, and using the name means the text field unfocuses when you change it
             className="parameter-control"
             style={{
               border: '1px solid #ccc',
@@ -488,13 +368,13 @@ const ParameterOptionControls = ({
             <input
               type="text"
               className="parameter-name-input"
-              // @ts-ignore
-              value={parameterOptions[parameterId].parameterName}
+              value={element.parameterName}
               onChange={(event) => {
-                // @ts-ignore
-                parameterOptions[parameterId].parameterName =
-                  event.target.value;
-                onChange();
+                const path = ReactEditor.findPath(editor, element);
+                const update: Partial<ParameterNode> = {
+                  parameterName: event.target.value,
+                };
+                Transforms.setNodes(editor, update, { at: path });
               }}
             />
             <br />
@@ -502,14 +382,15 @@ const ParameterOptionControls = ({
             <input
               type="number"
               className="parameter-max-length-input"
-              // @ts-ignore
-              value={parameterOptions[parameterId].maxLength}
+              value={element.parameterOptions.maxLength}
               onChange={(event) => {
-                // @ts-ignore
-                parameterOptions[parameterId].maxLength = parseInt(
-                  event.target.value,
-                );
-                onChange();
+                const path = ReactEditor.findPath(editor, element);
+                const update: Partial<ParameterNode> = {
+                  parameterOptions: {
+                    maxLength: parseInt(event.target.value),
+                  },
+                };
+                Transforms.setNodes(editor, update, { at: path });
               }}
             />
           </div>
@@ -522,7 +403,6 @@ const ParameterOptionControls = ({
 const save = async (value: any) => {
   const totalState = {
     editorValue: value,
-    parameterOptions: store.parameterOptions,
   };
 
   console.log('saving', totalState);
@@ -541,7 +421,7 @@ const debouncedSave = debounce(save, 1000);
 const Editor = () => {
   const options = useSyncedStore(store.options);
   const promptDocumentContainer = useSyncedStore(store.promptDocumentContainer);
-  const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
+  // const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
   // hm, it looks like it might still not be rerendering, especially when there are other (cross-tab comms?) users. it's okay, we're planning to put all this in slate soon. we'll revisit if there are still problems
 
   const cursorName = localStorage.getItem('cursor-name');
@@ -552,11 +432,7 @@ const Editor = () => {
       withChatCompletionsElements(
         withReact(
           withCursors(
-            withParameterSyncing(
-              withHistory(
-                withYjs(createEditor(), promptDocumentContainer.xml!),
-              ),
-            ),
+            withHistory(withYjs(createEditor(), promptDocumentContainer.xml!)),
             websocketProvider.awareness,
             {
               data: {
@@ -615,7 +491,6 @@ const Editor = () => {
         initialValue={initialValue}
         onChange={(value) => {
           console.log('onchange', value);
-          syncAllParams(editor);
           debouncedSave(value);
         }}
       >
@@ -625,11 +500,13 @@ const Editor = () => {
             onKeyDown={(event) => {
               if (event.key === '@') {
                 event.preventDefault();
+                // todo add a menu thing
                 addNewParameter(editor);
               }
             }}
           />
         </Cursors>
+        <ParameterOptionControls />
       </Slate>
       {/* Settings:
       <br />
@@ -641,17 +518,14 @@ const Editor = () => {
           options.jsonMode = event.target.checked;
         }}
       /> */}
-      <ParameterOptionControls
-        parameterOptions={parameterOptions}
-        onChange={() => debouncedSave(editor.children)}
-      />
+
       <div>
         <h3>API URL</h3>
         http://localhost:2348/complete?apiKey=1234
-        {Object.keys(parameterOptions).map((parameterId) => {
-          // @ts-ignore
+        {/* todo fix this with the new parameter setup */}
+        {/* {Object.keys(parameterOptions).map((parameterId) => {
           return `&${parameterOptions[parameterId].parameterName}=`;
-        })}
+        })} */}
       </div>
     </div>
   );
