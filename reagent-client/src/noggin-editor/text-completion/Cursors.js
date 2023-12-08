@@ -1,33 +1,33 @@
 import {
   // CursorOverlayData,
   useRemoteCursorOverlayPositions,
-} from '@slate-yjs/react'
-import { useRef } from 'react'
+} from '@slate-yjs/react';
+import { useRef } from 'react';
 
 import './Cursors.css';
 
 export function Cursors({ children }) {
-  const containerRef = useRef(null)
-  const [cursors] = useRemoteCursorOverlayPositions({ containerRef })
+  const containerRef = useRef(null);
+  const [cursors] = useRemoteCursorOverlayPositions({ containerRef });
 
   return (
     <div className="cursors" ref={containerRef}>
       {children}
-      {cursors.map(cursor => (
+      {cursors.map((cursor) => (
         <Selection key={cursor.clientId} {...cursor} />
       ))}
     </div>
-  )
+  );
 }
 
 function Selection({ data, selectionRects, caretPosition }) {
   if (!data) {
-    return null
+    return null;
   }
 
   const selectionStyle = {
     backgroundColor: data.color,
-  }
+  };
 
   return (
     <>
@@ -40,19 +40,19 @@ function Selection({ data, selectionRects, caretPosition }) {
       ))}
       {caretPosition && <Caret caretPosition={caretPosition} data={data} />}
     </>
-  )
+  );
 }
 
 function Caret({ caretPosition, data }) {
   const caretStyle = {
     ...caretPosition,
     background: data?.color,
-  }
+  };
 
   const labelStyle = {
     transform: 'translateY(-100%)',
     background: data?.color,
-  }
+  };
 
   return (
     <div style={caretStyle} className="caretMarker">
@@ -60,5 +60,5 @@ function Caret({ caretPosition, data }) {
         {data?.name}
       </div>
     </div>
-  )
+  );
 }
