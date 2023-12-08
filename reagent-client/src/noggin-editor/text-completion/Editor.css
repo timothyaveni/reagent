@@ -2,10 +2,17 @@
 .parameter {
   /* material blue */
   background-color: #2196f3;
-  /* border: 1px solid #0c2336; */
+  border: 1px solid white;
   color: white;
   padding: 2px 6px;
+  margin: 0 1px;
   border-radius: 3px;
+  /* box-sizing: border-box; */
+
+  &.selected {
+    /* background-color: #135388; */
+    border: 1px solid #0c2336;
+  }
 }
 
 .slate-wrapper [role=textbox] {
@@ -71,5 +78,20 @@
 
   &.text-paragraph-assistant {
     
+  }
+}
+
+.parameter-control {
+  .parameter-name-input {
+    font-size: 18px;
+    border: none;
+    border-bottom: 1px solid black;
+    padding: 4px;
+    margin-bottom: 12px;
+  }
+
+  .parameter-max-length-input {
+    font-size: 16px;
+    padding: 2px;
   }
 }

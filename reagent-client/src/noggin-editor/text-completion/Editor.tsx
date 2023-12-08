@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Editor as SlateEditor, Node, Transforms, createEditor } from 'slate';
+import {
+  Editor as SlateEditor,
+  Node,
+  Transforms,
+  createEditor,
+  Range,
+} from 'slate';
 import {
   Editable,
   ReactEditor,
@@ -18,6 +24,9 @@ import { withYjs, YjsEditor } from '@slate-yjs/core';
 
 import * as Y from 'yjs';
 
+import { v4 as uuid } from 'uuid';
+import { debounce } from 'underscore';
+
 import './Editor.css';
 
 const store = syncedStore({
@@ -27,6 +36,13 @@ const store = syncedStore({
   },
   options: {} as {
     jsonMode: boolean;
+  },
+  parameterOptions: {} as {
+    // todo: actually, we really should just make this part of the slate state so it's cut-and-pastable
+    [parameterId: string]: Y.Map<{
+      parameterName: string;
+      maxLength: number;
+    }>;
   },
 });
 
@@ -57,11 +73,22 @@ const Parameter = ({
   children: any;
   element: any;
 }) => {
-  // works similar to an @-mention but starting and ending with :
+  const selected = useSelected();
+  const parameterOptions = useSyncedStore(store.parameterOptions);
+  const parameter = parameterOptions[element.parameterId];
+
+  if (!parameter) {
+    return <span {...attributes}>{children}</span>;
+  }
 
   return (
-    <span {...attributes} className="parameter" contentEditable={false}>
-      {element.parameterId}
+    <span
+      {...attributes}
+      className={'parameter' + (selected ? ' selected' : '')}
+      contentEditable={false}
+    >
+      {/* @ts-ignore */}
+      {parameter.parameterName}
       {children}
     </span>
   );
@@ -96,9 +123,7 @@ const ChatTurn = ({
 
   return (
     <div {...attributes} className="chat-turn" contentEditable={false}>
-      <div
-        className={'chat-turn-inner' + (selected ? ' selected' : '')}
-      >
+      <div className={'chat-turn-inner' + (selected ? ' selected' : '')}>
         {element.speaker === 'user' ? (
           <div
             className="chat-turn-button chat-turn-button-user"
@@ -157,8 +182,103 @@ const TextFragment = ({
   );
 };
 
+const withParameterSyncing = (editor: any) => {
+  const {
+    insertFragment,
+    insertBreak,
+    insertSoftBreak,
+    insertNode,
+    insertText,
+
+    deleteForward,
+    deleteBackward,
+    deleteFragment,
+  } = editor;
+
+  // if there's a selection, inserts can delete text
+  // let's only do this for insertText for now -- this is where we need the optimization, and others get called e.g. on ctrl+z or ctrl+v where we might get new params
+  // ugh, that didn't fix it... screw it, we'll do it in onChange for now but def an optimization issue
+  const hasSelection = () => {
+    console.log('hasSelection', editor.selection);
+    if (editor.selection) {
+      // if range is empty
+      if (!Range.isCollapsed(editor.selection)) {
+        console.log('hasSelection true');
+        return true;
+      }
+    }
+
+    console.log('hasSelection false');
+    return false;
+  };
+
+  editor.deleteForward = (...args: any) => {
+    deleteForward(...args);
+    syncAllParams(editor);
+  };
+
+  editor.deleteBackward = (...args: any) => {
+    deleteBackward(...args);
+    syncAllParams(editor);
+  };
+
+  editor.deleteFragment = (...args: any) => {
+    deleteFragment(...args);
+    syncAllParams(editor);
+  };
+
+  editor.insertFragment = (...args: any) => {
+    // const nowHasSelection = hasSelection();
+    insertFragment(...args);
+    // if (nowHasSelection) {
+    syncAllParams(editor);
+    // }
+  };
+
+  editor.insertBreak = (...args: any) => {
+    // const nowHasSelection = hasSelection();
+    insertBreak(...args);
+    // if (nowHasSelection) {
+    syncAllParams(editor);
+    // }
+  };
+
+  editor.insertSoftBreak = (...args: any) => {
+    // const nowHasSelection = hasSelection();
+    insertSoftBreak(...args);
+    // if (nowHasSelection) {
+    syncAllParams(editor);
+    // }
+  };
+
+  editor.insertNode = (...args: any) => {
+    // const nowHasSelection = hasSelection();
+    insertNode(...args);
+    // if (nowHasSelection) {
+    syncAllParams(editor);
+    // }
+  };
+
+  editor.insertText = (...args: any) => {
+    const nowHasSelection = hasSelection();
+    insertText(...args);
+    if (nowHasSelection) {
+      syncAllParams(editor);
+    }
+  };
+
+  return editor;
+};
+
 const withChatCompletionsElements = (editor: any) => {
-  const { isInline, isVoid, normalizeNode } = editor;
+  const {
+    isInline,
+    isVoid,
+    normalizeNode,
+    deleteForward,
+    deleteBackward,
+    deleteFragment,
+  } = editor;
 
   editor.isInline = (element: any) => {
     if (element.type === 'parameter') {
@@ -266,59 +386,161 @@ const withChatCompletionsElements = (editor: any) => {
 };
 
 const withSoftBreak = (editor: any) => {
-  const { insertBreak } = editor;
-
   editor.insertBreak = () => {
-    // const { selection } = editor;
-
-    // if (selection) {
-    //   const [start] = Range.edges(selection);
-    //   const parent = Node.parent(editor, start.path);
-
-    //   if (editor.isInline(parent)) {
     return editor.insertText('\n');
-    //   }
-    // }
-
-    // insertBreak();
   };
 
   editor.insertSoftBreak = () => {
     // todo: add a chat turn, different from the one we'e currently in (the last one before the selection)
 
+    let speaker = 'user';
     const { selection } = editor;
+
+    if (selection) {
+      // todo
+    }
 
     Transforms.insertNodes(editor, {
       type: 'chat-turn',
-      speaker: 'user',
+      speaker,
       children: [{ text: '' }],
     } as unknown as Node); // todo hehe
     Transforms.move(editor);
-
-    // return editor.insertText('\n');
   };
 
   return editor;
 };
 
-// todo: we will probably do this imperatively someday instead of on every update
-const getAllParams = (editor: ReactEditor) => {
-  // console.log(
-  //   [...Node.nodes(editor)].filter(([node, path]: [any, number[]]) => {
-  //     return node.type === 'parameter';
-  //   }),
-  // );
+const syncAllParams = (editor: ReactEditor) => {
+  const parameterIds = [...Node.nodes(editor)]
+    .filter(([node, path]: [any, number[]]) => {
+      return node.type === 'parameter';
+    })
+    .map(([node]: [any, any]) => node.parameterId);
+
+  const storeParameterIds = Object.keys(store.parameterOptions);
+  console.log({ storeParameterIds, parameterIds });
+
+  for (const parameterId of storeParameterIds) {
+    if (!parameterIds.includes(parameterId)) {
+      delete store.parameterOptions[parameterId];
+    }
+  }
+
+  let nextParamNumber = storeParameterIds.length + 1;
+
+  for (const parameterId of parameterIds) {
+    console.log(store.parameterOptions, Object.values(store.parameterOptions));
+    while (
+      Object.values(store.parameterOptions).some(
+        // @ts-ignore you are KILLING me here typescript
+        (p) => p.parameterName === `param${nextParamNumber}`,
+      )
+    ) {
+      nextParamNumber++;
+    }
+
+    if (!storeParameterIds.includes(parameterId)) {
+      store.parameterOptions[parameterId] = new Y.Map([
+        ['parameterName', `param${nextParamNumber}`],
+        ['maxLength', 500],
+      ]);
+    }
+  }
 };
+
+const addNewParameter = (editor: ReactEditor) => {
+  console.log('pre', [...Node.nodes(editor)]);
+  Transforms.insertNodes(editor, {
+    type: 'parameter',
+    parameterId: uuid(),
+    children: [{ text: '' }],
+  } as unknown as Node); // todo hehe
+  console.log('post', [...Node.nodes(editor)]);
+  Transforms.move(editor);
+  syncAllParams(editor);
+};
+
+const ParameterOptionControls = ({ parameterOptions }: { parameterOptions: any }) => {
+  console.log('damn', parameterOptions);
+
+  return (
+    <div>
+      <h3>Parameter Options</h3>
+      {Object.keys(parameterOptions).map((parameterId) => {
+        return (
+          <div
+            key={parameterId}
+            className="parameter-control"
+            style={{
+              border: '1px solid #ccc',
+              padding: 10,
+              marginBottom: 10,
+            }}
+          >
+            <input
+              type="text"
+              className="parameter-name-input"
+              // @ts-ignore
+              value={parameterOptions[parameterId].parameterName}
+              onChange={(event) => {
+                // @ts-ignore
+                parameterOptions[parameterId].parameterName =
+                  event.target.value;
+              }}
+            />
+            <br />
+            Max length:{' '}
+            <input
+              type="number"
+              className="parameter-max-length-input"
+              // @ts-ignore
+              value={parameterOptions[parameterId].maxLength}
+              onChange={(event) => {
+                // @ts-ignore
+                parameterOptions[parameterId].maxLength = parseInt(
+                  event.target.value,
+                );
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const save = async (value: any) => {
+  const totalState = {
+    editorValue: value,
+    parameterOptions: store.parameterOptions,
+  };
+
+  console.log('saving', totalState);
+
+  await fetch('http://localhost:2348/save', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(totalState),
+  });
+};
+
+const debouncedSave = debounce(save, 1000);
 
 const Editor = () => {
   const options = useSyncedStore(store.options);
   const promptDocumentContainer = useSyncedStore(store.promptDocumentContainer);
+  const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
 
   const editor = useMemo(() => {
     const e = withSoftBreak(
       withChatCompletionsElements(
         withReact(
-          withHistory(withYjs(createEditor(), promptDocumentContainer.xml!)),
+          withParameterSyncing(
+            withHistory(withYjs(createEditor(), promptDocumentContainer.xml!)),
+          ),
         ),
       ),
     );
@@ -369,27 +591,21 @@ const Editor = () => {
         initialValue={initialValue}
         onChange={(value) => {
           // console.log(value);
-          getAllParams(editor);
+          syncAllParams(editor);
+          debouncedSave(value);
         }}
       >
         <Editable
           renderElement={renderElement}
           onKeyDown={(event) => {
-            if (event.key === ':') {
+            if (event.key === '@') {
               event.preventDefault();
-              Transforms.insertNodes(editor, {
-                type: 'parameter',
-                parameterId: 'param1',
-                children: [{ text: '' }],
-              } as unknown as Node); // todo hehe
-              Transforms.move(editor);
-            } else if (event.key === '@') {
-              // event.preventDefault();
+              addNewParameter(editor);
             }
           }}
         />
       </Slate>
-      Settings:
+      {/* Settings:
       <br />
       JSON output?{' '}
       <input
@@ -398,7 +614,17 @@ const Editor = () => {
         onChange={(event) => {
           options.jsonMode = event.target.checked;
         }}
-      />
+      /> */}
+      <ParameterOptionControls parameterOptions={parameterOptions} />
+      <div>
+        <h3>API URL</h3>
+        http://localhost:2348/complete?apiKey=1234{
+          Object.keys(parameterOptions).map((parameterId) => {
+            // @ts-ignore
+            return `&${parameterOptions[parameterId].parameterName}=`;
+          })
+        }
+      </div>
     </div>
   );
 };
