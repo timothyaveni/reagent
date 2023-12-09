@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
-import {
-  createEditor
-} from 'slate';
-import {
-  Editable,
-  Slate,
-  withReact,
-} from 'slate-react';
+import { createEditor } from 'slate';
+import { Editable, Slate, withReact } from 'slate-react';
 import { withHistory } from 'slate-history';
 
 import { useSyncedStore } from '@syncedstore/react';
@@ -16,7 +10,7 @@ import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 import './TextEditor.css';
 import { Cursors } from './Cursors';
 import { ParameterOptionControls } from './ParameterOptionControls';
-import { withChatCompletionsElements, withSoftBreak } from './editorPlugins';
+import { withChatElements, withPlainTextElements } from './editorPlugins';
 import { TextFragment } from './TextFragment';
 import { ChatTurn } from './ChatTurn';
 import { Parameter } from './Parameter';
@@ -32,11 +26,10 @@ const initialValue: any[] = [
 
 type Props = {
   documentKey: string;
+  textType: 'plain' | 'chat';
 };
 
-const TextEditor = ({
-  documentKey,
-}: Props) => {
+const TextEditor = ({ documentKey, textType }: Props) => {
   const promptDocuments = useSyncedStore(store.promptDocuments);
   // const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
   // hm, it looks like it might still not be rerendering, especially when there are other (cross-tab comms?) users. it's okay, we're planning to put all this in slate soon. we'll revisit if there are still problems
@@ -45,21 +38,21 @@ const TextEditor = ({
   const cursorColor = localStorage.getItem('cursor-color');
 
   const editor = useMemo(() => {
-    const e = withSoftBreak(
-      withChatCompletionsElements(
-        withReact(
-          withCursors(
-            withHistory(withYjs(createEditor(), promptDocuments[documentKey]!)),
-            websocketProvider.awareness,
-            {
-              data: {
-                name: cursorName || 'Anonymous',
-                color: cursorColor || '#000000',
-              },
-            },
-          ),
-        ),
+    const withReagentAugmentations =
+      textType === 'chat' ? withChatElements : withPlainTextElements;
+
+    let e = withCursors(
+      withYjs(
+        withReagentAugmentations(withReact(withHistory(createEditor()))),
+        promptDocuments[documentKey]!,
       ),
+      websocketProvider.awareness,
+      {
+        data: {
+          name: cursorName || 'Anonymous',
+          color: cursorColor || '#000000',
+        },
+      },
     );
 
     return e;

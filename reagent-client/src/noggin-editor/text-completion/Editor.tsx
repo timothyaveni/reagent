@@ -7,9 +7,9 @@ interface Props {
 
 const Editor: React.FC<Props> = (props) => {
 
-  return (<>
-      <TextEditor documentKey="editor1" />
-      <TextEditor documentKey="editor2" />
+  return (<>  
+      <TextEditor documentKey="editor1" textType="plain" />
+      <TextEditor documentKey="editor2" textType="chat" />
     </>
   );
 };

@@ -1,0 +1,10 @@
+
+.text-paragraph {
+  padding: 12px;
+  margin: 0 0 12px;
+  box-sizing: border-box;
+
+  &.text-paragraph-chat-turn {
+    border-top: 1px solid #ccc;
+  }
+}

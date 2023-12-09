@@ -2,8 +2,12 @@ import { Node } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
 import { ChatTurnNode } from './editor-types';
 
+import './TextFragment.css';
+
 export const TextFragment = ({
-  attributes, children, element,
+  attributes,
+  children,
+  element,
 }: {
   attributes: any;
   children: any;
@@ -12,24 +16,34 @@ export const TextFragment = ({
   const editor = useSlate() as ReactEditor;
   const path = ReactEditor.findPath(editor, element);
 
-  const previousTopLevelElement = [path[0] - 1];
+  let className = 'text-paragraph';
 
-  // todo: i thiink the normalization means this is never undefined but it's a risky typecast
-  const previousTopLevelElementNode = Node.get(
-    editor,
-    previousTopLevelElement
-  ) as ChatTurnNode;
+  // in chat completion, the previous node is the chat turn
+  const previousTopLevelElementPath = [path[0] - 1];
 
-  let className;
+  if (previousTopLevelElementPath[0] >= 0) {
+    const previousTopLevelElement = Node.get(
+      editor,
+      previousTopLevelElementPath,
+    );
 
-  if (previousTopLevelElementNode.speaker === 'user') {
-    className = 'text-paragraph-user';
-  } else if (previousTopLevelElementNode.speaker === 'assistant') {
-    className = 'text-paragraph-assistant';
+    // @ts-ignore
+    if (previousTopLevelElement.type === 'chat-turn') {
+      className += ' text-paragraph-chat-turn';
+
+      const previousTopLevelElementNode =
+        previousTopLevelElement as ChatTurnNode;
+
+      if (previousTopLevelElementNode.speaker === 'user') {
+        className += ' text-paragraph-user';
+      } else if (previousTopLevelElementNode.speaker === 'assistant') {
+        className += ' text-paragraph-assistant';
+      }
+    }
   }
 
   return (
-    <p className={'text-paragraph ' + className} {...attributes}>
+    <p className={className} {...attributes}>
       {children}
     </p>
   );
