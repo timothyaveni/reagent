@@ -6,6 +6,13 @@ export const store = syncedStore({
   promptDocuments: {} as {
     [key: string]: Y.XmlText;
   },
+  documentParameters: {} as {
+    [key: string]: Y.Map<{
+      name: string;
+      maxLength: number;
+    }>;
+  },
+  documentParameterIds: [] as string[], // using Object.keys doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
   options: {} as {
     jsonMode: boolean;
   },

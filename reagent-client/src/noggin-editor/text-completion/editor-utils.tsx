@@ -3,6 +3,9 @@ import { ReactEditor } from 'slate-react';
 import { ParameterNode } from './editor-types';
 import { debounce } from 'underscore';
 
+import { v4 as uuid } from 'uuid';
+import { store } from './store';
+import { Y } from '@syncedstore/core';
 
 export const getParameterElements = (editor: ReactEditor) => {
   return [...Node.nodes(editor)]
@@ -15,19 +18,34 @@ export const getParameterElements = (editor: ReactEditor) => {
 };
 
 export const addNewParameter = (editor: ReactEditor) => {
-  const existingParameters = getParameterElements(editor);
-  let newIndex = existingParameters.length + 1;
-  while (existingParameters.some((p) => p.parameterName === `param${newIndex}`)) {
+  // todo: do this with the store's parameters, not the editor's
+  const existingParameterIds = store.documentParameterIds;
+  let newIndex = existingParameterIds.length + 1;
+  // @ts-ignore
+  while (Object.values(store.documentParameters).some((p) => p?.name === `param${newIndex}`)) {
     newIndex++;
   }
 
+  const id = uuid();
+
+  store.documentParameters[id] = new Y.Map([
+    ['name', `param${newIndex}`],
+    ['maxLength', 500],
+  ]);
+    // @ts-ignore
+    // name: `param${newIndex}`,
+    // maxLength: 500,
+  // };
+
   Transforms.insertNodes(editor, {
     type: 'parameter',
-    parameterName: `param${newIndex}`,
+    parameterId: id,
     children: [{ text: '' }],
-    parameterOptions: {
-      maxLength: 500,
-    },
+    // TODO(param-sync)
+    // parameterOptions: {
+    //   name: `param${newIndex}`,
+    //   maxLength: 500,
+    // },
   } as ParameterNode);
 
   Transforms.move(editor);

@@ -9,12 +9,11 @@ import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 
 import './TextEditor.css';
 import { Cursors } from './Cursors';
-import { ParameterOptionControls } from './ParameterOptionControls';
 import { withChatElements, withPlainTextElements } from './editorPlugins';
 import { TextFragment } from './TextFragment';
 import { ChatTurn } from './ChatTurn';
 import { Parameter } from './Parameter';
-import { addNewParameter } from './editor-utils';
+import { addNewParameter, getParameterElements } from './editor-utils';
 import { debouncedSave } from './editor-utils';
 import { store, websocketProvider } from './store';
 
@@ -74,6 +73,37 @@ const TextEditor = ({ documentKey, textType }: Props) => {
     }
   }, []);
 
+  // TODO: flow state dump 2023-12-08 17:12 -- need to keep a separate list of ids for each doc and merge for the control section. sync should be just for this doc.
+  const syncParameters = useCallback(() => {
+    const parameterOptionDict = store.documentParameters;
+
+    const parameterElements = getParameterElements(editor);
+    for (const element of parameterElements) {
+      console.log('sync', element)
+      if (!store.documentParameterIds.includes(element.parameterId)) {
+        console.log('没有');
+        store.documentParameterIds.push(element.parameterId);
+      }
+    }
+
+    // now delete any that are no longer in the editor
+    for (const id of store.documentParameterIds) {
+      if (!parameterElements.some((e) => e.parameterId === id)) {
+        // okay, so, the plan is to sync parameter metadata into the editor state so that copy-paste works.
+        // this is going to be yucky and i don't want to do it right now.
+        // another way to get most of the way there is to just keep metadata around -- this doesn't work if you, like, refresh the page (well, assuming the room gets killed), and it's a memory leak, but at least it works for now.
+        // we still won't *render* stale parameters, because we're still splicing old params out of the array, but we secretly keep their metadata in the dict.
+        // this isn't the real reason we have a separate array and object (that was to get the damn thing to rerender), but at least it gives us this for free
+        // TODO(param-sync)
+        // delete store.documentParameters[id];
+        store.documentParameterIds.splice(
+          store.documentParameterIds.indexOf(id),
+          1,
+        );
+      }
+    }
+  }, [editor]);
+
   return (
     <div
       style={{
@@ -88,6 +118,7 @@ const TextEditor = ({ documentKey, textType }: Props) => {
         initialValue={initialValue}
         onChange={(value) => {
           console.log('onchange', value);
+          syncParameters();
           debouncedSave(value);
         }}
       >
@@ -103,7 +134,6 @@ const TextEditor = ({ documentKey, textType }: Props) => {
             }}
           />
         </Cursors>
-        <ParameterOptionControls />
       </Slate>
       {/* Settings:
       <br />
