@@ -1,0 +1,20 @@
+.editor {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  & h2 {
+    margin: 12px 0;
+    color: #444;
+    font-size: 1.1em;
+  }
+
+  & .editor-main-column {
+    flex: 2;
+  }
+
+  & .editor-side-column {
+    flex: 1;
+    margin-left: 20px;
+  }
+}

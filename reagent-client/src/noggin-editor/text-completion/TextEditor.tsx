@@ -26,9 +26,10 @@ const initialValue: any[] = [
 type Props = {
   documentKey: string;
   textType: 'plain' | 'chat';
+  className?: string;
 };
 
-const TextEditor = ({ documentKey, textType }: Props) => {
+const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
   const promptDocuments = useSyncedStore(store.promptDocuments);
   // const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
   // hm, it looks like it might still not be rerendering, especially when there are other (cross-tab comms?) users. it's okay, we're planning to put all this in slate soon. we'll revisit if there are still problems
@@ -79,10 +80,16 @@ const TextEditor = ({ documentKey, textType }: Props) => {
 
     const parameterElements = getParameterElements(editor);
     for (const element of parameterElements) {
-      console.log('sync', element)
-      if (!store.documentParameterIdsByDocument[documentKey]!.includes(element.parameterId)) {
+      console.log('sync', element);
+      if (
+        !store.documentParameterIdsByDocument[documentKey]!.includes(
+          element.parameterId,
+        )
+      ) {
         console.log('没有');
-        store.documentParameterIdsByDocument[documentKey]!.push(element.parameterId);
+        store.documentParameterIdsByDocument[documentKey]!.push(
+          element.parameterId,
+        );
       }
     }
 
@@ -105,14 +112,7 @@ const TextEditor = ({ documentKey, textType }: Props) => {
   }, [editor]);
 
   return (
-    <div
-      style={{
-        width: 960,
-        margin: 'auto',
-        marginTop: 20,
-      }}
-      className="slate-wrapper"
-    >
+    <div className={'slate-wrapper ' + className}>
       <Slate
         editor={editor}
         initialValue={initialValue}
@@ -135,25 +135,6 @@ const TextEditor = ({ documentKey, textType }: Props) => {
           />
         </Cursors>
       </Slate>
-      {/* Settings:
-      <br />
-      JSON output?{' '}
-      <input
-        type="checkbox"
-        checked={options.jsonMode}
-        onChange={(event) => {
-          options.jsonMode = event.target.checked;
-        }}
-      /> */}
-
-      <div>
-        <h3>API URL</h3>
-        http://localhost:2348/complete?apiKey=1234
-        {/* todo fix this with the new parameter setup */}
-        {/* {Object.keys(parameterOptions).map((parameterId) => {
-          return `&${parameterOptions[parameterId].parameterName}=`;
-        })} */}
-      </div>
     </div>
   );
 };

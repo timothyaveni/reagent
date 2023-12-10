@@ -22,7 +22,7 @@ export const AllParameterOptionControls = (props: Props) => {
 
   return (
     <div>
-      <h3>Parameter Options</h3>
+      <h2>Noggin parameters</h2>
       {parameterElementIds.map((id) => {
         return <ParameterOptionControls id={id} key={id} />;
       })}
