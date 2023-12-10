@@ -12,7 +12,10 @@ export const store = syncedStore({
       maxLength: number;
     }>;
   },
-  documentParameterIds: [] as string[], // using Object.keys doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
+  // using Object.keys on documentParameters doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
+  documentParameterIdsByDocument: {} as {
+    [key: string]: string[];
+  },
   options: {} as {
     jsonMode: boolean;
   },
@@ -23,6 +26,9 @@ store.promptDocuments['editor2'] = new Y.XmlText();
 // so, we need to set a default jsonMode if it's not already set after yjs syncs, but we don't want to do it prematurely in case there *is* something to sync
 // (in the real world, the race condition doesn't matter bc the default is just coming from the same place in the backend db)
 // if we don't set a default then we get in trouble trying to render the component
+
+store.documentParameterIdsByDocument['editor1'] = [];
+store.documentParameterIdsByDocument['editor2'] = [];
 
 const doc = getYjsDoc(store);
 export const websocketProvider = new WebsocketProvider(

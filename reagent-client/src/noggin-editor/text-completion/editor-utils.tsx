@@ -1,11 +1,11 @@
 import { Node, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { ParameterNode } from './editor-types';
-import { debounce } from 'underscore';
+import { debounce, uniq } from 'underscore';
 
 import { v4 as uuid } from 'uuid';
-import { store } from './store';
 import { Y } from '@syncedstore/core';
+import { store } from './store';
 
 export const getParameterElements = (editor: ReactEditor) => {
   return [...Node.nodes(editor)]
@@ -19,10 +19,17 @@ export const getParameterElements = (editor: ReactEditor) => {
 
 export const addNewParameter = (editor: ReactEditor) => {
   // todo: do this with the store's parameters, not the editor's
-  const existingParameterIds = store.documentParameterIds;
+  const existingParameterIds = uniq(
+    Object.values(store.documentParameterIdsByDocument).flat(),
+  );
   let newIndex = existingParameterIds.length + 1;
-  // @ts-ignore
-  while (Object.values(store.documentParameters).some((p) => p?.name === `param${newIndex}`)) {
+  // so, this is a little awkward, because it's using the map to check for collisions, but probably that's a good thing so we don't get collisions with hidden un-GC'd params -- even though that's probably not a big deal -- anyway, we'll fix this with TODO(param-sync)
+  while (
+    Object.values(store.documentParameters).some(
+      // @ts-ignore
+      (p) => p?.name === `param${newIndex}`,
+    )
+  ) {
     newIndex++;
   }
 
@@ -32,9 +39,9 @@ export const addNewParameter = (editor: ReactEditor) => {
     ['name', `param${newIndex}`],
     ['maxLength', 500],
   ]);
-    // @ts-ignore
-    // name: `param${newIndex}`,
-    // maxLength: 500,
+  // @ts-ignore
+  // name: `param${newIndex}`,
+  // maxLength: 500,
   // };
 
   Transforms.insertNodes(editor, {
@@ -67,4 +74,3 @@ const save = async (value: any) => {
   });
 };
 export const debouncedSave = debounce(save, 1000);
-

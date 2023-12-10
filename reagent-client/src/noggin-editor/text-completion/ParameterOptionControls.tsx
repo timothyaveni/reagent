@@ -1,9 +1,24 @@
 import { useSyncedStore } from '@syncedstore/react';
 import { store } from './store';
 
-export const AllParameterOptionControls = () => {
+import { uniq } from 'underscore';
+
+type Props = {
+  // for now this is a prop, but it won't actually change throughout the lifetime of the app
+  // (i'm making the call now that changing the model/schema will require at least a page reload, at least for v0)
+  // what this means is that we can safely use this as a way to call into hooks, but we might get in trouble with a linter
+  documents: string[];
+};
+
+export const AllParameterOptionControls = (props: Props) => {
   console.log('apoc rerender');
-  const parameterElementIds = useSyncedStore(store.documentParameterIds);
+  const documentIdList: string[][] = [];
+  for (const documentId of props.documents) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    documentIdList.push(useSyncedStore(store.documentParameterIdsByDocument)[documentId]!);
+  }
+
+  const parameterElementIds = uniq(documentIdList.flat());
 
   return (
     <div>

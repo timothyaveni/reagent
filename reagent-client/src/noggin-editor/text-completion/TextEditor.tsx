@@ -80,14 +80,14 @@ const TextEditor = ({ documentKey, textType }: Props) => {
     const parameterElements = getParameterElements(editor);
     for (const element of parameterElements) {
       console.log('sync', element)
-      if (!store.documentParameterIds.includes(element.parameterId)) {
+      if (!store.documentParameterIdsByDocument[documentKey]!.includes(element.parameterId)) {
         console.log('没有');
-        store.documentParameterIds.push(element.parameterId);
+        store.documentParameterIdsByDocument[documentKey]!.push(element.parameterId);
       }
     }
 
     // now delete any that are no longer in the editor
-    for (const id of store.documentParameterIds) {
+    for (const id of store.documentParameterIdsByDocument[documentKey]!) {
       if (!parameterElements.some((e) => e.parameterId === id)) {
         // okay, so, the plan is to sync parameter metadata into the editor state so that copy-paste works.
         // this is going to be yucky and i don't want to do it right now.
@@ -96,8 +96,8 @@ const TextEditor = ({ documentKey, textType }: Props) => {
         // this isn't the real reason we have a separate array and object (that was to get the damn thing to rerender), but at least it gives us this for free
         // TODO(param-sync)
         // delete store.documentParameters[id];
-        store.documentParameterIds.splice(
-          store.documentParameterIds.indexOf(id),
+        store.documentParameterIdsByDocument[documentKey]!.splice(
+          store.documentParameterIdsByDocument[documentKey]!.indexOf(id),
           1,
         );
       }

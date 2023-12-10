@@ -11,7 +11,7 @@ const Editor: React.FC<Props> = (props) => {
     <>
       <TextEditor documentKey="editor1" textType="plain" />
       <TextEditor documentKey="editor2" textType="chat" />
-      <AllParameterOptionControls />
+      <AllParameterOptionControls documents={['editor1', 'editor2']} />
     </>
   );
 };
