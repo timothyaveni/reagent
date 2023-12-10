@@ -72,16 +72,5 @@
 }
 
 .parameter-control {
-  .parameter-name-input {
-    font-size: 18px;
-    border: none;
-    border-bottom: 1px solid black;
-    padding: 4px;
-    margin-bottom: 12px;
-  }
 
-  .parameter-max-length-input {
-    font-size: 16px;
-    padding: 2px;
-  }
 }

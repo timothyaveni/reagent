@@ -1,0 +1,11 @@
+.parameter-control {
+  /* border: 1px solid #ccc; */
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.parameter-name-input {
+  background: transparent;
+}
