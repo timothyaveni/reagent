@@ -94,7 +94,8 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     }
 
     // now delete any that are no longer in the editor
-    for (const id of store.documentParameterIdsByDocument[documentKey]!) {
+    const ids = [...store.documentParameterIdsByDocument[documentKey]!]; // I think we need to pre-compute to avoid the iterator bug
+    for (const id of ids) {
       if (!parameterElements.some((e) => e.parameterId === id)) {
         // okay, so, the plan is to sync parameter metadata into the editor state so that copy-paste works.
         // this is going to be yucky and i don't want to do it right now.
