@@ -1,0 +1,46 @@
+.editor {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  & h3 {
+    margin: 0;
+    color: #444;
+    font-size: 1.1em;
+  }
+
+  & .editor-main-column {
+    flex: 2;
+
+    & .editor-main-column-header {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      & .editor-main-column-header-title {
+        display: flex;
+        align-items: center;
+
+        & h3 {
+          margin-right: 20px;
+        }
+      }
+
+      & .editor-main-column-header-controls {
+        display: flex;
+        align-items: center;
+        /* margin-left: 40px; */
+      }
+
+      & .MuiFormControlLabel-label {
+        font-size: 12pt;
+      }
+    }
+  }
+
+  & .editor-side-column {
+    flex: 1;
+    margin-left: 60px;
+  }
+}
