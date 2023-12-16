@@ -2,7 +2,7 @@
 
 current dev env:
 ```
-reagent-client $ PORT=2347 HOST=localhost npx y-websocket
-reagent-client $ npm run dev
+reagent-remix-vite $ PORT=2347 HOST=localhost npx y-websocket
+reagent-remix-vite $ npm run dev
 lightweight-demo-server $ node server.js # probably
 ```
