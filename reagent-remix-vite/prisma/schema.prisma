@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ONLY ONE should be available -- multi-login is handled with the UserMerges table
+  // the relation is on the other table because prisma wants it on the non-optional side
+  // so there's no actual constraint to make sure we don't have more than one auth for a user
+  // (though we do have a unique constraint on the individual tables)
+  githubAuth  GitHubAuth?  @relation("UserGitHubAuth")
+  ltiv1p3Auth LTIv1p3Auth? @relation("LTIv1p3Auth")
+
+  merges1 UserMerge[] @relation("user1")
+  merges2 UserMerge[] @relation("user2")
+
+  rejectedMerges1 RejectedMerge[] @relation("user1")
+  rejectedMerges2 RejectedMerge[] @relation("user2")
+
+  editedNogginRevisions NogginRevisions[]
+
+  teams         Team[]
+  organizations OrganizationMembership[]
+  Noggins       Noggins[]
+}
+
+model GitHubAuth {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User @relation("UserGitHubAuth", fields: [userId], references: [id])
+  userId Int  @unique
+
+  githubId String @unique
+}
+
+model LTIv1p3Auth {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User @relation("LTIv1p3Auth", fields: [userId], references: [id])
+  userId Int  @unique
+
+  issuer  String
+  subject String
+}
+
+model UserMerge {
+  id        Int       @id @default(autoincrement())
+  user1     User      @relation("user1", fields: [user1Id], references: [id])
+  user1Id   Int
+  user2     User      @relation("user2", fields: [user2Id], references: [id])
+  user2Id   Int
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+// don't nag the user about a merge opportunity
+model RejectedMerge {
+  id        Int      @id @default(autoincrement())
+  user1     User     @relation("user1", fields: [user1Id], references: [id])
+  user1Id   Int
+  user2     User     @relation("user2", fields: [user2Id], references: [id])
+  user2Id   Int
+  createdAt DateTime @default(now())
+}
+
+
+model Organization {
+  id        Int                      @id @default(autoincrement())
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+  deletedAt DateTime?
+  name      String
+  teams     Team[]
+  members   OrganizationMembership[]
+  noggins   Noggins[]
+}
+
+model OrganizationMembership {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  // 'member' | 'manager' | 'administrator'
+  role String
+}
+
+model Team {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  name      String    @unique
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+
+  members User[]
+
+  nogginRevisions NogginRevisions[]
+  Noggins         Noggins[]
+}
+
+
+model Noggins {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  title     String
+  slug      String    @unique
+
+  // a noggin can only be owned by a team or a user, not both
+  userOwner   User? @relation(fields: [userOwnerId], references: [id])
+  userOwnerId Int
+  teamOwner   Team? @relation(fields: [teamOwnerId], references: [id])
+  teamOwnerId Int
+
+  // both team-owned and user-owned noggins can have a parent organization. required for team-owned noggins
+  parentOrg    Organization? @relation(fields: [parentOrgId], references: [id])
+  parentOrgId  Int?
+
+  nogginRevisions NogginRevisions[]
+}
+
+model NogginRevisions {
+  id        Int       @id @default(autoincrement())
+  noggin    Noggins   @relation(fields: [nogginId], references: [id])
+  nogginId  Int
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  content   String
+  editors   User[]
+  Team      Team?     @relation(fields: [teamId], references: [id])
+  teamId    Int?
+}

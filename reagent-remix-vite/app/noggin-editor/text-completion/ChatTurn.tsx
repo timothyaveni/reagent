@@ -4,7 +4,9 @@ import { ReactEditor, useSelected, useSlate } from 'slate-react';
 import { ChatTurnNode } from './editor-types';
 
 export const ChatTurn = ({
-  attributes, children, element,
+  attributes,
+  children,
+  element,
 }: {
   attributes: any;
   children: any;

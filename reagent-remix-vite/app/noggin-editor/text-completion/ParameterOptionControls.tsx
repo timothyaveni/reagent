@@ -5,7 +5,7 @@ import { uniq } from 'underscore';
 
 import './ParameterControls.css';
 import { Button, TextField } from '@mui/material';
-import T from './i18n/T';
+import T from '../../i18n/T';
 
 type Props = {
   // for now this is a prop, but it won't actually change throughout the lifetime of the app

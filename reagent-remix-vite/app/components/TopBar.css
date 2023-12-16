@@ -1,0 +1,29 @@
+.top-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1rem;
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
+
+  & .site-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #444;
+  }
+
+  & nav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    & a {
+      margin-right: 3rem;
+      color: #444;
+      text-decoration: none;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+  }
+}

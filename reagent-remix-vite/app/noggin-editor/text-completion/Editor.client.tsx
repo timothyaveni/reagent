@@ -8,7 +8,7 @@ import { FormControlLabel, FormGroup, Icon, Switch, Tooltip } from '@mui/materia
 import HelpIcon from '@mui/icons-material/Help';
 
 import './Editor.css';
-import T, { t } from './i18n/T';
+import T, { t } from '../../i18n/T';
 
 interface Props {
   // Define your component's props here
