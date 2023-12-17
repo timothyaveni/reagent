@@ -8,7 +8,8 @@ import {
 import { Form, useActionData } from '@remix-run/react';
 import { requireUser } from '~/auth/auth.server';
 import { t } from '~/i18n/T';
-import { MAX_NAME_LENGTH, createOrganization } from '~/models/organization';
+import { createOrganization } from '~/models/organization.server';
+import { MAX_NAME_LENGTH } from '~/shared/organization';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
@@ -41,15 +42,14 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     );
   }
 
-  const organization = await createOrganization({
+  const organization = await createOrganization(context, {
     name: name!,
-    ownerId: user.id,
   });
 
   return redirect(`/organizations/${organization.id}`);
 };
 
-export default function OrganizationsList() {
+export default function OrganizationNew() {
   const actionData = useActionData<typeof action>();
   const nameError = actionData?.errors?.['name'];
 

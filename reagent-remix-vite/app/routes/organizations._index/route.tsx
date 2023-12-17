@@ -1,7 +1,6 @@
 import { LoaderFunctionArgs, json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import { requireUser } from '~/auth/auth.server';
-import { indexOrganizations } from '~/models/organization';
+import { indexOrganizations } from '~/models/organization.server';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const organizations = await indexOrganizations(context);
@@ -30,6 +29,7 @@ export default function OrganizationsList() {
             return (
               <li key={organization.id}>
                 <Link to={`/organizations/${organization.id}`}>{organization.name}</Link>
+                {/* <a href={`/organizations/${organization.id}`}>{organization.name}</a> */}
               </li>
             );
           })

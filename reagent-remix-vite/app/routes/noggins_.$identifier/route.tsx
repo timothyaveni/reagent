@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import Editor from '../noggin-editor/text-completion/Editor.client';
+import Editor from '../../noggin-editor/text-completion/Editor.client';
 import { useEffect, useState } from "react";
 import { requireUser } from "~/auth/auth.server";
 

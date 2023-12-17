@@ -1,4 +1,4 @@
-import DevLogin from "~/components/DevLogin";
+import DevLogin from "./DevLogin";
 import T from "~/i18n/T";
 
 export default function Login() {

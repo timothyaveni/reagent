@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  web:
+    build: ./reagent-remix-vite
+    ports:
+      - 2348:3000

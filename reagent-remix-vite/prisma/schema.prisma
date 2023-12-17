@@ -51,8 +51,26 @@ model LTIv1p3Auth {
   user   User @relation("LTIv1p3Auth", fields: [userId], references: [id])
   userId Int  @unique
 
-  issuer  String
-  subject String
+  ltiConnection   LTIv1p3Connection @relation(fields: [ltiConnectionId], references: [id])
+  ltiConnectionId Int
+
+  ltiUserId String @unique
+}
+
+model LTIv1p3Connection {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  consumerKey    String @unique
+  consumerSecret String
+
+  lastSeenConsumerName String?
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int          @unique
+
+  userAuths LTIv1p3Auth[]
 }
 
 model UserMerge {
@@ -75,16 +93,16 @@ model RejectedMerge {
   createdAt DateTime @default(now())
 }
 
-
 model Organization {
-  id        Int                      @id @default(autoincrement())
-  createdAt DateTime                 @default(now())
-  updatedAt DateTime                 @updatedAt
-  deletedAt DateTime?
-  name      String
-  teams     Team[]
-  members   OrganizationMembership[]
-  noggins   Noggins[]
+  id                Int                      @id @default(autoincrement())
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  deletedAt         DateTime?
+  name              String
+  teams             Team[]
+  members           OrganizationMembership[]
+  noggins           Noggins[]
+  ltiv1p3Connection LTIv1p3Connection?
 }
 
 model OrganizationMembership {
@@ -98,6 +116,8 @@ model OrganizationMembership {
 
   user   User @relation(fields: [userId], references: [id])
   userId Int
+
+  @@unique([organizationId, userId])
 
   // 'member' | 'manager' | 'administrator'
   role String
@@ -119,7 +139,6 @@ model Team {
   Noggins         Noggins[]
 }
 
-
 model Noggins {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
@@ -135,8 +154,8 @@ model Noggins {
   teamOwnerId Int
 
   // both team-owned and user-owned noggins can have a parent organization. required for team-owned noggins
-  parentOrg    Organization? @relation(fields: [parentOrgId], references: [id])
-  parentOrgId  Int?
+  parentOrg   Organization? @relation(fields: [parentOrgId], references: [id])
+  parentOrgId Int?
 
   nogginRevisions NogginRevisions[]
 }

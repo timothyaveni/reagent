@@ -6,8 +6,11 @@ import session from 'express-session';
 
 import passport from 'passport';
 import GitHubStrategy from 'passport-github2';
+import LTIStrategy from 'passport-lti';
+import lti from 'ims-lti';
 
 import { resolveGitHubAuth } from './auth/github.js';
+import { getSecretForConsumerKey, handleLTI } from './auth/lti.js';
 
 installGlobals();
 
@@ -77,8 +80,15 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-// the ol' body parser
-app.use(express.urlencoded({ extended: true }));
+
+// trust proxy:
+app.set('trust proxy', 1);
+
+// // print whether the connection is encrypted
+// app.use(function (req, res, next) {
+//   console.log('req.protocol', req.protocol);
+//   next();
+// });
 
 app.get(
   '/auth/github',
@@ -96,8 +106,84 @@ app.get(
   },
 );
 
+// this requires the LTI consumer and the reagent server to agree on the request protocol (http/https)
+// for this to work, our TLS termination proxy needs to be trusted -- hence 'trust proxy' earlier
+// make sure X-Forwarded-Proto is set to https in the proxy
+passport.use(new LTIStrategy({
+	// consumerKey: 'testconsumerkey',
+	// consumerSecret: 'testconsumersecret'
+	// pass the req object to callback
+	// passReqToCallback: true,
+	// https://github.com/omsmith/ims-lti#nonce-stores
+	// nonceStore: new RedisNonceStore('testconsumerkey', redisClient)
+  // TODO: we do care about the nonce, i suppose
+  createProvider: async function(req, done) {
+    const consumerKey = req.body.oauth_consumer_key;
+    try {
+      console.log('consumerKey', consumerKey);
+      const consumerSecret = await getSecretForConsumerKey(consumerKey);
+      console.log('consumerSecret', consumerSecret);
+      const provider = new lti.Provider(consumerKey, consumerSecret, null); // nonceStore
+      return done(null, provider);
+    } catch (err) {
+      console.log('fail', err);
+      return done('LTI connection not found', null);
+    }
+  }
+}, function(lti, done) {
+	// LTI launch parameters
+	console.dir(lti);
+	return done(null, lti); // this goes into req.lti
+}));
+
+app.post(
+  '/auth/ltiv1p3',
+  express.urlencoded({ extended: true }),
+  passport.authenticate('lti', {
+    assignProperty: 'lti', // req.lti will have the `done` callback value
+  }),
+  async function (req, res) {
+    console.log('req', req.body, req.lti);
+    let user;
+    try {
+      user = await handleLTI(req);
+    } catch (err) {
+      // missing LTI connection, for example
+      console.log(err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+
+    if (user) {
+      req.login(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        res.redirect('/');
+      });
+    } else {
+      // set session
+      req.session.lastLTILaunch = req.lti;
+      res.redirect('/auth/ltiv1p3/new-account-interstitial');
+    }
+  },
+);
+
+// app.get(
+//   '/auth/ltiv1p3/callback',
+//   passport.authenticate('lti', { failureRedirect: '/login' }),
+//   function (req, res) {
+//     console.log('req', req);
+//     console.log('res', res);
+//     console.log('req.user', req.user);
+//     res.redirect('/');
+//   },
+// );
+
 if (process.env.NODE_ENV === 'development') {
-  app.post('/auth/dev/login', function (req, res, next) {
+  app.post('/auth/dev/login',
+  express.urlencoded({ extended: true }),
+  function (req, res, next) {
     if (req.body.password !== process.env.DEV_LOGIN_PASSWORD) {
       return res.redirect('/login');
     }

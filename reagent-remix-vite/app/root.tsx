@@ -9,14 +9,13 @@ import {
 } from '@remix-run/react';
 
 import './styles/global.css';
-import { PageLayout } from './components/PageLayout';
+import { PageLayout } from './components/PageLayout/PageLayout';
 import { ContextType } from 'server-types';
 import { LoaderFunctionArgs, json } from '@remix-run/node';
 
 export const loader = async ({
   context
 }: LoaderFunctionArgs) => {
-  console.log('context', context);
   if (context.user) {
     return json({ loggedIn: true });
   } else {
