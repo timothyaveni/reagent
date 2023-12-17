@@ -207,3 +207,21 @@ export const loadOrganization = async (
     }
   }
 };
+
+export const addUserToOrganization_OMNIPOTENT = async ({
+  userId,
+  organizationId,
+  role = OrganizationRole.MEMBER,
+}: {
+  userId: number;
+  organizationId: number;
+  role?: OrganizationRole;
+}) => {
+  await prisma.organizationMembership.create({
+    data: {
+      userId,
+      organizationId,
+      role,
+    },
+  });
+}

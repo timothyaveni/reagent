@@ -27,3 +27,34 @@ export const createNewLTIConnection = async (
     },
   });
 };
+
+export const getLTIConnectionNameWithOrgNameAndId_OMNISCIENT = async ({
+  connectionId,
+}: {
+  connectionId: number;
+}) => {
+  const connection = await prisma.lTIv1p3Connection.findUnique({
+    where: {
+      id: connectionId,
+    },
+    select: {
+      lastSeenConsumerName: true,
+      organization: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!connection) {
+    throw new Error('Connection not found');
+  }
+
+  return {
+    connectionName: connection.lastSeenConsumerName,
+    orgName: connection.organization.name,
+    orgId: connection.organization.id,
+  };
+};

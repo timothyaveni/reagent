@@ -10,7 +10,11 @@ import LTIStrategy from 'passport-lti';
 import lti from 'ims-lti';
 
 import { resolveGitHubAuth } from './auth/github.js';
-import { getSecretForConsumerKey, handleLTI } from './auth/lti.js';
+import {
+  getLTIConnectionForConsumerKey,
+  getSecretForConsumerKey,
+  handleLTI,
+} from './auth/lti.js';
 
 installGlobals();
 
@@ -97,7 +101,7 @@ app.get(
 
 app.get(
   '/auth/github/callback',
-  passport.authenticate('github', { failureRedirect: '/login' }),
+  passport.authenticate('github', { failureRedirect: '/auth/login' }),
   function (req, res) {
     console.log('req', req);
     console.log('res', res);
@@ -109,69 +113,86 @@ app.get(
 // this requires the LTI consumer and the reagent server to agree on the request protocol (http/https)
 // for this to work, our TLS termination proxy needs to be trusted -- hence 'trust proxy' earlier
 // make sure X-Forwarded-Proto is set to https in the proxy
-passport.use(new LTIStrategy({
-	// consumerKey: 'testconsumerkey',
-	// consumerSecret: 'testconsumersecret'
-	// pass the req object to callback
-	// passReqToCallback: true,
-	// https://github.com/omsmith/ims-lti#nonce-stores
-	// nonceStore: new RedisNonceStore('testconsumerkey', redisClient)
-  // TODO: we do care about the nonce, i suppose
-  createProvider: async function(req, done) {
-    const consumerKey = req.body.oauth_consumer_key;
-    try {
-      console.log('consumerKey', consumerKey);
-      const consumerSecret = await getSecretForConsumerKey(consumerKey);
-      console.log('consumerSecret', consumerSecret);
-      const provider = new lti.Provider(consumerKey, consumerSecret, null); // nonceStore
-      return done(null, provider);
-    } catch (err) {
-      console.log('fail', err);
-      return done('LTI connection not found', null);
-    }
-  }
-}, function(lti, done) {
-	// LTI launch parameters
-	console.dir(lti);
-	return done(null, lti); // this goes into req.lti
-}));
+passport.use(
+  new LTIStrategy(
+    {
+      // consumerKey: 'testconsumerkey',
+      // consumerSecret: 'testconsumersecret'
+      // pass the req object to callback
+      // passReqToCallback: true,
+      // https://github.com/omsmith/ims-lti#nonce-stores
+      // nonceStore: new RedisNonceStore('testconsumerkey', redisClient)
+      // TODO: we do care about the nonce, i suppose
+      createProvider: async function (req, done) {
+        const consumerKey = req.body.oauth_consumer_key;
+        try {
+          console.log('consumerKey', consumerKey);
+          const consumerSecret = await getSecretForConsumerKey(consumerKey);
+          console.log('consumerSecret', consumerSecret);
+          const provider = new lti.Provider(consumerKey, consumerSecret, null); // nonceStore
+          return done(null, provider);
+        } catch (err) {
+          console.log('fail', err);
+          return done('LTI connection not found', null);
+        }
+      },
+    },
+    function (lti, done) {
+      // LTI launch parameters
+      console.dir(lti);
+      return done(null, lti); // this goes into req.lti
+    },
+  ),
+);
 
 app.post(
   '/auth/ltiv1p3',
   express.urlencoded({ extended: true }),
   passport.authenticate('lti', {
-    assignProperty: 'lti', // req.lti will have the `done` callback value
+    assignProperty: 'lti', // req.lti will have the `done` callback value.
+    // the 'right' way to do this is to let authenticate set the user object and do the redirect...
+    // maybe i don't really need the passport module for LTI if i'm going to do it manually lol
   }),
   async function (req, res) {
     console.log('req', req.body, req.lti);
-    let user;
-    try {
-      user = await handleLTI(req);
-    } catch (err) {
-      // missing LTI connection, for example
+    const ltiConnection = await getLTIConnectionForConsumerKey(
+      req.body.oauth_consumer_key,
+    );
+
+    if (!ltiConnection) {
       console.log(err);
-      res.status(500).send('Internal Server Error');
-      return;
+      return res.status(500).send('Internal Server Error');
     }
+
+    const user = await handleLTI(req, ltiConnection);
 
     if (user) {
       req.login(user, (err) => {
         if (err) {
           return next(err);
         }
-        res.redirect('/');
+        res.redirect('/'); // TODO: initial LTI launch login goes to the org page.. should they all?
       });
     } else {
+      console.log({
+        launchParams: req.lti,
+        connectionId: ltiConnection.id,
+      });
       // set session
-      req.session.lastLTILaunch = req.lti;
-      res.redirect('/auth/ltiv1p3/new-account-interstitial');
+      req.session.lastLTILaunch = {
+        launchParams: req.lti,
+        connectionId: ltiConnection.id,
+      };
+      req.session.save(() => {
+        res.redirect('/auth/ltiv1p3/new-account-interstitial');
+      });
     }
   },
 );
 
 // app.get(
 //   '/auth/ltiv1p3/callback',
-//   passport.authenticate('lti', { failureRedirect: '/login' }),
+//   passport.authenticate('lti', { failureRedirect: '/auth/login' }),
 //   function (req, res) {
 //     console.log('req', req);
 //     console.log('res', res);
@@ -181,25 +202,27 @@ app.post(
 // );
 
 if (process.env.NODE_ENV === 'development') {
-  app.post('/auth/dev/login',
-  express.urlencoded({ extended: true }),
-  function (req, res, next) {
-    if (req.body.password !== process.env.DEV_LOGIN_PASSWORD) {
-      return res.redirect('/login');
-    }
+  app.post(
+    '/auth/dev/login',
+    express.urlencoded({ extended: true }),
+    function (req, res, next) {
+      if (req.body.password !== process.env.DEV_LOGIN_PASSWORD) {
+        return res.redirect('/auth/login');
+      }
 
-    req.login(
-      {
-        id: parseInt(req.body.id, 10),
-      },
-      (err) => {
-        if (err) {
-          return next(err);
-        }
-        res.redirect('/');
-      },
-    );
-  });
+      req.login(
+        {
+          id: parseInt(req.body.id, 10),
+        },
+        (err) => {
+          if (err) {
+            return next(err);
+          }
+          res.redirect('/');
+        },
+      );
+    },
+  );
 }
 
 app.get('/logout', function (req, res, next) {
@@ -218,10 +241,27 @@ app.all(
     build: vite
       ? () => vite.ssrLoadModule(unstable_viteServerBuildModuleId)
       : await import('./build/server/index.js'),
-    getLoadContext: (req) => ({
-      // @ts-expect-error todo
-      user: req.user,
-    }),
+    getLoadContext: (req) => {
+      // console.log('glc req', req);
+      return {
+        user: req.user,
+        session: req.session,
+        loginNewUser: async (user) => {
+          return await new Promise((resolve, reject) => req.login(
+            {
+              id: user.id,
+            },
+            (err) => {
+              if (err) {
+                // return next(err);
+                reject(err);
+              }
+              resolve();
+            },
+          ));
+        }
+      };
+    },
   }),
 );
 

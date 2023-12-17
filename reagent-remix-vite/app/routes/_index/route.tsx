@@ -25,7 +25,7 @@ export default function Index() {
         <h1 className="splash-title">
           <T>reagent</T>
         </h1>
-        <Link to="/login" className="splash-button">
+        <Link to="/auth/login" className="splash-button">
           <T>Log in</T>
         </Link>
       </div>

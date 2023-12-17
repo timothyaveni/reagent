@@ -1,6 +1,14 @@
-// TODO: i guess this is AppLoadContext? declaration merging?
-export type ContextType = {
-  user: {
-    id: number;
-  };
+declare module "@remix-run/server-runtime" {
+  export interface AppLoadContext {
+    user?: {
+      id: number;
+    };
+    session: {
+      lastLTILaunch?: {
+        launchParams: any;
+        connectionId: number;
+      };
+    }
+    loginNewUser: (user: { id: number }) => Promise<void>;
+  }
 }

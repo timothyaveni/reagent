@@ -54,7 +54,9 @@ model LTIv1p3Auth {
   ltiConnection   LTIv1p3Connection @relation(fields: [ltiConnectionId], references: [id])
   ltiConnectionId Int
 
-  ltiUserId String @unique
+  ltiUserId String
+
+  @@unique([ltiConnectionId, ltiUserId])
 }
 
 model LTIv1p3Connection {

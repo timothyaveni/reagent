@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [remix({
     routes: async (defineRoutes) => {
       return defineRoutes((route) => {
-        
+
       });
     },
   }), tsconfigPaths()],
