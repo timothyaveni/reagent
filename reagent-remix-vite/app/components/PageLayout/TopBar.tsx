@@ -1,11 +1,14 @@
 import { Link } from '@remix-run/react';
 import './TopBar.css';
 import T from '~/i18n/T';
+import ReagentWordmark from './ReagentWordmark';
 
 export default function TopBar() {
   return (
     <div className="top-bar">
-      <div className="site-title">reagent</div>
+      <div className="site-title">
+        <ReagentWordmark />
+      </div>
 
       <nav>
         <Link to="/organizations">

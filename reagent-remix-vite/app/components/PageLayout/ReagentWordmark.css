@@ -1,0 +1,12 @@
+.wordmark {
+  font-size: 24pt;
+  font-weight: bold;
+}
+
+.wordmark-re {
+  color: #666;
+}
+
+.wordmark-agent {
+  color: var(--reagent-purple);
+}
