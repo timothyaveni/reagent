@@ -5,7 +5,7 @@ import {
 } from '@remix-run/node';
 import Editor from '../../noggin-editor/text-completion/Editor.client';
 import { useEffect, useState } from 'react';
-import { requireUser } from '~/auth/auth.server';
+import { requireUserPreservingPath } from '~/auth/auth.server';
 import { loadNogginBySlug } from '~/models/noggin.server';
 
 import jwt from 'jsonwebtoken';
@@ -24,8 +24,12 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ params, context }: LoaderFunctionArgs) => {
-  const user = requireUser(context);
+export const loader = async ({
+  request,
+  params,
+  context,
+}: LoaderFunctionArgs) => {
+  const user = requireUserPreservingPath(request, context);
   const { identifier } = params;
 
   const noggin = await loadNogginBySlug(context, { slug: identifier });

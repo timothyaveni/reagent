@@ -16,7 +16,15 @@ export const meta: MetaFunction = () => {
 
 export const loader = ({ context }: { context: AppLoadContext }) => {
   if (context.user) {
+    // mostly the express server should make sure we go where we came from after login, but if they go manually...
     return redirect('/noggins');
+
+    // if (context.session.postLoginRedirect) {
+    //   context.session.postLoginRedirect = null;
+    //   return redirect(context.session.postLoginRedirect);
+    // } else {
+    //   return redirect('/noggins');
+    // }
   }
   return null;
 };

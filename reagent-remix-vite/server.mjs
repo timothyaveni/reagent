@@ -94,19 +94,54 @@ app.set('trust proxy', 1);
 //   next();
 // });
 
+app.get('/auth/login', function (req, res, next) {
+  const { redirect } = req.query;
+
+  if (redirect) {
+    console.log('redirect', redirect);
+    req.session.postLoginRedirect = redirect;
+  } else {
+    console.log('no redirect');
+    req.session.postLoginRedirect = null;
+  }
+
+  req.session.save(() => {
+    req.session.reload(() => {
+      console.log('post-save', req.session);
+      next();
+    });
+  });
+});
+
+const loginRedirect = (req, res) => {
+  console.log('req.session 2', req.session);
+  if (req.session.postLoginRedirect) {
+    const redirect = req.session.postLoginRedirect;
+    req.session.postLoginRedirect = null;
+    return res.redirect(redirect); // todo if we're doing this in express we should strip host
+  } else {
+    return res.redirect('/');
+  }
+};
+
 app.get(
   '/auth/github',
-  passport.authenticate('github', { scope: ['user:email'] }),
+  (req, res, next) => {
+    console.log('req.session 1', req.session);
+    next();
+  },
+  passport.authenticate('github', { scope: ['user:email'], keepSessionInfo: true, }), // not sure this works. we should probably not do this anyway -- regen session i guess
 );
 
 app.get(
   '/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/auth/login' }),
   function (req, res) {
-    console.log('req', req);
-    console.log('res', res);
+    // console.log('req', req);
+    // console.log('res', res);
     console.log('req.user', req.user);
-    res.redirect('/');
+    console.log('req.session', req.session);
+    return loginRedirect(req, res);
   },
 );
 
@@ -152,6 +187,8 @@ app.post(
     assignProperty: 'lti', // req.lti will have the `done` callback value.
     // the 'right' way to do this is to let authenticate set the user object and do the redirect...
     // maybe i don't really need the passport module for LTI if i'm going to do it manually lol
+
+    keepSessionInfo: true,
   }),
   async function (req, res) {
     console.log('req', req.body, req.lti);
@@ -214,11 +251,14 @@ if (process.env.NODE_ENV === 'development') {
         {
           id: parseInt(req.body.id, 10),
         },
+        {
+          keepSessionInfo: true,
+        },
         (err) => {
           if (err) {
             return next(err);
           }
-          res.redirect('/');
+          return loginRedirect(req, res);
         },
       );
     },
@@ -247,19 +287,21 @@ app.all(
         user: req.user,
         session: req.session,
         loginNewUser: async (user) => {
-          return await new Promise((resolve, reject) => req.login(
-            {
-              id: user.id,
-            },
-            (err) => {
-              if (err) {
-                // return next(err);
-                reject(err);
-              }
-              resolve();
-            },
-          ));
-        }
+          return await new Promise((resolve, reject) =>
+            req.login(
+              {
+                id: user.id,
+              },
+              (err) => {
+                if (err) {
+                  // return next(err);
+                  reject(err);
+                }
+                resolve();
+              },
+            ),
+          );
+        },
       };
     },
   }),

@@ -8,6 +8,7 @@ declare module "@remix-run/server-runtime" {
         launchParams: any;
         connectionId: number;
       };
+      postLoginRedirect?: string | null;
     }
     loginNewUser: (user: { id: number }) => Promise<void>;
   }

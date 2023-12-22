@@ -1,10 +1,10 @@
 import { LoaderFunctionArgs, json, redirect } from '@remix-run/node';
 import { Form, Link, useLoaderData } from '@remix-run/react';
 import { AppLoadContext } from '@remix-run/server-runtime';
-import { requireUser } from '~/auth/auth.server';
+import { requireUser, requireUserPreservingPath } from '~/auth/auth.server';
 import { createNoggin, loadNogginsIndex } from '~/models/noggin.server';
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
+export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
 
   const noggins = await loadNogginsIndex(context);
@@ -12,8 +12,14 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   return json({ noggins });
 };
 
-export const action = async ({ context }: { context: AppLoadContext }) => {
-  const user = requireUser(context);
+export const action = async ({
+  request,
+  context,
+}: {
+  request: any;
+  context: AppLoadContext;
+}) => {
+  const user = requireUserPreservingPath(request, context);
 
   const noggin = await createNoggin(context, {
     ownerType: 'user',
