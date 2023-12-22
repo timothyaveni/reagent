@@ -18,6 +18,7 @@ import EditorHeader from './EditorHeader';
 
 export const meta: MetaFunction = () => {
   return [
+    // TODO prob just remove this block
     { title: 'New Remix App' },
     { name: 'description', content: 'Welcome to Remix!' },
   ];
@@ -40,7 +41,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     JWT_PRIVATE_KEY,
     {
       algorithm: 'ES512',
-      expiresIn: '5m',
+      expiresIn: '30m',
     },
   );
 

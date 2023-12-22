@@ -64,6 +64,7 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "prisma": "^5.7.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.1.6",
     "vite": "^5.0.0",
     "vite-tsconfig-paths": "^4.2.1"

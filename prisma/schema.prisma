@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output = env("PRISMA_OUTPUT")
+  output   = env("PRISMA_OUTPUT")
 }
 
 datasource db {
@@ -161,6 +161,9 @@ model Noggin {
   parentOrgId Int?
 
   nogginRevisions NogginRevision[]
+
+  aiModel   AIModel @relation(fields: [aIModelId], references: [id])
+  aIModelId Int
 }
 
 model NogginRevision {
@@ -175,4 +178,37 @@ model NogginRevision {
   editors   User[]
   // Team      Team?     @relation(fields: [teamId], references: [id])
   // teamId    Int?
+}
+
+//
+
+model ModelProvider {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  name   String    @unique
+  models AIModel[]
+
+  credentialsSchema String
+}
+
+model AIModel {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  modelProvider   ModelProvider @relation(fields: [modelProviderId], references: [id])
+  modelProviderId Int
+  name            String
+
+  revision String
+
+  editorSchema String
+
+  Noggin Noggin[]
+
+  @@unique([modelProviderId, name])
 }

@@ -19,10 +19,12 @@ import { NogginEditorStore, initializeStoreForNoggin } from './store';
 import { WebsocketProvider } from 'y-websocket';
 import { useHasPopulatedStore } from './editor-utils';
 import { useRevalidator } from '@remix-run/react';
+import { EditorSchema } from '~/shared/editorSchema';
 
 interface Props {
   noggin: {
     id: number;
+    editorSchema: EditorSchema;
   };
   authToken: string;
 }

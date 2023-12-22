@@ -32,24 +32,30 @@ export const createNoggin = async (
   // there is a race condition of course but the database has a uniqueness constraint. user will live
   const slug = await generateFreeSlug();
 
+  const provider = await prisma.modelProvider.findFirstOrThrow({
+    where: {
+      name: 'openai',
+    },
+  });
+
+  const aiModel = await prisma.aIModel.findFirstOrThrow({
+    where: {
+      modelProviderId: provider.id,
+      name: 'gpt-4-1106-preview',
+    },
+  });
+
   const noggin = await prisma.noggin.create({
     data: {
       slug,
       title: slug,
+      aIModelId: aiModel.id,
       ...(owner.ownerType === 'user'
         ? {
-            userOwner: {
-              connect: {
-                id: owner.ownerId,
-              },
-            },
+            userOwnerId: owner.ownerId,
           }
         : {
-            teamOwner: {
-              connect: {
-                id: owner.ownerId,
-              },
-            },
+            teamOwnerId: owner.ownerId,
           }),
     },
   });
@@ -105,6 +111,11 @@ export const loadNogginBySlug = async (
     select: {
       id: true,
       title: true,
+      aiModel: {
+        select: {
+          editorSchema: true,
+        },
+      },
     },
   });
 
