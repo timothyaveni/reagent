@@ -13,6 +13,7 @@ type EditorHeight = 'primary' | 'default';
 interface ModelInput_PlainTextWithParameters extends ModelInputBase {
   type: 'plain-text-with-parameters';
   editorHeight?: EditorHeight;
+  default?: string;
 }
 
 interface ModelInput_ChatTextUserImagesWithParameters extends ModelInputBase {

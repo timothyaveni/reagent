@@ -17,12 +17,14 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
     switch (input.type) {
       case 'chat-text-user-images-with-parameters':
       case 'chat-text-with-parameters':
-      case 'plain-text-with-parameters':
         modelInputs.set(inputKey, new Y.XmlText());
+        break;
+      case 'plain-text-with-parameters':
+        modelInputs.set(inputKey, new Y.XmlText(input.default || undefined));
         break;
       case 'integer':
       case 'number':
-        modelInputs.set(inputKey, (input as any).defaultValue || 0); // TODO '|| 0' is a hack while i'm too lazy to validate the seed
+        modelInputs.set(inputKey, input.default);
         break;
     }
   }
