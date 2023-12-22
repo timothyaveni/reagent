@@ -13,6 +13,7 @@ import jwt from 'jsonwebtoken';
 import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
 import { notFound } from '~/route-utils/status-code';
 import { useLoaderData } from '@remix-run/react';
+import { CircularProgress } from '@mui/material';
 
 export const meta: MetaFunction = () => {
   return [
@@ -38,9 +39,11 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     JWT_PRIVATE_KEY,
     {
       algorithm: 'ES512',
-      expiresIn: '10s',
+      expiresIn: '5m',
     },
   );
+
+  console.log({ authToken });
 
   return json({ noggin, authToken });
 };
@@ -58,12 +61,12 @@ const RemixEditorWrapper = () => {
   }, []);
 
   if (!mounted) {
-    return null; // TODO: loading screen
+    return <CircularProgress />; // TODO: loading screen
   }
 
   return <Editor noggin={noggin} authToken={authToken} />;
 };
 
-export default function Index() {
+export default function EditorPage() {
   return <RemixEditorWrapper />;
 }

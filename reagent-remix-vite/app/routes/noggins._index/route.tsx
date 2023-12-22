@@ -39,13 +39,10 @@ export default function NogginList() {
           // @ts-expect-error ugh idk why the types are wonky from loader data
           noggins.map((noggin) => {
             return (
-              // <Link to={`/noggins/${noggin.slug}`} key={noggin.slug}>
-              // todo: we should use link here, but i'm having some trouble presumably with global state so we need to cause a reload
               <li key={noggin.slug}>
-                <a href={`/noggins/${noggin.slug}`}>
+                <Link to={`/noggins/${noggin.slug}`} key={noggin.slug}>
                   {noggin.title}
-                  {/* // </Link> */}
-                </a>
+                </Link>
               </li>
             );
           })

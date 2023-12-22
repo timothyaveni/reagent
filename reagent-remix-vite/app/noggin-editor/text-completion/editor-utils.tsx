@@ -4,9 +4,9 @@ import { ParameterNode } from './editor-types';
 import { debounce, uniq } from 'underscore';
 
 import { v4 as uuid } from 'uuid';
-import { Y } from '@syncedstore/core';
+import { Y, observeDeep } from '@syncedstore/core';
 import { NogginEditorStore } from './store';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { StoreContext } from './Editor.client';
 import { useSyncedStore } from '@syncedstore/react';
 
@@ -20,30 +20,70 @@ export const useEditorStore = () => {
   return store;
 };
 
-export const useHasPopulatedStore = (storeAndWebsocketProvider: any) => {
+export const useHasPopulatedStore = (store: any) => {
+  const [hasPopulatedStore, setHasPopulatedStore] = useState(false);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
+
+    if (store) {
+      if (store.promptDocuments?.editor1) {
+        setHasPopulatedStore(true);
+      } else {
+        setHasPopulatedStore(false);
+        unsubscribeRef.current = observeDeep(store, () => {
+          if (store.promptDocuments?.editor1) { // TODO
+            setHasPopulatedStore(true);
+            if (unsubscribeRef.current) {
+              unsubscribeRef.current();
+              unsubscribeRef.current = null;
+            }
+          }
+        });
+      }
+    } else {
+      setHasPopulatedStore(false);
+    }
+  }, [store]);
+
+  useEffect(() => {
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
+    };
+  });
+
+  return hasPopulatedStore;
+
   // const storeAndWebsocketProvider = useContext(StoreContext);
-  console.log('haspopulatedstore', storeAndWebsocketProvider);
+  // console.log('haspopulatedstore', storeAndWebsocketProvider);
 
   // if (!storeAndWebsocketProvider.store) {
   //   console.log('no store');
   //   return false;
   // }
 
-  try {
-    const { promptDocuments } = useSyncedStore(storeAndWebsocketProvider.store);
-    console.log('promptDocuments', promptDocuments);
-    if (!promptDocuments) {
-      console.log('no promptDocuments');
-      return false;
-    }
-  } catch (e) {
-    console.log('error', e);
-    return false;
-  }
+  // try {
+  //   const { promptDocuments } = useSyncedStore(storeAndWebsocketProvider.store);
+  //   console.log('promptDocuments', promptDocuments);
+  //   if (!promptDocuments) {
+  //     console.log('no promptDocuments');
+  //     return false;
+  //   }
+  // } catch (e) {
+  //   console.log('error', e);
+  //   return false;
+  // }
 
-  console.log('haspopulatedstore true');
+  // console.log('haspopulatedstore true');
 
-  return true;
+  // return true;
 
   // const [hasPopulatedStore, setHasPopulatedStore] = useState(false);
 
