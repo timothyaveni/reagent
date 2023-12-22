@@ -13,15 +13,12 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ context }: { context: AppLoadContext }) => {
-  const user = requireUser(context);
-
-  const noggin = await createNoggin(context, {
-    ownerType: 'user',
-    ownerId: user.id,
-  });
-
-  // TODO: either fix the global state pollution or make this a hard redirect
-  return redirect(`/noggins/${noggin.slug}`);
+  // const user = requireUser(context);
+  // const noggin = await createNoggin(context, {
+  //   ownerType: 'user',
+  //   ownerId: user.id,
+  // });
+  // // return redirect(`/noggins/${noggin.slug}`);
 };
 
 export default function NogginList() {
@@ -30,9 +27,7 @@ export default function NogginList() {
   return (
     <div className="noggin-list">
       <h1>Noggins</h1>
-      <Form method="post" action="/noggins">
-        <button type="submit">New noggin</button>
-      </Form>
+      <Link to="/noggins/new">New noggin</Link>
 
       <ul>
         {

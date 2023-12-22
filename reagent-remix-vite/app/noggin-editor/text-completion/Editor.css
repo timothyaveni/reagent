@@ -12,13 +12,13 @@
   & .editor-main-column {
     flex: 2;
 
-    & .editor-main-column-header {
+    & .editor-header {
       margin-top: 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
 
-      & .editor-main-column-header-title {
+      & .editor-header-title {
         display: flex;
         align-items: center;
 
@@ -27,7 +27,7 @@
         }
       }
 
-      & .editor-main-column-header-controls {
+      & .editor-header-controls {
         display: flex;
         align-items: center;
         /* margin-left: 40px; */

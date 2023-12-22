@@ -6,7 +6,7 @@ import {
 import Editor from '../../noggin-editor/text-completion/Editor.client';
 import { useEffect, useState } from 'react';
 import { requireUser } from '~/auth/auth.server';
-import { loadNogginBySlug } from '~/models/noggin.server';
+import { getNogginEditorSchema_OMNISCIENT, loadNogginBySlug } from '~/models/noggin.server';
 
 import jwt from 'jsonwebtoken';
 
@@ -15,6 +15,7 @@ import { notFound } from '~/route-utils/status-code';
 import { useLoaderData } from '@remix-run/react';
 import { CircularProgress } from '@mui/material';
 import EditorHeader from './EditorHeader';
+import { EditorSchema } from '~/shared/editorSchema';
 
 export const meta: MetaFunction = () => {
   return [
@@ -34,6 +35,8 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw notFound();
   }
 
+  const editorSchema = await getNogginEditorSchema_OMNISCIENT(noggin.id);
+
   const authToken = jwt.sign(
     {
       nogginId: noggin.id,
@@ -47,15 +50,17 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   console.log({ authToken });
 
-  return json({ noggin, authToken });
+  return json({ noggin, editorSchema, authToken });
 };
 
 const RemixEditorWrapper = ({
   noggin,
   authToken,
+  editorSchema,
 }: {
   noggin: any; // TODO
   authToken: string;
+  editorSchema: EditorSchema,
 }) => {
   // dude this is SO INCREDIBLY not a vibe
   // but i'm having a couple bundler problems with the editor on the server
@@ -71,16 +76,16 @@ const RemixEditorWrapper = ({
     return <CircularProgress />; // TODO: loading screen
   }
 
-  return <Editor noggin={noggin} authToken={authToken} />;
+  return <Editor noggin={noggin} authToken={authToken} editorSchema={editorSchema} />;
 };
 
 export default function EditorPage() {
-  const { noggin, authToken } = useLoaderData<typeof loader>();
+  const { noggin, authToken, editorSchema } = useLoaderData<typeof loader>();
 
   return (
     <>
       <EditorHeader noggin={noggin} />
-      <RemixEditorWrapper noggin={noggin} authToken={authToken} />
+      <RemixEditorWrapper noggin={noggin} editorSchema={editorSchema} authToken={authToken} />
     </>
   );
 }

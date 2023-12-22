@@ -41,7 +41,7 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     throw new Error('trying to render a null websocket provider');
   }
 
-  const promptDocuments = useSyncedStore(store.promptDocuments);
+  const modelInputs = useSyncedStore(store.modelInputs);
   // const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
   // hm, it looks like it might still not be rerendering, especially when there are other (cross-tab comms?) users. it's okay, we're planning to put all this in slate soon. we'll revisit if there are still problems
 
@@ -55,7 +55,7 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     // let e = withCursors(
     //   withYjs(
     //     withReagentAugmentations(withReact(withHistory(createEditor()))),
-    //     promptDocuments[documentKey]!,
+    //     modelInputs[documentKey]!,
     //   ),
     //   websocketProvider.awareness,
     //   {
@@ -67,11 +67,11 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     // );
     let e = withYjs(
       withReagentAugmentations(withReact(withHistory(createEditor()))),
-      promptDocuments[documentKey]!,
+      modelInputs[documentKey]!,
     );
 
     return e;
-  }, [promptDocuments, promptDocuments[documentKey], cursorName, cursorColor]);
+  }, [modelInputs, modelInputs[documentKey], cursorName, cursorColor]);
 
   useEffect(() => {
     console.log('editor useeffect');
