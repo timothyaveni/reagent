@@ -14,6 +14,7 @@ import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
 import { notFound } from '~/route-utils/status-code';
 import { useLoaderData } from '@remix-run/react';
 import { CircularProgress } from '@mui/material';
+import EditorHeader from './EditorHeader';
 
 export const meta: MetaFunction = () => {
   return [
@@ -48,13 +49,18 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   return json({ noggin, authToken });
 };
 
-const RemixEditorWrapper = () => {
+const RemixEditorWrapper = ({
+  noggin,
+  authToken,
+}: {
+  noggin: any; // TODO
+  authToken: string;
+}) => {
   // dude this is SO INCREDIBLY not a vibe
   // but i'm having a couple bundler problems with the editor on the server
   // and dude. i really do not need to render this on the server.
   // paranoid it's going to join the websocket room during ssr anyway lol
   const [mounted, setMounted] = useState(false);
-  const { noggin, authToken } = useLoaderData<typeof loader>();
 
   useEffect(() => {
     setMounted(true);
@@ -68,5 +74,12 @@ const RemixEditorWrapper = () => {
 };
 
 export default function EditorPage() {
-  return <RemixEditorWrapper />;
+  const { noggin, authToken } = useLoaderData<typeof loader>();
+
+  return (
+    <>
+      <EditorHeader noggin={noggin} />
+      <RemixEditorWrapper noggin={noggin} authToken={authToken} />
+    </>
+  );
 }

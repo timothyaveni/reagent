@@ -42,12 +42,16 @@ export const AllParameterOptionControls = (props: Props) => {
       {parameterElementIds.length === 0 && (
         <>
           <p>
-            <T>Your prompts don't contain any variables!</T>
+            <T>
+              Your prompts don't contain any variables! You can add one by
+              typing "@" into the pane to the left.
+            </T>
           </p>
 
-          <Button variant="outlined">
+          {/* TODO */}
+          {/* <Button variant="outlined">
             <T>Add one</T>
-          </Button>
+          </Button> */}
         </>
       )}
       {parameterElementIds.map((id) => {
