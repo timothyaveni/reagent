@@ -1,0 +1,35 @@
+{
+  "name": "y-websocket-server",
+  "version": "1.0.0",
+  "description": "This code is adapted (maybe. or maybe I didn't make any changes yet.) from the starter server code in [y-websocket](https://github.com/yjs/y-websocket), by Kevin Jahns.",
+  "main": "server.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generate-prisma": "npx prisma generate --schema=../reagent-remix-vite/prisma/schema.prisma",
+    "start": "npx tsc && node dist/server.js"
+  },
+  "prisma": {
+    "schema": "../prisma/schema.prisma"
+  },
+  "type": "module",
+  "author": "",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "lodash.debounce": "^4.0.8",
+    "typescript": "^5.3.3",
+    "underscore": "^1.13.6",
+    "ws": "^8.15.1",
+    "y-protocols": "^1.0.6",
+    "yjs": "^13.6.10"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/node": "^20.10.5",
+    "@types/underscore": "^1.11.15",
+    "@types/ws": "^8.5.10",
+    "prisma": "^5.7.1",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { createEditor } from 'slate';
 import { Editable, Slate, withReact } from 'slate-react';
 import { withHistory } from 'slate-history';
@@ -13,9 +13,13 @@ import { withChatElements, withPlainTextElements } from './editorPlugins';
 import { TextFragment } from './TextFragment';
 import { ChatTurn } from './ChatTurn';
 import { Parameter } from './Parameter';
-import { addNewParameter, getParameterElements } from './editor-utils';
+import {
+  addNewParameter,
+  getParameterElements,
+  useEditorStore,
+} from './editor-utils';
 import { debouncedSave } from './editor-utils';
-import { store, websocketProvider } from './store';
+import { StoreContext } from './Editor.client';
 
 const initialValue: any[] = [
   // {
@@ -30,6 +34,13 @@ type Props = {
 };
 
 const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
+  const store = useEditorStore();
+  const { websocketProvider } = useContext(StoreContext);
+
+  if (!websocketProvider) {
+    throw new Error('trying to render a null websocket provider');
+  }
+
   const promptDocuments = useSyncedStore(store.promptDocuments);
   // const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
   // hm, it looks like it might still not be rerendering, especially when there are other (cross-tab comms?) users. it's okay, we're planning to put all this in slate soon. we'll revisit if there are still problems
@@ -41,24 +52,29 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     const withReagentAugmentations =
       textType === 'chat' ? withChatElements : withPlainTextElements;
 
-    let e = withCursors(
-      withYjs(
-        withReagentAugmentations(withReact(withHistory(createEditor()))),
-        promptDocuments[documentKey]!,
-      ),
-      websocketProvider.awareness,
-      {
-        data: {
-          name: cursorName || 'Anonymous',
-          color: cursorColor || '#000000',
-        },
-      },
+    // let e = withCursors(
+    //   withYjs(
+    //     withReagentAugmentations(withReact(withHistory(createEditor()))),
+    //     promptDocuments[documentKey]!,
+    //   ),
+    //   websocketProvider.awareness,
+    //   {
+    //     data: {
+    //       name: cursorName || 'Anonymous',
+    //       color: cursorColor || '#000000',
+    //     },
+    //   },
+    // );
+    let e = withYjs(
+      withReagentAugmentations(withReact(withHistory(createEditor()))),
+      promptDocuments[documentKey]!,
     );
 
     return e;
   }, [promptDocuments, promptDocuments[documentKey], cursorName, cursorColor]);
 
   useEffect(() => {
+    console.log('editor useeffect');
     YjsEditor.connect(editor);
     return () => YjsEditor.disconnect(editor);
   }, [editor]);
@@ -79,6 +95,7 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     const parameterOptionDict = store.documentParameters;
 
     const parameterElements = getParameterElements(editor);
+    console.log('pe', parameterElements, JSON.stringify(store.documentParameterIdsByDocument), documentKey);
     for (const element of parameterElements) {
       console.log('sync', element);
       if (
@@ -123,18 +140,18 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
           debouncedSave(value);
         }}
       >
-        <Cursors>
+        {/* <Cursors> */}
           <Editable
             renderElement={renderElement}
             onKeyDown={(event) => {
               if (event.key === '@') {
                 event.preventDefault();
                 // todo add a menu thing
-                addNewParameter(editor);
+                addNewParameter(store, editor);
               }
             }}
           />
-        </Cursors>
+        {/* </Cursors> */}
       </Slate>
     </div>
   );

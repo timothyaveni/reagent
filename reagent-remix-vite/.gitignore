@@ -5,4 +5,5 @@ node_modules
 /public/build
 .env
 
-prisma/dev.db
+jwt/*.pem
+jwt/*.pem.json

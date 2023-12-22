@@ -1,6 +1,8 @@
 import { useSyncedStore } from '@syncedstore/react';
+import { useContext } from 'react';
 import { useSelected } from 'slate-react';
-import { store } from './store';
+import { StoreContext } from './Editor.client';
+import { useEditorStore } from './editor-utils';
 
 export const Parameter = ({
   attributes, children, element,
@@ -9,6 +11,7 @@ export const Parameter = ({
   children: any;
   element: any;
 }) => {
+  const store = useEditorStore();
   const selected = useSelected();
 
   // @ts-ignore

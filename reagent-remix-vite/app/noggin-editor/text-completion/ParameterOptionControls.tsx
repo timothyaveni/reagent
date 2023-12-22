@@ -1,11 +1,13 @@
 import { useSyncedStore } from '@syncedstore/react';
-import { store } from './store';
 
 import { uniq } from 'underscore';
 
 import './ParameterControls.css';
 import { Button, TextField } from '@mui/material';
 import T from '../../i18n/T';
+import { useContext } from 'react';
+import { StoreContext } from './Editor.client';
+import { useEditorStore } from './editor-utils';
 
 type Props = {
   // for now this is a prop, but it won't actually change throughout the lifetime of the app
@@ -15,6 +17,7 @@ type Props = {
 };
 
 export const AllParameterOptionControls = (props: Props) => {
+  const store = useEditorStore();
   console.log('apoc rerender');
   const documentIdList: string[][] = [];
   for (const documentId of props.documents) {
@@ -55,6 +58,7 @@ export const AllParameterOptionControls = (props: Props) => {
 };
 
 function ParameterOptionControls({ id }: { id: string }) {
+  const store = useEditorStore();
   const parameterOptions = useSyncedStore(store.documentParameters);
   if (!parameterOptions[id]) {
     console.log(

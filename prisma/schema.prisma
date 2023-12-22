@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output = env("PRISMA_OUTPUT")
 }
 
 datasource db {
@@ -25,11 +26,11 @@ model User {
   rejectedMerges1 RejectedMerge[] @relation("user1")
   rejectedMerges2 RejectedMerge[] @relation("user2")
 
-  editedNogginRevisions NogginRevisions[]
+  editedNogginRevisions NogginRevision[]
 
   teams         Team[]
   organizations OrganizationMembership[]
-  Noggins       Noggins[]
+  noggins       Noggin[]
 }
 
 model GitHubAuth {
@@ -103,7 +104,7 @@ model Organization {
   name              String
   teams             Team[]
   members           OrganizationMembership[]
-  noggins           Noggins[]
+  noggins           Noggin[]
   ltiv1p3Connection LTIv1p3Connection?
 }
 
@@ -119,10 +120,10 @@ model OrganizationMembership {
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  @@unique([organizationId, userId])
-
   // 'member' | 'manager' | 'administrator'
   role String
+
+  @@unique([organizationId, userId])
 }
 
 model Team {
@@ -137,11 +138,11 @@ model Team {
 
   members User[]
 
-  nogginRevisions NogginRevisions[]
-  Noggins         Noggins[]
+  // nogginRevisions NogginRevisions[]
+  noggins Noggin[]
 }
 
-model Noggins {
+model Noggin {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -151,25 +152,27 @@ model Noggins {
 
   // a noggin can only be owned by a team or a user, not both
   userOwner   User? @relation(fields: [userOwnerId], references: [id])
-  userOwnerId Int
+  userOwnerId Int?
   teamOwner   Team? @relation(fields: [teamOwnerId], references: [id])
-  teamOwnerId Int
+  teamOwnerId Int?
 
   // both team-owned and user-owned noggins can have a parent organization. required for team-owned noggins
   parentOrg   Organization? @relation(fields: [parentOrgId], references: [id])
   parentOrgId Int?
 
-  nogginRevisions NogginRevisions[]
+  nogginRevisions NogginRevision[]
 }
 
-model NogginRevisions {
+model NogginRevision {
   id        Int       @id @default(autoincrement())
-  noggin    Noggins   @relation(fields: [nogginId], references: [id])
+  noggin    Noggin    @relation(fields: [nogginId], references: [id])
   nogginId  Int
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  content   String
+  // content   String
+  content   Bytes
   editors   User[]
-  Team      Team?     @relation(fields: [teamId], references: [id])
-  teamId    Int?
+  // Team      Team?     @relation(fields: [teamId], references: [id])
+  // teamId    Int?
 }
