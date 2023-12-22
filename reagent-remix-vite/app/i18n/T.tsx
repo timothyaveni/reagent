@@ -1,3 +1,5 @@
+import { I18nString } from "~/shared/editorSchema";
+
 const T = ({
   children,
   flagged = false,
@@ -10,6 +12,12 @@ const T = ({
   </>
 };
 
-export const t = (s: string) => s;
+export const t = (s: string | I18nString ) => {
+  if (typeof s === 'string') {
+    return s;
+  }
+
+  return s.en_US;
+};
 
 export default T;

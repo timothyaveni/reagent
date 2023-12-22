@@ -210,5 +210,5 @@ model AIModel {
 
   Noggin Noggin[]
 
-  @@unique([modelProviderId, name])
+  @@unique([modelProviderId, name, revision])
 }

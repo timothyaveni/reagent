@@ -31,12 +31,12 @@ export const useHasPopulatedStore = (store: any) => {
     }
 
     if (store) {
-      if (store.promptDocuments?.editor1) {
+      if (store.syncState?.synced) {
         setHasPopulatedStore(true);
       } else {
         setHasPopulatedStore(false);
         unsubscribeRef.current = observeDeep(store, () => {
-          if (store.promptDocuments?.editor1) { // TODO
+          if (store.syncState?.synced) { // a little awkward. we need all the keys to be present in the syncedStore default value, meaning we need to peer into an object here to see if we got a field from the backend
             setHasPopulatedStore(true);
             if (unsubscribeRef.current) {
               unsubscribeRef.current();
@@ -60,34 +60,6 @@ export const useHasPopulatedStore = (store: any) => {
   });
 
   return hasPopulatedStore;
-
-  // const storeAndWebsocketProvider = useContext(StoreContext);
-  // console.log('haspopulatedstore', storeAndWebsocketProvider);
-
-  // if (!storeAndWebsocketProvider.store) {
-  //   console.log('no store');
-  //   return false;
-  // }
-
-  // try {
-  //   const { promptDocuments } = useSyncedStore(storeAndWebsocketProvider.store);
-  //   console.log('promptDocuments', promptDocuments);
-  //   if (!promptDocuments) {
-  //     console.log('no promptDocuments');
-  //     return false;
-  //   }
-  // } catch (e) {
-  //   console.log('error', e);
-  //   return false;
-  // }
-
-  // console.log('haspopulatedstore true');
-
-  // return true;
-
-  // const [hasPopulatedStore, setHasPopulatedStore] = useState(false);
-
-  // const store = useSyncedStore(storeAndWebsocketProvider.store);
 };
 
 export const getParameterElements = (editor: ReactEditor) => {

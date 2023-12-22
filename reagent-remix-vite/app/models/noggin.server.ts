@@ -1,7 +1,7 @@
 import { AppLoadContext } from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
 import prisma from '~/db';
-import { createNogginYjsDoc, serializeYDoc } from './nogginRevision.server';
+import { createInitialRevisionForNoggin_OMNIPOTENT } from './nogginRevision.server';
 
 import {
   uniqueNamesGenerator,
@@ -9,63 +9,63 @@ import {
   animals,
   NumberDictionary,
 } from 'unique-names-generator';
+import { EditorSchema } from '~/shared/editorSchema';
 
 export const createNoggin = async (
   context: AppLoadContext,
-  owner: {
+  nogginData: {
     ownerType: 'user' | 'team';
     ownerId: number;
+    aiModelId: number;
+    name: string;
   },
 ) => {
   const user = await requireUser(context);
 
-  if (owner.ownerType === 'user' && owner.ownerId !== user.id) {
+  if (nogginData.ownerType === 'user' && nogginData.ownerId !== user.id) {
     throw new Error('Cannot create noggin for another user');
-  } else if (owner.ownerType === 'team') {
+  } else if (nogginData.ownerType === 'team') {
     // TODO
     throw new Error('Cannot create noggin for a team');
   }
 
-  const yDoc = await createNogginYjsDoc();
-  const buffer = serializeYDoc(yDoc);
-
   // there is a race condition of course but the database has a uniqueness constraint. user will live
   const slug = await generateFreeSlug();
 
-  const provider = await prisma.modelProvider.findFirstOrThrow({
-    where: {
-      name: 'openai',
-    },
-  });
+  // TODO: here is where we would authenticate that you're permitted to create a noggin with this model
+  // (or that you/your org has an api key for this model)
 
-  const aiModel = await prisma.aIModel.findFirstOrThrow({
-    where: {
-      modelProviderId: provider.id,
-      name: 'gpt-4-1106-preview',
+  console.log({
+    data: {
+      slug,
+      title: nogginData.name || slug,
+      aIModelId: nogginData.aiModelId,
+      ...(nogginData.ownerType === 'user'
+        ? {
+            userOwnerId: nogginData.ownerId,
+          }
+        : {
+            teamOwnerId: nogginData.ownerId,
+          }),
     },
   });
 
   const noggin = await prisma.noggin.create({
     data: {
       slug,
-      title: slug,
-      aIModelId: aiModel.id,
-      ...(owner.ownerType === 'user'
+      title: nogginData.name || slug,
+      aIModelId: nogginData.aiModelId,
+      ...(nogginData.ownerType === 'user'
         ? {
-            userOwnerId: owner.ownerId,
+            userOwnerId: nogginData.ownerId,
           }
         : {
-            teamOwnerId: owner.ownerId,
+            teamOwnerId: nogginData.ownerId,
           }),
     },
   });
 
-  await prisma.nogginRevision.create({
-    data: {
-      content: buffer,
-      nogginId: noggin.id,
-    },
-  });
+  await createInitialRevisionForNoggin_OMNIPOTENT(noggin.id);
 
   return noggin;
 };
@@ -111,11 +111,6 @@ export const loadNogginBySlug = async (
     select: {
       id: true,
       title: true,
-      aiModel: {
-        select: {
-          editorSchema: true,
-        },
-      },
     },
   });
 
@@ -155,4 +150,25 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
   });
 
   return noggins;
+};
+
+export const getNogginEditorSchema_OMNISCIENT = async (
+  nogginId: number,
+): Promise<EditorSchema> => {
+  const noggin = await prisma.noggin.findUniqueOrThrow({
+    where: {
+      id: nogginId,
+    },
+    select: {
+      aiModel: {
+        select: {
+          editorSchema: true,
+        },
+      },
+    },
+  });
+
+  // console.log('noggin.aiModel.editorSchema', noggin.aiModel.editorSchema);
+
+  return JSON.parse(noggin.aiModel.editorSchema);
 };
