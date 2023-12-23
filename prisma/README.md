@@ -1,0 +1,1 @@
+This schema is licensed under the Apache license v2, meaning it can be used even outside of AGPL-licensed projects -- excuse the temporary solution of just mentioning this in this folder while I figure out a better way to organize this project structure

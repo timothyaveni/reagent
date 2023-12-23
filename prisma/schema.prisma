@@ -142,6 +142,8 @@ model Team {
   noggins Noggin[]
 }
 
+//
+
 model Noggin {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
@@ -162,8 +164,10 @@ model Noggin {
 
   nogginRevisions NogginRevision[]
 
-  aiModel   AIModel @relation(fields: [aIModelId], references: [id])
-  aIModelId Int
+  aiModel   AIModel @relation(fields: [aiModelId], references: [id])
+  aiModelId Int
+
+  apiKeys NogginAPIKey[]
 }
 
 model NogginRevision {
@@ -178,6 +182,17 @@ model NogginRevision {
   editors   User[]
   // Team      Team?     @relation(fields: [teamId], references: [id])
   // teamId    Int?
+}
+
+model NogginAPIKey {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  key       String    @unique
+  noggin    Noggin    @relation(fields: [nogginId], references: [id])
+  nogginId  Int
 }
 
 //

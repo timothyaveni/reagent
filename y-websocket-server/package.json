@@ -15,6 +15,7 @@
   "author": "",
   "license": "AGPL-3.0-or-later",
   "dependencies": {
+    "@prisma/client": "^5.7.1",
     "dotenv": "^16.3.1",
     "jsonwebtoken": "^9.0.2",
     "lodash.debounce": "^4.0.8",

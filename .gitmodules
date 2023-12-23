@@ -1,0 +1,3 @@
+[submodule "noggin-server"]
+	path = noggin-server
+	url = git@github.com:timothyaveni/noggin-server.git

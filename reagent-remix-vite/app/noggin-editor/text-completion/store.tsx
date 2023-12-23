@@ -14,6 +14,7 @@ type DocType = {
     [key: string]: Y.Map<{
       name: string;
       maxLength: number;
+      defaultValue: string;
     }>;
   };
   // using Object.keys on documentParameters doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
@@ -34,7 +35,7 @@ export const initializeStoreForNoggin = (
 ) => {
   console.log('initializeStoreForNoggin', noggin, authToken);
 
-  const yjsDoc = new Y.Doc();
+  const yDoc = new Y.Doc();
   const store = syncedStore<DocType>(
     {
       modelInputs: {},
@@ -43,7 +44,7 @@ export const initializeStoreForNoggin = (
       documentParameterIdsByDocument: {},
       syncState: {},
     } as DocType,
-    yjsDoc,
+    yDoc,
   );
 
   // expensive debug call lol
@@ -59,7 +60,7 @@ export const initializeStoreForNoggin = (
     'ws://localhost:2347',
     // 'wss://ws.dev.rea.gent',
     noggin.id.toString(),
-    yjsDoc,
+    yDoc,
     {
       params: { authToken },
     },

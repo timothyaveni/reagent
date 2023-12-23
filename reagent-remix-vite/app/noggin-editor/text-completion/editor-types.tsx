@@ -3,6 +3,7 @@ import { BaseElement } from 'slate';
 type ParameterOptions = {
   name: string;
   maxLength: number;
+  defaultValue: string;
 };
 
 export interface ParameterNode extends BaseElement {

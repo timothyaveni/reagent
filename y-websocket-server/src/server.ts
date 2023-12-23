@@ -47,31 +47,15 @@ const server = http.createServer((request, response) => {
 const prisma = new PrismaClient();
 
 const serializeYDoc = (ydoc: Y.Doc) => {
-  // console.log('serialize1', JSON.stringify(ydoc.toJSON()));
+  console.log('serialize', ydoc.toJSON());
   const buffer = Buffer.from(Y.encodeStateAsUpdate(ydoc));
-  // console.log('serialize', buffer);
   return buffer;
-  // return buffer.toString('base64');
 };
 
 const deserializeYDoc = (serialized: Buffer, ydoc: Y.Doc) => {
-  // const obj = JSON.parse(serialized);
-  // const ydoc = new Y.Doc();
-  // for (const key of Object.keys(obj)) {
-  //   ydoc.get(key).fromJSON(obj[key]);
-  // }
-  // return ydoc;
-  // const buffer = Buffer.from(serialized, 'base64');
-  // const uint8Array = new Uint8Array(buffer);
-  // const snapshot = Y.decodeSnapshot(uint8Array);
-  // Y.snapshot
-
-  // const buffer = Buffer.from(serialized, 'base64');
   const uint8Array = new Uint8Array(serialized);
-  // console.log('deserialize', uint8Array);
-  // console.trace(); // Log a stack trace
-  // Y.decodeStateVector(uint8Array);
-  Y.applyUpdate(ydoc, uint8Array); // idk
+  Y.applyUpdate(ydoc, uint8Array);
+  console.log('deserialize', ydoc.toJSON())
   return ydoc;
 };
 

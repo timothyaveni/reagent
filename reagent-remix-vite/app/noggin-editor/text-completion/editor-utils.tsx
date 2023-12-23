@@ -8,7 +8,6 @@ import { Y, observeDeep } from '@syncedstore/core';
 import { NogginEditorStore } from './store';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { StoreContext } from './Editor.client';
-import { useSyncedStore } from '@syncedstore/react';
 
 export const useEditorStore = () => {
   const { store } = useContext(StoreContext);
@@ -36,7 +35,8 @@ export const useHasPopulatedStore = (store: any) => {
       } else {
         setHasPopulatedStore(false);
         unsubscribeRef.current = observeDeep(store, () => {
-          if (store.syncState?.synced) { // a little awkward. we need all the keys to be present in the syncedStore default value, meaning we need to peer into an object here to see if we got a field from the backend
+          if (store.syncState?.synced) {
+            // a little awkward. we need all the keys to be present in the syncedStore default value, meaning we need to peer into an object here to see if we got a field from the backend
             setHasPopulatedStore(true);
             if (unsubscribeRef.current) {
               unsubscribeRef.current();
@@ -96,6 +96,7 @@ export const addNewParameter = (
   store.documentParameters[id] = new Y.Map([
     ['name', `param${newIndex}`],
     ['maxLength', 500],
+    ['defaultValue', ''],
   ]);
   // @ts-ignore
   // name: `param${newIndex}`,

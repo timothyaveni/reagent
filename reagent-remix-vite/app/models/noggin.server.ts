@@ -35,32 +35,40 @@ export const createNoggin = async (
   // TODO: here is where we would authenticate that you're permitted to create a noggin with this model
   // (or that you/your org has an api key for this model)
 
-  console.log({
-    data: {
-      slug,
-      title: nogginData.name || slug,
-      aIModelId: nogginData.aiModelId,
-      ...(nogginData.ownerType === 'user'
-        ? {
-            userOwnerId: nogginData.ownerId,
-          }
-        : {
-            teamOwnerId: nogginData.ownerId,
-          }),
-    },
-  });
+  // console.log({
+  //   data: {
+  //     slug,
+  //     title: nogginData.name || slug,
+  //     aIModelId: nogginData.aiModelId,
+  //     ...(nogginData.ownerType === 'user'
+  //       ? {
+  //           userOwnerId: nogginData.ownerId,
+  //         }
+  //       : {
+  //           teamOwnerId: nogginData.ownerId,
+  //         }),
+  //   },
+  // });
 
   const noggin = await prisma.noggin.create({
     data: {
       slug,
       title: nogginData.name || slug,
-      aIModelId: nogginData.aiModelId,
+      aiModel: { connect: { id: nogginData.aiModelId } },
       ...(nogginData.ownerType === 'user'
         ? {
-            userOwnerId: nogginData.ownerId,
+            userOwner: {
+              connect: {
+                id: nogginData.ownerId,
+              },
+            },
           }
         : {
-            teamOwnerId: nogginData.ownerId,
+            teamOwner: {
+              connect: {
+                id: nogginData.ownerId,
+              },
+            },
           }),
     },
   });
