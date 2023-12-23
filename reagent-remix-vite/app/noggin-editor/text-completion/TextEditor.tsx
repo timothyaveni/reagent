@@ -52,23 +52,23 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     const withReagentAugmentations =
       textType === 'chat' ? withChatElements : withPlainTextElements;
 
-    // let e = withCursors(
-    //   withYjs(
-    //     withReagentAugmentations(withReact(withHistory(createEditor()))),
-    //     modelInputs[documentKey]!,
-    //   ),
-    //   websocketProvider.awareness,
-    //   {
-    //     data: {
-    //       name: cursorName || 'Anonymous',
-    //       color: cursorColor || '#000000',
-    //     },
-    //   },
-    // );
-    let e = withYjs(
-      withReagentAugmentations(withReact(withHistory(createEditor()))),
-      modelInputs[documentKey]!,
+    let e = withCursors(
+      withYjs(
+        withReagentAugmentations(withReact(withHistory(createEditor()))),
+        modelInputs[documentKey]!,
+      ),
+      websocketProvider.awareness,
+      {
+        data: {
+          name: cursorName || 'Anonymous',
+          color: cursorColor || '#000000',
+        },
+      },
     );
+    // let e = withYjs(
+    //   withReagentAugmentations(withReact(withHistory(createEditor()))),
+    //   modelInputs[documentKey]!,
+    // );
 
     return e;
   }, [modelInputs, modelInputs[documentKey], cursorName, cursorColor]);
@@ -140,7 +140,7 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
           debouncedSave(value);
         }}
       >
-        {/* <Cursors> */}
+        <Cursors>
           <Editable
             renderElement={renderElement}
             onKeyDown={(event) => {
@@ -151,7 +151,7 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
               }
             }}
           />
-        {/* </Cursors> */}
+        </Cursors>
       </Slate>
     </div>
   );
