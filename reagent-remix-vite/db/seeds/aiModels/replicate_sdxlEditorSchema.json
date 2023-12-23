@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "allInputs": {
+    "prompt": {
+      "name": {
+        "en_US": "Prompt"
+      },
+      "description": {
+        "en_US": ""
+      },
+      "type": "plain-text-with-parameters"
+    },
+    "negative-prompt": {
+      "name": {
+        "en_US": "Negative prompt"
+      },
+      "description": {
+        "en_US": ""
+      },
+      "type": "plain-text-with-parameters"
+    },
+
+    "width": {
+      "name": {
+        "en_US": "Width"
+      },
+      "description": {
+        "en_US": "Width of the generated image"
+      },
+      "type": "integer",
+      "default": 1024,
+      "min": 1,
+      "max": 4096
+    },
+    "height": {
+      "name": {
+        "en_US": "Height"
+      },
+      "description": {
+        "en_US": "Height of the generated image"
+      },
+      "type": "number",
+      "default": 1024,
+      "min": 1,
+      "max": 4096
+    }
+  },
+
+  "modelInputComponents": ["prompt", "negative-prompt"],
+
+  "modelParameterComponents": ["width", "height"]
+}
