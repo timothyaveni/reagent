@@ -49,7 +49,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   return json({ noggin, authToken });
 };
 
-const WebsocketConnectedEditor = ({
+const WebsocketConnectedSubpage = ({
   noggin,
   authToken,
 }: {
@@ -89,12 +89,12 @@ const WebsocketConnectedEditor = ({
 };
 
 export default function EditorPage() {
-  const { noggin, authToken, editorSchema } = useLoaderData<typeof loader>();
+  const { noggin, authToken } = useLoaderData<typeof loader>();
 
   return (
     <>
       <EditorHeader noggin={noggin} />
-      <WebsocketConnectedEditor noggin={noggin} authToken={authToken} />
+      <WebsocketConnectedSubpage noggin={noggin} authToken={authToken} />
     </>
   );
 }

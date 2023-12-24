@@ -118,6 +118,7 @@ export const loadNogginBySlug = async (
     },
     select: {
       id: true,
+      slug: true,
       title: true,
     },
   });
