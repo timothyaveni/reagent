@@ -47,7 +47,6 @@ const server = http.createServer((request, response) => {
 const prisma = new PrismaClient();
 
 const serializeYDoc = (ydoc: Y.Doc) => {
-  console.log('serialize', ydoc.toJSON());
   const buffer = Buffer.from(Y.encodeStateAsUpdate(ydoc));
   return buffer;
 };
@@ -55,7 +54,6 @@ const serializeYDoc = (ydoc: Y.Doc) => {
 const deserializeYDoc = (serialized: Buffer, ydoc: Y.Doc) => {
   const uint8Array = new Uint8Array(serialized);
   Y.applyUpdate(ydoc, uint8Array);
-  console.log('deserialize', ydoc.toJSON())
   return ydoc;
 };
 
