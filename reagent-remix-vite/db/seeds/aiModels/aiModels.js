@@ -104,15 +104,31 @@ async function main() {
       editorSchema: sdxlEditorSchema,
     },
   });
+
+  const fofr_sdxlEmojiEditorSchema = JSON.stringify(
+    require('./replicate_fofr_sdxlEmojiEditorSchema.json'),
+  );
+
+  const fofr_sdxlEmoji = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'fofr_sdxl-emoji',
+        revision:
+          'dee76b5afde21b0f01ed7925f0665b7e879c50ee718c5f78a9d38e04d523cc5e_2023-12-24',
+      },
+    },
+    update: {
+      editorSchema: fofr_sdxlEmojiEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'fofr_sdxl-emoji',
+      revision:
+        'dee76b5afde21b0f01ed7925f0665b7e879c50ee718c5f78a9d38e04d523cc5e_2023-12-24',
+      editorSchema: fofr_sdxlEmojiEditorSchema,
+    },
+  });
 }
-// main()
-//   .then(async () => {
-//     await prisma.$disconnect();
-//   })
-//   .catch(async (e) => {
-//     console.error(e);
-//     await prisma.$disconnect();
-//     process.exit(1);
-//   });
 
 export default main;
