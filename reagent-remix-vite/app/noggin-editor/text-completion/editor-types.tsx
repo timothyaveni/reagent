@@ -16,3 +16,8 @@ export interface ChatTurnNode extends BaseElement {
   type: 'chat-turn';
   speaker: 'user' | 'assistant';
 }
+
+export interface InlineImage extends BaseElement {
+  type: 'inline-image';
+  src: string;
+}

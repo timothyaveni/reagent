@@ -3,11 +3,23 @@ import { useSyncedStore } from '@syncedstore/react';
 import { uniq } from 'underscore';
 
 import './ParameterControls.css';
-import { Button, TextField } from '@mui/material';
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from '@mui/material';
 import T from '../../i18n/T';
 import { useContext } from 'react';
 import { StoreContext } from './Editor.client';
 import { useEditorStore } from './editor-utils';
+import {
+  DocumentImageParameter,
+  DocumentParameter,
+  DocumentTextParameter,
+} from './store';
 
 type Props = {
   // for now this is a prop, but it won't actually change throughout the lifetime of the app
@@ -64,7 +76,8 @@ export const AllParameterOptionControls = (props: Props) => {
 function ParameterOptionControls({ id }: { id: string }) {
   const store = useEditorStore();
   const parameterOptions = useSyncedStore(store.documentParameters);
-  if (!parameterOptions[id]) {
+  const thisParameter = parameterOptions[id];
+  if (!thisParameter) {
     console.log(
       'no parameter options yet',
       id,
@@ -73,27 +86,95 @@ function ParameterOptionControls({ id }: { id: string }) {
     return null; // next tick, i think
   }
 
-  const thisParameter = parameterOptions[id];
+  // @ts-ignore
+  switch (thisParameter.type) {
+    case 'image':
+      return (
+        <ImageParameterOptionControls
+          id={id}
+          parameter={thisParameter as unknown as DocumentImageParameter}
+        />
+      );
+    case 'text':
+    default: // TODO probably get rid of this -- i just didn't want to migrate my test db
+      return (
+        <TextParameterOptionControls
+          id={id}
+          parameter={thisParameter as unknown as DocumentTextParameter}
+        />
+      );
+  }
+
+  throw new Error('unknown parameter type');
+}
+
+function NameField({ parameter }: { parameter: DocumentParameter }) {
+  return (
+    <TextField
+      variant="standard"
+      // @ts-ignore
+      value={parameter.name}
+      onChange={(event) => {
+        // @ts-ignore
+        parameter.name = event.target.value;
+      }}
+    />
+  );
+}
+
+function TypeField({
+  parameterId,
+  parameter,
+}: {
+  parameterId: string;
+  parameter: DocumentParameter;
+}) {
+  // this will retain old parameter info in the param object, but that's okay. for now, anyway. makes it easier to switch back and forth, if you want to for some reason
+  return (
+    <FormControl variant="standard">
+      <InputLabel id={`parameter-type-field-${parameterId}`}>
+        <T>Type</T>
+      </InputLabel>
+      <Select
+        label={<T>Type</T>}
+        value={parameter.type}
+        onChange={(event) => {
+          // @ts-ignore
+          parameter.type = event.target.value;
+        }}
+      >
+        <MenuItem value="text">
+          <T>Text</T>
+        </MenuItem>
+        <MenuItem value="image">
+          <T>Image</T>
+        </MenuItem>
+      </Select>
+    </FormControl>
+  );
+}
+
+function TextParameterOptionControls({
+  id,
+  parameter,
+}: {
+  id: string;
+  parameter: DocumentTextParameter;
+}) {
+  // TODO: do not render type parameter if the editor does not have this feature enabled 
 
   return (
     <div key={id} className="parameter-control">
-      <TextField
-        variant="standard"
-        // @ts-ignore
-        value={thisParameter.name}
-        onChange={(event) => {
-          // @ts-ignore
-          thisParameter.name = event.target.value;
-        }}
-      />
+      <NameField parameter={parameter} />
+      <TypeField parameterId={id} parameter={parameter} />
       <br />
 
       <TextField
         // @ts-ignore
-        value={thisParameter.maxLength}
+        value={parameter.maxLength}
         onChange={(event) => {
           // @ts-ignore
-          thisParameter.maxLength = parseInt(event.target.value);
+          parameter.maxLength = parseInt(event.target.value);
         }}
         type="number"
         label="Max length"
@@ -103,13 +184,53 @@ function ParameterOptionControls({ id }: { id: string }) {
 
       <TextField
         // @ts-ignore
-        value={thisParameter.defaultValue}
+        value={parameter.defaultValue}
         onChange={(event) => {
           // @ts-ignore
-          thisParameter.defaultValue = event.target.value;
+          parameter.defaultValue = event.target.value;
         }}
         label="Default value"
       />
+    </div>
+  );
+}
+
+function ImageParameterOptionControls({
+  id,
+  parameter,
+}: {
+  id: string;
+  parameter: DocumentImageParameter;
+}) {
+  return (
+    <div key={id} className="parameter-control">
+      <NameField parameter={parameter} />
+      <TypeField parameterId={id} parameter={parameter} />
+      <br />
+
+      <FormControl variant="standard">
+        <InputLabel id={`parameter-image-quality-field-${id}`}>
+          <T>Image quality</T>
+        </InputLabel>
+        <Select
+          label={<T>Image quality</T>}
+          value={parameter.openAI_detail}
+          onChange={(event) => {
+            // @ts-ignore
+            parameter.openAI_detail = event.target.value;
+          }}
+        >
+          <MenuItem value="auto">
+            <T>auto</T>
+          </MenuItem>
+          <MenuItem value="low">
+            <T>low</T>
+          </MenuItem>
+          <MenuItem value="high">
+            <T>high</T>
+          </MenuItem>
+        </Select>
+      </FormControl>
     </div>
   );
 }

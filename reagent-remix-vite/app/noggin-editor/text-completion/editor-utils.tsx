@@ -95,6 +95,7 @@ export const addNewParameter = (
 
   store.documentParameters[id] = new Y.Map([
     ['name', `param${newIndex}`],
+    ['type', 'text'],
     ['maxLength', 500],
     ['defaultValue', ''],
   ]);

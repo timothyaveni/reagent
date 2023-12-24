@@ -16,7 +16,9 @@ async function main() {
     },
   });
 
-  const gpt41106PreviewEditorSchema = JSON.stringify(require('./openai_gpt41106PreviewEditorSchema.json'));
+  const gpt41106PreviewEditorSchema = JSON.stringify(
+    require('./openai_gpt41106PreviewEditorSchema.json'),
+  );
 
   const gpt41106Preview = await prisma.aIModel.upsert({
     where: {
@@ -34,6 +36,29 @@ async function main() {
       name: 'gpt-4-1106-preview',
       revision: '2023-12-22',
       editorSchema: gpt41106PreviewEditorSchema,
+    },
+  });
+
+  const gpt4VisionPreviewEditorSchema = JSON.stringify(
+    require('./openai_gpt4VisionPreviewEditorSchema.json'),
+  );
+
+  const gpt4VisionPreview = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'gpt-4-vision-preview',
+        revision: '2023-12-23',
+      },
+    },
+    update: {
+      editorSchema: gpt4VisionPreviewEditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'gpt-4-vision-preview',
+      revision: '2023-12-23',
+      editorSchema: gpt4VisionPreviewEditorSchema,
     },
   });
 
@@ -55,7 +80,9 @@ async function main() {
     },
   });
 
-  const sdxlEditorSchema = JSON.stringify(require('./replicate_sdxlEditorSchema.json'));
+  const sdxlEditorSchema = JSON.stringify(
+    require('./replicate_sdxlEditorSchema.json'),
+  );
 
   const sdxl = await prisma.aIModel.upsert({
     where: {

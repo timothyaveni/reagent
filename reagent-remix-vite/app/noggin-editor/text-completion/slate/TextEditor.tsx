@@ -8,8 +8,8 @@ import { useSyncedStore } from '@syncedstore/react';
 import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 
 import './TextEditor.css';
-import { Cursors } from './Cursors';
-import { withChatElements, withPlainTextElements } from './editorPlugins';
+import { Cursors } from '../Cursors';
+import { withChatElements, withPlainTextElements } from '../editorPlugins';
 import { TextFragment } from './TextFragment';
 import { ChatTurn } from './ChatTurn';
 import { Parameter } from './Parameter';
@@ -17,23 +17,26 @@ import {
   addNewParameter,
   getParameterElements,
   useEditorStore,
-} from './editor-utils';
-import { debouncedSave } from './editor-utils';
-import { StoreContext } from './Editor.client';
+} from '../editor-utils';
+import { debouncedSave } from '../editor-utils';
+import { StoreContext } from '../Editor.client';
+import { InlineImage } from './InlineImage';
 
-const initialValue: any[] = [
-  // {
-  //   children: [{ text: '' }],
-  // },
-];
+const initialValue: any[] = [];
 
 type Props = {
   documentKey: string;
   textType: 'plain' | 'chat';
+  allowImages?: 'none' | 'user' | 'all';
   className?: string;
 };
 
-const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
+const TextEditor = ({
+  documentKey,
+  textType,
+  allowImages = 'none',
+  className = '',
+}: Props) => {
   const store = useEditorStore();
   const { websocketProvider } = useContext(StoreContext);
 
@@ -42,10 +45,8 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
   }
 
   const modelInputs = useSyncedStore(store.modelInputs);
-  // const parameterOptions = useSyncedStore(store.parameterOptions); // I thiiink this is a quirk of the library, that we have to do this here instead of in ParameterControls so it will rerender
-  // hm, it looks like it might still not be rerendering, especially when there are other (cross-tab comms?) users. it's okay, we're planning to put all this in slate soon. we'll revisit if there are still problems
 
-  const cursorName = localStorage.getItem('cursor-name');
+  const cursorName = localStorage.getItem('cursor-name'); // TODO don't do it like this
   const cursorColor = localStorage.getItem('cursor-color');
 
   const editor = useMemo(() => {
@@ -65,10 +66,6 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
         },
       },
     );
-    // let e = withYjs(
-    //   withReagentAugmentations(withReact(withHistory(createEditor()))),
-    //   modelInputs[documentKey]!,
-    // );
 
     return e;
   }, [modelInputs, modelInputs[documentKey], cursorName, cursorColor]);
@@ -85,6 +82,8 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
         return <Parameter {...props} />;
       case 'chat-turn':
         return <ChatTurn {...props} />;
+      case 'image':
+        return <InlineImage {...props} />;
       default:
         return <TextFragment {...props} />;
     }
@@ -95,7 +94,12 @@ const TextEditor = ({ documentKey, textType, className = '' }: Props) => {
     const parameterOptionDict = store.documentParameters;
 
     const parameterElements = getParameterElements(editor);
-    console.log('pe', parameterElements, JSON.stringify(store.documentParameterIdsByDocument), documentKey);
+    console.log(
+      'pe',
+      parameterElements,
+      JSON.stringify(store.documentParameterIdsByDocument),
+      documentKey,
+    );
     for (const element of parameterElements) {
       console.log('sync', element);
       if (

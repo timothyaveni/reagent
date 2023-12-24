@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Transforms } from 'slate';
 import { ReactEditor, useSelected, useSlate } from 'slate-react';
-import { ChatTurnNode } from './editor-types';
+import { ChatTurnNode } from '../editor-types';
 
 export const ChatTurn = ({
   attributes,

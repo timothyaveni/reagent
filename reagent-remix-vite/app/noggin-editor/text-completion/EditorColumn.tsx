@@ -1,7 +1,7 @@
 import HelpIcon from '@mui/icons-material/Help';
 import { FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
 
-import TextEditor from './TextEditor';
+import TextEditor from './slate/TextEditor';
 import T, { t } from '~/i18n/T';
 import { ModelInput } from '~/shared/editorSchema';
 import EditorComponentWithHeader from './EditorComponentWithHeader';

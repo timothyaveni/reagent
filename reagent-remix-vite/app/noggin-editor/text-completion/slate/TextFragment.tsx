@@ -1,6 +1,6 @@
 import { Node } from 'slate';
 import { ReactEditor, useSlate } from 'slate-react';
-import { ChatTurnNode } from './editor-types';
+import { ChatTurnNode } from '../editor-types';
 
 import './TextFragment.css';
 

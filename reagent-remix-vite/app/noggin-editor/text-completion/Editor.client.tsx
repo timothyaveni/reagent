@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import TextEditor from './TextEditor';
+import TextEditor from './slate/TextEditor';
 import { AllParameterOptionControls } from './ParameterOptionControls';
 
 import {

@@ -1,5 +1,5 @@
 import { ModelInput } from '~/shared/editorSchema';
-import TextEditor from './TextEditor';
+import TextEditor from './slate/TextEditor';
 
 export default function EditorComponent({
   inputKey,
@@ -10,9 +10,16 @@ export default function EditorComponent({
 }) {
   switch (input.type) {
     case 'chat-text-user-images-with-parameters':
-      return <>Not implemented</>;
-
-    // TODO: min-height settings in the editor schema -- like we had in className="slate-wrapper-main"
+      return (
+        <TextEditor
+          documentKey={inputKey}
+          textType="chat"
+          allowImages="user"
+          className={
+            input.editorHeight === 'primary' ? 'slate-wrapper-main' : ''
+          }
+        />
+      );
     case 'chat-text-with-parameters':
       return (
         <TextEditor
