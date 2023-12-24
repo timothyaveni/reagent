@@ -14,7 +14,7 @@ services:
       - /app/node_modules/
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
-    restart: unless-stopped
+    restart: on-failure:5
   yjs-websocket:
     build:
       context: ./y-websocket-server
@@ -27,7 +27,7 @@ services:
       - /app/node_modules/
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
-    restart: unless-stopped
+    restart: on-failure:5
   noggin-server:
     build:
       context: ./noggin-server
@@ -40,7 +40,7 @@ services:
       - /app/node_modules/
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
-    restart: unless-stopped
+    restart: on-failure:5
   postgres:
     image: postgres:16.0
     environment:
