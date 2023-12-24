@@ -108,6 +108,12 @@ model Organization {
   ltiv1p3Connection LTIv1p3Connection?
 }
 
+enum OrganizationMembershipRole {
+  member
+  manager
+  owner
+}
+
 model OrganizationMembership {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
@@ -120,8 +126,7 @@ model OrganizationMembership {
   user   User @relation(fields: [userId], references: [id])
   userId Int
 
-  // 'member' | 'manager' | 'administrator'
-  role String
+  role OrganizationMembershipRole
 
   @@unique([organizationId, userId])
 }
@@ -190,9 +195,9 @@ model NogginAPIKey {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  key       String    @unique
-  noggin    Noggin    @relation(fields: [nogginId], references: [id])
-  nogginId  Int
+  key      String @unique
+  noggin   Noggin @relation(fields: [nogginId], references: [id])
+  nogginId Int
 }
 
 //
