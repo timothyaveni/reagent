@@ -17,7 +17,8 @@
       "description": {
         "en_US": "The chat prompt is the main input to the model. It can contain instructions, information, and relevant prior context.\n\nTypically, the last item in a prompt is a &ldquo;User&rdquo; section, representing the current query. The model will always respond with an &ldquo;Assistant&rdquo; section.\n\nEven if you are not building a chatbot, you can use the chat format to delineate &rdquo;turns&ldquo; taken by the system. &ldquo;User&rdquo; sections do not need to be formatted as natural-language questions.\n\nMany of the highest-quality large language models are available only in chat format, so it can be valuable to use chat prompts even if your prompt only ever consists of a single &ldquo;User&rdquo; turn."
       },
-      "type": "chat-text-user-images-with-parameters"
+      "type": "chat-text-user-images-with-parameters",
+      "editorHeight": "primary"
     },
     "temperature": {
       "name": {
