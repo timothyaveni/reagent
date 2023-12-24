@@ -118,19 +118,3 @@ export const addNewParameter = (
   Transforms.move(editor);
 };
 
-const save = async (value: any) => {
-  const totalState = {
-    editorValue: value,
-  };
-
-  console.log('saving', totalState);
-
-  await fetch('http://localhost:2348/save', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(totalState),
-  });
-};
-export const debouncedSave = debounce(save, 1000);

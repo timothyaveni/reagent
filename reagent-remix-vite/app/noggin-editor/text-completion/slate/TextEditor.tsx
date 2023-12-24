@@ -18,7 +18,6 @@ import {
   getParameterElements,
   useEditorStore,
 } from '../editor-utils';
-import { debouncedSave } from '../editor-utils';
 import { StoreContext } from '../Editor.client';
 import { InlineImage } from './InlineImage';
 
@@ -141,7 +140,6 @@ const TextEditor = ({
         onChange={(value) => {
           console.log('onchange', value);
           syncParameters();
-          debouncedSave(value);
         }}
       >
         <Cursors>
