@@ -1,8 +1,10 @@
-import { LoaderFunctionArgs, json, redirect } from '@remix-run/node';
-import { Form, Link, useLoaderData } from '@remix-run/react';
+import { LoaderFunctionArgs, json } from '@remix-run/node';
+import { Link, useLoaderData } from '@remix-run/react';
 import { AppLoadContext } from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
-import { createNoggin, loadNogginsIndex } from '~/models/noggin.server';
+import { loadNogginsIndex } from '~/models/noggin.server';
+
+import './NogginList.css';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
@@ -12,14 +14,16 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   return json({ noggins });
 };
 
-export const action = async ({ context }: { context: AppLoadContext }) => {
-  // const user = requireUser(context);
-  // const noggin = await createNoggin(context, {
-  //   ownerType: 'user',
-  //   ownerId: user.id,
-  // });
-  // // return redirect(`/noggins/${noggin.slug}`);
-};
+// TODO type
+function NogginCard({ noggin }: { noggin: any }) {
+  return (
+    <div className="noggin-card">
+      <Link to={`/noggins/${noggin.slug}`} key={noggin.slug}>
+        {noggin.title}
+      </Link>
+    </div>
+  );
+}
 
 export default function NogginList() {
   const { noggins } = useLoaderData<typeof loader>();
@@ -29,20 +33,12 @@ export default function NogginList() {
       <h1>Noggins</h1>
       <Link to="/noggins/new">New noggin</Link>
 
-      <ul>
-        {
-          // @ts-expect-error ugh idk why the types are wonky from loader data
-          noggins.map((noggin) => {
-            return (
-              <li key={noggin.slug}>
-                <Link to={`/noggins/${noggin.slug}`} key={noggin.slug}>
-                  {noggin.title}
-                </Link>
-              </li>
-            );
-          })
-        }
-      </ul>
+      {
+        // @ts-expect-error ugh idk why the types are wonky from loader data
+        noggins.slice(0, 8).map((noggin) => (
+          <NogginCard key={noggin.slug} noggin={noggin} />
+        ))
+      }
     </div>
   );
 }

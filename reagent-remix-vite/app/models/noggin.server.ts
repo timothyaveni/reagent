@@ -157,6 +157,19 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
     },
   });
 
+  // todo do this with sql (don't think prisma supports bleh)
+  noggins.sort((a, b) => {
+    if (!a.nogginRevisions[0]) {
+      return 1;
+    } else if (!b.nogginRevisions[0]) {
+      return -1;
+    } else {
+      return +b.nogginRevisions[0].updatedAt > +a.nogginRevisions[0].updatedAt
+        ? 1
+        : -1;
+    }
+  });
+
   return noggins;
 };
 
