@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "prisma": {
-    "schema": "../prisma/schema.prisma",
+    "schema": "/app/prisma/schema.prisma",
     "seed": "node ./db/seeds/seed.js"
   },
   "scripts": {

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  remix:
+    build:
+      context: ./reagent-remix-vite
+      dockerfile: Dockerfile.dev
+    ports:
+      - 3000:3000
+      - 24678:24678 # vite hmr
+    volumes:
+      - ./reagent-remix-vite:/app
+      - ./prisma:/app/prisma
+      - /app/node_modules/
+    environment:
+      - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
+    restart: unless-stopped
+  yjs-websocket:
+    build:
+      context: ./y-websocket-server
+      dockerfile: Dockerfile.dev
+    ports:
+      - 2347:2347
+    volumes:
+      - ./y-websocket-server:/app
+      - ./prisma:/app/prisma
+      - /app/node_modules/
+    environment:
+      - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
+    restart: unless-stopped
+  noggin-server:
+    build:
+      context: ./noggin-server
+      dockerfile: Dockerfile.dev
+    ports:
+      - 2358:2358
+    volumes:
+      - ./noggin-server:/app
+      - ./prisma:/app/prisma
+      - /app/node_modules/
+    environment:
+      - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
+    restart: unless-stopped
+  postgres:
+    image: postgres:16.0
+    environment:
+      POSTGRES_PASSWORD: pg_dev_password
+      PGDATA: /pg-data
+    volumes:
+      - ./pg-data:/pg-data
+    restart: unless-stopped

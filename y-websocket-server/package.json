@@ -4,12 +4,10 @@
   "description": "This code is adapted (maybe. or maybe I didn't make any changes yet.) from the starter server code in [y-websocket](https://github.com/yjs/y-websocket), by Kevin Jahns.",
   "main": "server.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-prisma": "npx prisma generate --schema=../reagent-remix-vite/prisma/schema.prisma",
-    "start": "npx tsc && node dist/server.js"
+    "dev": "tsc-watch --preserveWatchOutput --onSuccess \"node dist/server.js\""
   },
   "prisma": {
-    "schema": "../prisma/schema.prisma"
+    "schema": "/app/prisma/schema.prisma"
   },
   "type": "module",
   "author": "",
@@ -31,6 +29,7 @@
     "@types/underscore": "^1.11.15",
     "@types/ws": "^8.5.10",
     "prisma": "^5.7.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsc-watch": "^6.0.4"
   }
 }
