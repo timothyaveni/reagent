@@ -18,7 +18,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 function NogginCard({ noggin }: { noggin: any }) {
   return (
     <div className="noggin-card">
-      <Link to={`/noggins/${noggin.slug}`} key={noggin.slug}>
+      <Link to={`/noggins/${noggin.slug}/edit`} key={noggin.slug}>
         {noggin.title}
       </Link>
     </div>

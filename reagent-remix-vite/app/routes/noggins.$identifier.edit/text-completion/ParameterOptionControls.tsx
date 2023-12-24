@@ -4,16 +4,13 @@ import { uniq } from 'underscore';
 
 import './ParameterControls.css';
 import {
-  Button,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   TextField,
 } from '@mui/material';
-import T from '../../i18n/T';
-import { useContext } from 'react';
-import { StoreContext } from './Editor.client';
+import T from '~/i18n/T';
 import { useEditorStore } from './editor-utils';
 import {
   DocumentImageParameter,
@@ -161,7 +158,7 @@ function TextParameterOptionControls({
   id: string;
   parameter: DocumentTextParameter;
 }) {
-  // TODO: do not render type parameter if the editor does not have this feature enabled 
+  // TODO: do not render type parameter if the editor does not have this feature enabled
 
   return (
     <div key={id} className="parameter-control">

@@ -18,7 +18,7 @@ import {
   getParameterElements,
   useEditorStore,
 } from '../editor-utils';
-import { StoreContext } from '../Editor.client';
+import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 import { InlineImage } from './InlineImage';
 
 const initialValue: any[] = [];

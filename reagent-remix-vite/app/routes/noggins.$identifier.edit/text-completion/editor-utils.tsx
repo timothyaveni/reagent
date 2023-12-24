@@ -7,7 +7,7 @@ import { v4 as uuid } from 'uuid';
 import { Y, observeDeep } from '@syncedstore/core';
 import { NogginEditorStore } from './store';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { StoreContext } from './Editor.client';
+import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 
 export const useEditorStore = () => {
   const { store } = useContext(StoreContext);

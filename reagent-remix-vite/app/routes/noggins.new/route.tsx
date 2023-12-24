@@ -42,7 +42,7 @@ export const action = async ({ request, context }: { request: any; context: AppL
     name: name === '' ? null : name,
   });
 
-  return redirect(`/noggins/${noggin.slug}`);
+  return redirect(`/noggins/${noggin.slug}/edit`);
 };
 
 export default function NewNoggin() {

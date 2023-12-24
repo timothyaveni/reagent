@@ -3,19 +3,20 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from '@remix-run/node';
-import Editor from '../../noggin-editor/text-completion/Editor.client';
 import { useEffect, useState } from 'react';
 import { requireUser } from '~/auth/auth.server';
-import { getNogginEditorSchema_OMNISCIENT, loadNogginBySlug } from '~/models/noggin.server';
+import { loadNogginBySlug } from '~/models/noggin.server';
 
 import jwt from 'jsonwebtoken';
 
 import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
 import { notFound } from '~/route-utils/status-code';
-import { useLoaderData } from '@remix-run/react';
-import { CircularProgress } from '@mui/material';
+import { Outlet, useLoaderData } from '@remix-run/react';
 import EditorHeader from './EditorHeader';
-import { EditorSchema } from '~/shared/editorSchema';
+import { NogginEditorStore } from '~/routes/noggins.$identifier.edit/text-completion/store';
+import { WebsocketProvider } from 'y-websocket';
+import { EditorWebsocketPopulator } from './EditorWebsocketPopulator.client';
+import { StoreContext } from './StoreContext';
 
 export const meta: MetaFunction = () => {
   return [
@@ -35,8 +36,6 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw notFound();
   }
 
-  const editorSchema = await getNogginEditorSchema_OMNISCIENT(noggin.id);
-
   const authToken = jwt.sign(
     {
       nogginId: noggin.id,
@@ -50,33 +49,42 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   console.log({ authToken });
 
-  return json({ noggin, editorSchema, authToken });
+  return json({ noggin, authToken });
 };
 
-const RemixEditorWrapper = ({
+const WebsocketConnectedEditor = ({
   noggin,
   authToken,
-  editorSchema,
 }: {
   noggin: any; // TODO
   authToken: string;
-  editorSchema: EditorSchema,
 }) => {
-  // dude this is SO INCREDIBLY not a vibe
-  // but i'm having a couple bundler problems with the editor on the server
-  // and dude. i really do not need to render this on the server.
-  // paranoid it's going to join the websocket room during ssr anyway lol
-  const [mounted, setMounted] = useState(false);
+  const [storeAndWebsocketProvider, setStoreAndWebsocketProvider] = useState<{
+    store: NogginEditorStore | null;
+    websocketProvider: WebsocketProvider | null;
+  }>({
+    store: null,
+    websocketProvider: null,
+  });
+
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    setIsMounted(true);
   }, []);
 
-  if (!mounted) {
-    return <CircularProgress />; // TODO: loading screen
-  }
-
-  return <Editor noggin={noggin} authToken={authToken} editorSchema={editorSchema} />;
+  return (
+    <StoreContext.Provider value={storeAndWebsocketProvider}>
+      {isMounted && (
+        <EditorWebsocketPopulator
+          noggin={noggin}
+          authToken={authToken}
+          setStoreAndWebsocketProvider={setStoreAndWebsocketProvider}
+        />
+      )}
+      <Outlet />
+    </StoreContext.Provider>
+  );
 };
 
 export default function EditorPage() {
@@ -85,7 +93,7 @@ export default function EditorPage() {
   return (
     <>
       <EditorHeader noggin={noggin} />
-      <RemixEditorWrapper noggin={noggin} editorSchema={editorSchema} authToken={authToken} />
+      <WebsocketConnectedEditor noggin={noggin} authToken={authToken} />
     </>
   );
 }
