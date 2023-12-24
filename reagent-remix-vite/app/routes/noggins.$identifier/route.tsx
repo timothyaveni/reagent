@@ -4,7 +4,6 @@ import {
   type MetaFunction,
 } from '@remix-run/node';
 import { useEffect, useState } from 'react';
-import { requireUser } from '~/auth/auth.server';
 import { loadNogginBySlug } from '~/models/noggin.server';
 
 import jwt from 'jsonwebtoken';
@@ -26,7 +25,6 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
-  const user = requireUser(context);
   const { identifier } = params;
 
   const noggin = await loadNogginBySlug(context, { slug: identifier });
