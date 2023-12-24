@@ -5,7 +5,7 @@ import { debounce, uniq } from 'underscore';
 
 import { v4 as uuid } from 'uuid';
 import { Y, observeDeep } from '@syncedstore/core';
-import { NogginEditorStore } from './store';
+import { NogginEditorStore } from './store.client';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 

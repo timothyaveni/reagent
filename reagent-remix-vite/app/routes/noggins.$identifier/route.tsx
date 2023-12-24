@@ -11,11 +11,10 @@ import jwt from 'jsonwebtoken';
 
 import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
 import { notFound } from '~/route-utils/status-code';
-import { Outlet, useLoaderData } from '@remix-run/react';
+import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
 import EditorHeader from './EditorHeader';
-import { NogginEditorStore } from '~/routes/noggins.$identifier.edit/text-completion/store';
+import { initializeStoreForNoggin, NogginEditorStore } from '~/routes/noggins.$identifier.edit/text-completion/store.client';
 import { WebsocketProvider } from 'y-websocket';
-import { EditorWebsocketPopulator } from './EditorWebsocketPopulator.client';
 import { StoreContext } from './StoreContext';
 
 export const meta: MetaFunction = () => {
@@ -67,21 +66,25 @@ const WebsocketConnectedEditor = ({
     websocketProvider: null,
   });
 
-  const [isMounted, setIsMounted] = useState(false);
+  const revalidator = useRevalidator();
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    // initializeStoreForNoggin is in a .client file, so it will be undefined on SSR, but the useEffect doesn't run anyway
+    // todo: kill old websocket on param change. but not when we just go to a subpage
+    const { store, websocketProvider } = initializeStoreForNoggin(
+      {
+        id: noggin.id,
+      },
+      authToken,
+      revalidator.revalidate,
+    );
+
+    console.log('store useeffect');
+    setStoreAndWebsocketProvider({ store, websocketProvider });
+  }, [noggin.id, authToken]);
 
   return (
     <StoreContext.Provider value={storeAndWebsocketProvider}>
-      {isMounted && (
-        <EditorWebsocketPopulator
-          noggin={noggin}
-          authToken={authToken}
-          setStoreAndWebsocketProvider={setStoreAndWebsocketProvider}
-        />
-      )}
       <Outlet />
     </StoreContext.Provider>
   );

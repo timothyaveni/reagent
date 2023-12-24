@@ -1,6 +1,6 @@
 import { createContext } from "react";
 import { WebsocketProvider } from "y-websocket";
-import { NogginEditorStore } from "~/routes/noggins.$identifier.edit/text-completion/store";
+import { NogginEditorStore } from "~/routes/noggins.$identifier.edit/text-completion/store.client";
 
 // todo dedup types
 export const StoreContext = createContext<{

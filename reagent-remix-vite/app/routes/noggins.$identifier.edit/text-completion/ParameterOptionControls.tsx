@@ -16,7 +16,7 @@ import {
   DocumentImageParameter,
   DocumentParameter,
   DocumentTextParameter,
-} from './store';
+} from './store.client';
 
 type Props = {
   // for now this is a prop, but it won't actually change throughout the lifetime of the app
