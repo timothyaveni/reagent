@@ -35,7 +35,7 @@ export default function NogginList() {
 
       {
         // @ts-expect-error ugh idk why the types are wonky from loader data
-        noggins.slice(0, 8).map((noggin) => (
+        noggins.map((noggin) => (
           <NogginCard key={noggin.slug} noggin={noggin} />
         ))
       }
