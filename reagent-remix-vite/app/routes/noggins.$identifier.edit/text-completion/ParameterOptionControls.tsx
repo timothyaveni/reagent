@@ -77,7 +77,7 @@ function ControlsWrapper({
   const hasPopulatedStore = useHasPopulatedStore();
 
   if (!hasPopulatedStore) {
-    return <Skeleton variant="rectangular" height={200} />;
+    return <Skeleton variant="rounded" height={200} />;
   }
 
   return (

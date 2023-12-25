@@ -4,10 +4,10 @@ import prisma from '~/db';
 import { createInitialRevisionForNoggin_OMNIPOTENT } from './nogginRevision.server';
 
 import {
-  uniqueNamesGenerator,
+  NumberDictionary,
   adjectives,
   animals,
-  NumberDictionary,
+  uniqueNamesGenerator,
 } from 'unique-names-generator';
 import { EditorSchema } from '~/shared/editorSchema';
 
@@ -192,5 +192,5 @@ export const getNogginEditorSchema_OMNISCIENT = async (
 
   // console.log('noggin.aiModel.editorSchema', noggin.aiModel.editorSchema);
 
-  return JSON.parse(noggin.aiModel.editorSchema);
+  return noggin.aiModel.editorSchema as unknown as EditorSchema;
 };

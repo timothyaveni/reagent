@@ -16,9 +16,7 @@ async function main() {
     },
   });
 
-  const gpt41106PreviewEditorSchema = JSON.stringify(
-    require('./openai_gpt41106PreviewEditorSchema.json'),
-  );
+  const gpt41106PreviewEditorSchema = require('./openai_gpt41106PreviewEditorSchema.json');
 
   const gpt41106Preview = await prisma.aIModel.upsert({
     where: {
@@ -39,9 +37,7 @@ async function main() {
     },
   });
 
-  const gpt4VisionPreviewEditorSchema = JSON.stringify(
-    require('./openai_gpt4VisionPreviewEditorSchema.json'),
-  );
+  const gpt4VisionPreviewEditorSchema = require('./openai_gpt4VisionPreviewEditorSchema.json');
 
   const gpt4VisionPreview = await prisma.aIModel.upsert({
     where: {
@@ -69,20 +65,18 @@ async function main() {
     update: {},
     create: {
       name: 'replicate',
-      credentialsSchema: JSON.stringify({
+      credentialsSchema: {
         apiToken: {
           type: 'string',
           name: {
             en_US: 'API Token',
           },
         },
-      }),
+      },
     },
   });
 
-  const sdxlEditorSchema = JSON.stringify(
-    require('./replicate_sdxlEditorSchema.json'),
-  );
+  const sdxlEditorSchema = require('./replicate_sdxlEditorSchema.json');
 
   const sdxl = await prisma.aIModel.upsert({
     where: {
@@ -105,9 +99,7 @@ async function main() {
     },
   });
 
-  const fofr_sdxlEmojiEditorSchema = JSON.stringify(
-    require('./replicate_fofr_sdxlEmojiEditorSchema.json'),
-  );
+  const fofr_sdxlEmojiEditorSchema = require('./replicate_fofr_sdxlEmojiEditorSchema.json');
 
   const fofr_sdxlEmoji = await prisma.aIModel.upsert({
     where: {

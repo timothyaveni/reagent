@@ -2,13 +2,6 @@ FROM node:21.4.0-bookworm
 
 WORKDIR /app
 
-COPY package.json /app
-COPY package-lock.json /app
-
-RUN npm install --force # we don't love --force but i think react canary ends up making us need it
-
-# COPY . /app
-
 ENV NODE_ENV=development
 ENV PRISMA_OUTPUT="/app/node_modules/.prisma/client"
 

@@ -1,8 +1,8 @@
-import React from 'react';
-import NogginTitleInput from './NogginTitleInput';
 import { Tab, Tabs } from '@mui/material';
-import T from '~/i18n/T';
 import { useMatches, useNavigate } from '@remix-run/react';
+import React from 'react';
+import T from '~/i18n/T';
+import NogginTitleInput from './NogginTitleInput';
 
 import './EditorHeader.css';
 
@@ -29,6 +29,7 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({ noggin }) => {
       </div>
 
       <div className="noggin-nav-tabs-wrapper">
+        {/* TODO hmm for some reason this loads after hydration / after you click on it */}
         <Tabs
           value={navValue}
           onChange={(e, newValue) => {

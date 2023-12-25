@@ -13,7 +13,7 @@ export function TextEditorWrapper(props: TextEditorProps) {
         }
       >
         <Skeleton
-          variant="rectangular"
+          variant="rounded"
           height={props.editorHeight === 'primary' ? 400 : 75}
         />
       </div>
