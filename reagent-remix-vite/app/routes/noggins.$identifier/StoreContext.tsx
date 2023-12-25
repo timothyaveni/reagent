@@ -5,8 +5,10 @@ import { NogginEditorStore } from "~/routes/noggins.$identifier.edit/text-comple
 // todo dedup types
 export const StoreContext = createContext<{
   store: NogginEditorStore | null;
+  hasPopulatedStore: boolean;
   websocketProvider: WebsocketProvider | null;
 }>({
   store: null,
+  hasPopulatedStore: false,
   websocketProvider: null,
 });

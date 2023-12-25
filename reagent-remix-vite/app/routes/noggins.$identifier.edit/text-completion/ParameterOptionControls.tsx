@@ -2,16 +2,17 @@ import { useSyncedStore } from '@syncedstore/react';
 
 import { uniq } from 'underscore';
 
-import './ParameterControls.css';
 import {
   FormControl,
   InputLabel,
   MenuItem,
   Select,
+  Skeleton,
   TextField,
 } from '@mui/material';
 import T from '~/i18n/T';
-import { useEditorStore } from './editor-utils';
+import './ParameterControls.css';
+import { useEditorStore, useHasPopulatedStore } from './editor-utils';
 import {
   DocumentImageParameter,
   DocumentParameter,
@@ -63,12 +64,30 @@ export const AllParameterOptionControls = (props: Props) => {
           </Button> */}
         </>
       )}
-      {parameterElementIds.map((id) => {
-        return <ParameterOptionControls id={id} key={id} />;
-      })}
+      <ControlsWrapper parameterElementIds={parameterElementIds} />
     </div>
   );
 };
+
+function ControlsWrapper({
+  parameterElementIds,
+}: {
+  parameterElementIds: string[];
+}) {
+  const hasPopulatedStore = useHasPopulatedStore();
+
+  if (!hasPopulatedStore) {
+    return <Skeleton variant="rectangular" height={200} />;
+  }
+
+  return (
+    <div className="parameter-controls-wrapper">
+      {parameterElementIds.map((id) => (
+        <ParameterOptionControls key={id} id={id} />
+      ))}
+    </div>
+  );
+}
 
 function ParameterOptionControls({ id }: { id: string }) {
   const store = useEditorStore();

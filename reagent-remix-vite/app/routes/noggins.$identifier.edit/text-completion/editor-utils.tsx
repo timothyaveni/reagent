@@ -19,7 +19,7 @@ export const useEditorStore = () => {
   return store;
 };
 
-export const useHasPopulatedStore = (store: any) => {
+export const useRootHasPopulatedStore = (store: any) => {
   const [hasPopulatedStore, setHasPopulatedStore] = useState(false);
   const unsubscribeRef = useRef<(() => void) | null>(null);
 
@@ -59,6 +59,11 @@ export const useHasPopulatedStore = (store: any) => {
     };
   });
 
+  return hasPopulatedStore;
+};
+
+export const useHasPopulatedStore = () => {
+  const { hasPopulatedStore } = useContext(StoreContext);
   return hasPopulatedStore;
 };
 

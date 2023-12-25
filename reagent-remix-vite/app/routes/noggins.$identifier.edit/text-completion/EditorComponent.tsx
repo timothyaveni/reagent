@@ -1,5 +1,5 @@
 import { ModelInput } from '~/shared/editorSchema';
-import TextEditor from './slate/TextEditor';
+import { TextEditorWrapper } from './slate/TextEditorWrapper';
 
 export default function EditorComponent({
   inputKey,
@@ -11,33 +11,27 @@ export default function EditorComponent({
   switch (input.type) {
     case 'chat-text-user-images-with-parameters':
       return (
-        <TextEditor
+        <TextEditorWrapper
           documentKey={inputKey}
           textType="chat"
           allowImages="user"
-          className={
-            input.editorHeight === 'primary' ? 'slate-wrapper-main' : ''
-          }
+          editorHeight={input.editorHeight}
         />
       );
     case 'chat-text-with-parameters':
       return (
-        <TextEditor
+        <TextEditorWrapper
           documentKey={inputKey}
           textType="chat"
-          className={
-            input.editorHeight === 'primary' ? 'slate-wrapper-main' : ''
-          }
+          editorHeight={input.editorHeight}
         />
       );
     case 'plain-text-with-parameters':
       return (
-        <TextEditor
+        <TextEditorWrapper
           documentKey={inputKey}
           textType="plain"
-          className={
-            input.editorHeight === 'primary' ? 'slate-wrapper-main' : ''
-          }
+          editorHeight={input.editorHeight}
         />
       );
     case 'integer':

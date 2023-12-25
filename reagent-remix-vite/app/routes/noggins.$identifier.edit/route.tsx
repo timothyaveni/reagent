@@ -6,7 +6,7 @@ import {
   getNogginEditorSchema_OMNISCIENT,
   loadNogginBySlug,
 } from '~/models/noggin.server';
-import Editor from './text-completion/Editor.client';
+import Editor from './text-completion/Editor';
 import { notFound } from '~/route-utils/status-code';
 
 export const loader = async ({ params, context }: any) => {

@@ -17,20 +17,32 @@
   }
 }
 
+.slate-skeleton {
+  margin: auto;
+  margin-top: 20px;
+}
+
 .slate-wrapper {
   margin: auto;
   margin-top: 20px;
-  min-height: 100px;
 }
 
 .slate-wrapper [role='textbox'] {
   border: 1px solid #ccc;
-  padding: 24px;
+  padding: 20px;
   border-radius: 0;
 
   /* active */
   &:focus {
     outline-color: var(--reagent-purple);
+  }
+
+  & p {
+    padding: 0;
+  }
+
+  & p:last-child {
+    margin-bottom: 0;
   }
 }
 
@@ -40,6 +52,8 @@
 
 .chat-turn {
   user-select: none;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 20px;
 
   & .chat-turn-inner {
     /* display: inline-block;

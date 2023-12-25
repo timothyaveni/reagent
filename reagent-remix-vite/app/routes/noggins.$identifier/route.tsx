@@ -8,12 +8,16 @@ import { loadNogginBySlug } from '~/models/noggin.server';
 
 import jwt from 'jsonwebtoken';
 
-import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
-import { notFound } from '~/route-utils/status-code';
 import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
-import EditorHeader from './EditorHeader';
-import { initializeStoreForNoggin, NogginEditorStore } from '~/routes/noggins.$identifier.edit/text-completion/store.client';
+import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
 import { WebsocketProvider } from 'y-websocket';
+import { notFound } from '~/route-utils/status-code';
+import {
+  initializeStoreForNoggin,
+  NogginEditorStore,
+} from '~/routes/noggins.$identifier.edit/text-completion/store.client';
+import { useRootHasPopulatedStore } from '../noggins.$identifier.edit/text-completion/editor-utils';
+import EditorHeader from './EditorHeader';
 import { StoreContext } from './StoreContext';
 
 export const meta: MetaFunction = () => {
@@ -81,8 +85,17 @@ const WebsocketConnectedSubpage = ({
     setStoreAndWebsocketProvider({ store, websocketProvider });
   }, [noggin.id, authToken]);
 
+  const hasPopulatedStore = useRootHasPopulatedStore(
+    storeAndWebsocketProvider.store,
+  );
+
   return (
-    <StoreContext.Provider value={storeAndWebsocketProvider}>
+    <StoreContext.Provider
+      value={{
+        ...storeAndWebsocketProvider,
+        hasPopulatedStore,
+      }}
+    >
       <Outlet />
     </StoreContext.Provider>
   );

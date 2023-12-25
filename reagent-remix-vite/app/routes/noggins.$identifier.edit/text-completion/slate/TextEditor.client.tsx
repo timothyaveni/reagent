@@ -1,42 +1,52 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { createEditor } from 'slate';
-import { Editable, Slate, withReact } from 'slate-react';
 import { withHistory } from 'slate-history';
+import { Editable, Slate, withReact } from 'slate-react';
 
 import { useSyncedStore } from '@syncedstore/react';
 
 import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 
-import './TextEditor.css';
+import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 import { Cursors } from '../Cursors';
-import { withChatElements, withPlainTextElements } from '../editorPlugins';
-import { TextFragment } from './TextFragment';
-import { ChatTurn } from './ChatTurn';
-import { Parameter } from './Parameter';
 import {
   addNewParameter,
   getParameterElements,
   useEditorStore,
+  useHasPopulatedStore,
 } from '../editor-utils';
-import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
+import { withChatElements, withPlainTextElements } from '../editorPlugins';
+import { ChatTurn } from './ChatTurn';
 import { InlineImage } from './InlineImage';
+import { Parameter } from './Parameter';
+import './TextEditor.css';
+import { TextFragment } from './TextFragment';
 
 const initialValue: any[] = [];
 
-type Props = {
+export type TextEditorProps = {
   documentKey: string;
   textType: 'plain' | 'chat';
   allowImages?: 'none' | 'user' | 'all';
-  className?: string;
+  // className?: string;
+  editorHeight?: 'primary' | 'default';
 };
 
 const TextEditor = ({
   documentKey,
   textType,
   allowImages = 'none',
-  className = '',
-}: Props) => {
+  editorHeight,
+}: TextEditorProps) => {
   const store = useEditorStore();
+  const hasPopulatedStore = useHasPopulatedStore();
+
+  console.log({ store, hasPopulatedStore });
+
+  if (!hasPopulatedStore) {
+    throw new Error('trying to render a null store');
+  }
+
   const { websocketProvider } = useContext(StoreContext);
 
   if (!websocketProvider) {
@@ -133,7 +143,12 @@ const TextEditor = ({
   }, [editor]);
 
   return (
-    <div className={'slate-wrapper ' + className}>
+    <div
+      className={
+        'slate-wrapper ' +
+        (editorHeight === 'primary' ? 'slate-wrapper-main' : '')
+      }
+    >
       <Slate
         editor={editor}
         initialValue={initialValue}

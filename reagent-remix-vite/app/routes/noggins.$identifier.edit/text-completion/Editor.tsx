@@ -1,13 +1,10 @@
 import React, { useContext } from 'react';
-import { AllParameterOptionControls } from './ParameterOptionControls';
 
-import { CircularProgress } from '@mui/material';
-
-import './Editor.css';
-import { useHasPopulatedStore } from './editor-utils';
-import { EditorSchema } from '~/shared/editorSchema';
-import EditorColumn from './EditorColumn';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
+import { EditorSchema } from '~/shared/editorSchema';
+import './Editor.css';
+import EditorColumn from './EditorColumn';
+import { AllParameterOptionControls } from './ParameterOptionControls';
 
 export interface EditorProps {
   noggin: {
@@ -18,12 +15,6 @@ export interface EditorProps {
 
 const Editor: React.FC<EditorProps> = (props) => {
   const { store } = useContext(StoreContext);
-
-  const hasPopulatedStore = useHasPopulatedStore(store);
-
-  if (!hasPopulatedStore) {
-    return <CircularProgress />; // todo this looks like shit
-  }
 
   const { editorSchema } = props;
   console.log({ editorSchema });
