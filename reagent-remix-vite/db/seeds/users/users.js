@@ -19,9 +19,11 @@ async function main() {
   }
 
   const user = await prisma.user.create({
-    githubAuth: {
-      create: {
-        githubId: userGithubId,
+    data: {
+      githubAuth: {
+        create: {
+          githubId: userGithubId,
+        },
       },
     },
   });

@@ -11,8 +11,9 @@ async function main() {
     update: {},
     create: {
       name: 'openai',
-      credentialsSchema:
-        '{"apiKey": {"type": "string", "name": {"en_US": "API Key"}}}',
+      credentialsSchema: {
+        apiKey: { type: 'string', name: { en_US: 'API Key' } },
+      },
     },
   });
 
