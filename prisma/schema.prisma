@@ -198,9 +198,14 @@ model NogginAPIKey {
   noggin   Noggin @relation(fields: [nogginId], references: [id])
   nogginId Int
 
+  // set only if this key is for the reagent UI
+  primaryUIKeyReagentUserId Int?
+
   canViewRunResult      Boolean
   canViewFullRunHistory Boolean
   canCreateRun          Boolean
+
+  @@unique([nogginId, primaryUIKeyReagentUserId])
 }
 
 model NogginRun {

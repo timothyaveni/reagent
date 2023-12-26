@@ -125,6 +125,8 @@ function ParameterOptionControls({ id }: { id: string }) {
 }
 
 function NameField({ parameter }: { parameter: DocumentParameter }) {
+  // TODO: prevent dupes, etc.
+  // TODO: also prevent reserved params like 'key'... hmm we don't love this but the idea is simple api even if it's worse practice
   return (
     <TextField
       variant="standard"

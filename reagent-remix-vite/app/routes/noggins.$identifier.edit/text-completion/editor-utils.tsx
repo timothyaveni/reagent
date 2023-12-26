@@ -1,13 +1,14 @@
 import { Node, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
+import { uniq } from 'underscore';
 import { ParameterNode } from './editor-types';
-import { debounce, uniq } from 'underscore';
 
-import { v4 as uuid } from 'uuid';
 import { Y, observeDeep } from '@syncedstore/core';
-import { NogginEditorStore } from './store.client';
+import { useSyncedStore } from '@syncedstore/react';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
+import { DocumentParameter, NogginEditorStore } from './store.client';
 
 export const useEditorStore = () => {
   const { store } = useContext(StoreContext);
@@ -67,6 +68,36 @@ export const useHasPopulatedStore = () => {
   return hasPopulatedStore;
 };
 
+type EditorParametersList = {
+  id: string;
+  parameter: DocumentParameter;
+}[];
+export const useEditorParameters = (): EditorParametersList => {
+  // for parameters synced to documentParameters in the store
+  const store = useEditorStore();
+  const parameterMap = useSyncedStore(store.documentParameters); // this includes orphaned parameters
+  const parameterIdsByDocument = useSyncedStore(
+    store.documentParameterIdsByDocument, // actually i think we have to use this so it invalidates, like we saw before
+  );
+
+  const seenIds = new Set<string>();
+  const parameters: EditorParametersList = [];
+  for (const documentId of Object.keys(parameterIdsByDocument)) {
+    const parameterIds = parameterIdsByDocument[documentId] || [];
+    for (const parameterId of parameterIds) {
+      if (!seenIds.has(parameterId)) {
+        parameters.push({
+          id: parameterId,
+          parameter: parameterMap[parameterId] as unknown as DocumentParameter,
+        });
+        seenIds.add(parameterId);
+      }
+    }
+  }
+
+  return parameters;
+};
+
 export const getParameterElements = (editor: ReactEditor) => {
   return [...Node.nodes(editor)]
     .filter(([node, path]: [any, number[]]) => {
@@ -122,4 +153,3 @@ export const addNewParameter = (
 
   Transforms.move(editor);
 };
-

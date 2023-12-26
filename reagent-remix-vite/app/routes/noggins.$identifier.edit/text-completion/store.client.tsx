@@ -1,4 +1,4 @@
-import { getYjsDoc, observeDeep, syncedStore } from '@syncedstore/core';
+import { syncedStore } from '@syncedstore/core';
 import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
 
@@ -25,16 +25,10 @@ export type DocumentParameter = DocumentTextParameter | DocumentImageParameter;
 type _DPTypeCheck = DocumentParameter['type'];
 
 type DocType = {
-  modelInputs: {
-    [key: string]: Y.XmlText | any;
-  };
-  documentParameters: {
-    [key: string]: Y.Map<DocumentParameter>;
-  };
+  modelInputs: Record<string, Y.XmlText | any>;
+  documentParameters: Record<string, Y.Map<DocumentParameter>>;
   // using Object.keys on documentParameters doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
-  documentParameterIdsByDocument: {
-    [key: string]: string[];
-  };
+  documentParameterIdsByDocument: Record<string, string[]>;
   syncState: {
     synced?: boolean;
   };
@@ -43,6 +37,7 @@ type DocType = {
 let globalWebsocketProvider: WebsocketProvider | null = null;
 
 export const initializeStoreForNoggin = (
+  Y_WEBSOCKET_SERVER_EXTERNAL_URL: string,
   noggin: { id: number },
   authToken: string,
   revalidate: () => void,
@@ -71,8 +66,7 @@ export const initializeStoreForNoggin = (
   }
 
   const websocketProvider = new WebsocketProvider(
-    'ws://localhost:2347',
-    // 'wss://ws.dev.rea.gent',
+    Y_WEBSOCKET_SERVER_EXTERNAL_URL,
     noggin.id.toString(),
     yDoc,
     {

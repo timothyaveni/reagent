@@ -1,16 +1,14 @@
 import { Tab, Tabs } from '@mui/material';
-import { useMatches, useNavigate } from '@remix-run/react';
+import { useLoaderData, useMatches, useNavigate } from '@remix-run/react';
 import React from 'react';
 import T from '~/i18n/T';
 import NogginTitleInput from './NogginTitleInput';
 
 import './EditorHeader.css';
+import { NogginRouteLoaderType } from './route';
 
-interface EditorHeaderProps {
-  noggin: any; // TODO
-}
-
-const EditorHeader: React.FC<EditorHeaderProps> = ({ noggin }) => {
+const EditorHeader: React.FC = () => {
+  const { noggin } = useLoaderData<NogginRouteLoaderType>();
   const navigate = useNavigate();
   const locationMatches = useMatches();
   console.log({ locationMatches });

@@ -50,16 +50,19 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   console.log({ authToken });
 
-  return json({ noggin, authToken });
+  return json({
+    Y_WEBSOCKET_SERVER_EXTERNAL_URL:
+      process.env.Y_WEBSOCKET_SERVER_EXTERNAL_URL,
+    noggin,
+    authToken,
+  });
 };
 
-const WebsocketConnectedSubpage = ({
-  noggin,
-  authToken,
-}: {
-  noggin: any; // TODO
-  authToken: string;
-}) => {
+export type NogginRouteLoaderType = typeof loader;
+
+const WebsocketConnectedSubpage = () => {
+  const { Y_WEBSOCKET_SERVER_EXTERNAL_URL, noggin, authToken } =
+    useLoaderData<typeof loader>();
   const [storeAndWebsocketProvider, setStoreAndWebsocketProvider] = useState<{
     store: NogginEditorStore | null;
     websocketProvider: WebsocketProvider | null;
@@ -74,6 +77,7 @@ const WebsocketConnectedSubpage = ({
     // initializeStoreForNoggin is in a .client file, so it will be undefined on SSR, but the useEffect doesn't run anyway
     // todo: kill old websocket on param change. but not when we just go to a subpage
     const { store, websocketProvider } = initializeStoreForNoggin(
+      Y_WEBSOCKET_SERVER_EXTERNAL_URL,
       {
         id: noggin.id,
       },
@@ -102,12 +106,10 @@ const WebsocketConnectedSubpage = ({
 };
 
 export default function EditorPage() {
-  const { noggin, authToken } = useLoaderData<typeof loader>();
-
   return (
     <>
-      <EditorHeader noggin={noggin} />
-      <WebsocketConnectedSubpage noggin={noggin} authToken={authToken} />
+      <EditorHeader />
+      <WebsocketConnectedSubpage />
     </>
   );
 }

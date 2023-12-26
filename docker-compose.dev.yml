@@ -11,10 +11,11 @@ services:
     volumes:
       - ./reagent-remix-vite:/app
       - ./prisma:/app/prisma
-      # - /app/node_modules/
-    # user: timothy
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
+      - Y_WEBSOCKET_SERVER_EXTERNAL_URL=ws://localhost:2347
+      - NOGGIN_SERVER_EXTERNAL_URL=http://localhost:2358
+      - NOGGIN_SERVER_INTERNAL_URL=http://noggin-server:2358
     restart: on-failure:5
   yjs-websocket:
     build:
@@ -25,8 +26,6 @@ services:
     volumes:
       - ./y-websocket-server:/app
       - ./prisma:/app/prisma
-      # - /app/node_modules/
-    # user: timothy
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
     restart: on-failure:5
@@ -39,8 +38,6 @@ services:
     volumes:
       - ./noggin-server:/app
       - ./prisma:/app/prisma
-      # - /app/node_modules/
-    # user: timothy
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
     restart: on-failure:5
