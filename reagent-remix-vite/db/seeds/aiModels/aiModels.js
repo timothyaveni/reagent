@@ -38,6 +38,27 @@ async function main() {
     },
   });
 
+  const gpt35Turbo1106EditorSchema = require('./openai_gpt35Turbo1106EditorSchema.json');
+
+  const gpt35Turbo1106 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'gpt-3.5-turbo-1106',
+        revision: '2023-12-25',
+      },
+    },
+    update: {
+      editorSchema: gpt35Turbo1106EditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'gpt-3.5-turbo-1106',
+      revision: '2023-12-25',
+      editorSchema: gpt35Turbo1106EditorSchema,
+    },
+  });
+
   const gpt4VisionPreviewEditorSchema = require('./openai_gpt4VisionPreviewEditorSchema.json');
 
   const gpt4VisionPreview = await prisma.aIModel.upsert({

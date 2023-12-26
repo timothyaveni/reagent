@@ -247,9 +247,10 @@ model NogginRunLogEntry {
   run   NogginRun @relation(fields: [runId], references: [id])
   runId Int
 
-  level   NogginRunLogLevel
-  stage   NogginRunLogEntryStage
-  message Json
+  level       NogginRunLogLevel
+  stage       NogginRunLogEntryStage
+  message     Json
+  privateData Json? // so we can store extra (secret?) debug data that shouldn't make it to the client
 }
 
 model NogginRunResult {
