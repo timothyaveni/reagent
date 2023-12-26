@@ -49,16 +49,14 @@ export const useRootHasPopulatedStore = (store: any) => {
     } else {
       setHasPopulatedStore(false);
     }
-  }, [store]);
 
-  useEffect(() => {
     return () => {
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
         unsubscribeRef.current = null;
       }
     };
-  });
+  }, [store]);
 
   return hasPopulatedStore;
 };
