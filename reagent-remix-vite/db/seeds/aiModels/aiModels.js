@@ -143,6 +143,40 @@ async function main() {
       editorSchema: fofr_sdxlEmojiEditorSchema,
     },
   });
+
+  const testProvider = await prisma.modelProvider.upsert({
+    where: {
+      name: 'test',
+    },
+    update: {},
+    create: {
+      name: 'test',
+      credentialsSchema: {
+        // apiKey: { type: 'string', name: { en_US: 'API Key' } },
+      },
+    },
+  });
+
+  const unlimitedBreadsticksEditorSchema = require('./test_unlimitedBreadsticksEditorSchema.json');
+
+  const unlimitedBreadsticks = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: testProvider.id,
+        name: 'unlimited-breadsticks',
+        revision: '2023-12-26',
+      },
+    },
+    update: {
+      editorSchema: unlimitedBreadsticksEditorSchema,
+    },
+    create: {
+      modelProviderId: testProvider.id,
+      name: 'unlimited-breadsticks',
+      revision: '2023-12-26',
+      editorSchema: unlimitedBreadsticksEditorSchema,
+    },
+  });
 }
 
 export default main;

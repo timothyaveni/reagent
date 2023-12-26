@@ -103,12 +103,6 @@ const TextEditor = ({
     const parameterOptionDict = store.documentParameters;
 
     const parameterElements = getParameterElements(editor);
-    console.log(
-      'pe',
-      parameterElements,
-      JSON.stringify(store.documentParameterIdsByDocument),
-      documentKey,
-    );
     for (const element of parameterElements) {
       console.log('sync', element);
       if (

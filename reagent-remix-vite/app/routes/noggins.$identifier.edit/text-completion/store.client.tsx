@@ -42,7 +42,8 @@ export const initializeStoreForNoggin = (
   authToken: string,
   revalidate: () => void,
 ) => {
-  console.log('initializeStoreForNoggin', noggin, authToken);
+  const rng = Math.random();
+  console.log('initializeStoreForNoggin', noggin, authToken, rng);
 
   const yDoc = new Y.Doc();
   const store = syncedStore<DocType>(
@@ -75,7 +76,7 @@ export const initializeStoreForNoggin = (
   );
 
   websocketProvider.on('connection-close', (e: any) => {
-    console.log('connection error', e.code);
+    console.log('connection error', e.code, rng);
 
     // hm, i don't think we can get the error message from the server...
     // let's just check on the client if it looks like the authToken JWT is expired

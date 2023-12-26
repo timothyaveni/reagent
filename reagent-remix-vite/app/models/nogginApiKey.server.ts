@@ -23,6 +23,7 @@ export const createOrGetPrimaryUINogginAPIKey_OMNIPOTENT = async (
 ): Promise<string> => {
   // todo we probably don't want this to be omnipotent but we haven't really written the per-noggin auth code yet. here we would enforce ownership
   const user = await requireUser(context);
+  // todo rotate these out? idk
 
   const primaryUIKeyReagentUserId = user.id;
 

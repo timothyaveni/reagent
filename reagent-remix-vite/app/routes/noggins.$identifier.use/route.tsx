@@ -51,7 +51,7 @@ export const action = async ({ request, params, context }: any) => {
   const { NOGGIN_SERVER_INTERNAL_URL } = process.env;
 
   // TODO hm random thought i feel like it could happen that a param is `number | string` which we can't distinguish in formdata but we could in json...
-  const bodyParams = new URLSearchParams(request.body);
+  const bodyParams = await request.formData();
   const filteredParams: Record<string, string> = {};
   for (const [key, value] of bodyParams.entries()) {
     if (key.startsWith('_reagent_param_')) {

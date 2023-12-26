@@ -74,6 +74,8 @@ const WebsocketConnectedSubpage = () => {
   const revalidator = useRevalidator();
 
   useEffect(() => {
+    console.log('useEffect', { nogginid: noggin.id, authToken });
+
     // initializeStoreForNoggin is in a .client file, so it will be undefined on SSR, but the useEffect doesn't run anyway
     // todo: kill old websocket on param change. but not when we just go to a subpage
     const { store, websocketProvider } = initializeStoreForNoggin(
@@ -92,6 +94,8 @@ const WebsocketConnectedSubpage = () => {
   const hasPopulatedStore = useRootHasPopulatedStore(
     storeAndWebsocketProvider.store,
   );
+
+  console.log({ store: storeAndWebsocketProvider.store, hasPopulatedStore });
 
   return (
     <StoreContext.Provider

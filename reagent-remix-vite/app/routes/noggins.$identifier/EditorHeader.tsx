@@ -16,7 +16,9 @@ const EditorHeader: React.FC = () => {
     (match) => match.id === 'routes/noggins.$identifier.edit',
   );
   const isUse = locationMatches.some(
-    (match) => match.id === 'routes/noggins.$identifier.use',
+    (match) =>
+      match.id === 'routes/noggins.$identifier.use' ||
+      match.id === 'routes/noggins.$identifier.use_.$runId', // todo hm we might change this later
   );
   const navValue = isEdit ? 'edit' : isUse ? 'use' : null;
 
