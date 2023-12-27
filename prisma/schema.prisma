@@ -215,10 +215,20 @@ model NogginRun {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  nogginRevision    NogginRevision      @relation(fields: [nogginRevisionId], references: [id])
-  nogginRevisionId  Int
-  nogginRunLogEntry NogginRunLogEntry[]
-  nogginRunResult   NogginRunResult?
+  nogginRevision       NogginRevision         @relation(fields: [nogginRevisionId], references: [id])
+  nogginRevisionId     Int
+  nogginRunLogEntry    NogginRunLogEntry[]
+  nogginRunOutputEntry NogginRunOutputEntry[]
+
+  status NogginRunStatus
+
+  estimatedCost Float?
+
+  // TODO: these might be something we'd want to normalize
+  evaluatedParameters Json?
+  evaluatedOverrides  Json?
+
+  computedCost Float?
 }
 
 enum NogginRunLogLevel {
@@ -258,20 +268,40 @@ model NogginRunLogEntry {
   privateData Json? // so we can store extra (secret?) debug data that shouldn't make it to the client
 }
 
-model NogginRunResult {
+enum NogginRunOutputEntryContentType {
+  text
+  assetUrl
+  error
+}
+
+enum NogginRunOutputEntryStage {
+  incremental
+  final
+}
+
+model NogginRunOutputEntry {
   id        Int       @id @default(autoincrement())
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
+  entryTypeVersion Int
+
   run   NogginRun @relation(fields: [runId], references: [id])
-  runId Int       @unique
+  runId Int
 
-  computedCost Float
+  contentType NogginRunOutputEntryContentType
+  content     String
+  metadata    Json?
 
-  // TODO: these might be something we'd want to normalize
-  evaluatedParameters Json
-  evaluatedOverrides  Json
+  stage NogginRunOutputEntryStage
+}
+
+enum NogginRunStatus {
+  pending
+  running
+  succeeded
+  failed
 }
 
 //

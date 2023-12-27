@@ -21,7 +21,7 @@ async function createNogginWithRevision({
   const buffer = fs.readFileSync(
     path.join(new URL(import.meta.url).pathname, '..', filename),
   );
-  
+
   // const buffer = Buffer.from(hexContent, 'hex');
   // console.log(slug, base64Content.toString());
   // const buffer = Buffer.from(base64Content, 'base64');
@@ -71,7 +71,7 @@ async function main() {
   await createNogginWithRevision({
     filename: './icon-generator.ydoc',
     title: 'Icon Generator',
-    slug: 'icon-generator-0123',
+    slug: 'icy-gorilla-0123',
     modelProviderName: 'replicate',
     modelName: 'sdxl',
     modelRevision:
@@ -81,7 +81,7 @@ async function main() {
   await createNogginWithRevision({
     filename: './hex-color-converter.ydoc',
     title: 'Hex Color Converter',
-    slug: 'hex-converter-0123',
+    slug: 'heavy-crocodile-0123',
     modelProviderName: 'openai',
     modelName: 'gpt-4-1106-preview',
     modelRevision: '2023-12-22',
@@ -90,7 +90,7 @@ async function main() {
   await createNogginWithRevision({
     filename: './todo-list-classifier.ydoc',
     title: 'Todo List Classifier',
-    slug: 'todo-classifier-0123',
+    slug: 'total-cat-0123',
     modelProviderName: 'openai',
     modelName: 'gpt-4-1106-preview',
     modelRevision: '2023-12-22',
@@ -99,7 +99,7 @@ async function main() {
   await createNogginWithRevision({
     filename: './joke-teller.ydoc',
     title: 'Joke Teller',
-    slug: 'joke-teller-0123',
+    slug: 'joint-tiger-0123',
     modelProviderName: 'openai',
     modelName: 'gpt-4-1106-preview',
     modelRevision: '2023-12-22',
@@ -108,7 +108,7 @@ async function main() {
   await createNogginWithRevision({
     filename: './tree-lights.ydoc',
     title: 'Tree Lights',
-    slug: 'tree-lights-0123',
+    slug: 'tremendous-lion-0123',
     modelProviderName: 'openai',
     modelName: 'gpt-4-vision-preview',
     modelRevision: '2023-12-23',
@@ -117,7 +117,7 @@ async function main() {
   await createNogginWithRevision({
     filename: './bananagrams-checker.ydoc',
     title: 'Bananagrams Checker',
-    slug: 'bananagrams-checker-0123',
+    slug: 'balanced-cheetah-0123',
     modelProviderName: 'openai',
     modelName: 'gpt-4-vision-preview',
     modelRevision: '2023-12-23',
@@ -126,7 +126,7 @@ async function main() {
   await createNogginWithRevision({
     filename: './cat-detector.ydoc',
     title: 'Cat Detector',
-    slug: 'cat-detector-0123',
+    slug: 'capitalist-donkey-0123',
     modelProviderName: 'openai',
     modelName: 'gpt-4-vision-preview',
     modelRevision: '2023-12-23',

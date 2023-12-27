@@ -1,4 +1,4 @@
-import { Button, Skeleton, TextField } from '@mui/material';
+import { Button, Grid, Skeleton, TextField } from '@mui/material';
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 import {
@@ -65,8 +65,13 @@ export default function NewRunForm() {
   return (
     <div className="new-run-form">
       <h2>Run this noggin</h2>
-      <NewRunVariablesForm />
-      <NewRunOverrides />
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <NewRunVariablesForm />
+          <NewRunOverrides />
+        </Grid>
+        <Grid>http://localhost:2358/noggin?key=asdf</Grid>
+      </Grid>
     </div>
   );
 }

@@ -50,8 +50,10 @@ export default function NogginRun(props: any) {
 
     ws.onmessage = (event) => {
       const obj = JSON.parse(event.data);
-      if (obj.type === 'output') {
+      if (obj.type === 'incremental output') {
         setOutputText((prev) => prev + obj.text);
+      } else if (obj.type === 'final output') {
+        setOutputText(obj.text);
       }
     };
 
