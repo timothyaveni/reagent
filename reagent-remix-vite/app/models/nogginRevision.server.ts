@@ -1,6 +1,6 @@
 import { prisma } from 'db/db';
+import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import * as Y from 'yjs';
-import { EditorSchema } from '~/shared/editorSchema';
 import { getNogginEditorSchema_OMNISCIENT } from './noggin.server';
 
 const serializeYDoc = (ydoc: Y.Doc) => {
@@ -12,8 +12,8 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
   const yDoc = new Y.Doc();
 
   const modelInputs = yDoc.getMap('modelInputs');
-  for (const inputKey of Object.keys(editorSchema.allInputs)) {
-    const input = editorSchema.allInputs[inputKey];
+  for (const inputKey of Object.keys(editorSchema.allEditorComponents)) {
+    const input = editorSchema.allEditorComponents[inputKey];
     switch (input.type) {
       case 'chat-text-user-images-with-parameters':
       case 'chat-text-with-parameters':
@@ -34,8 +34,8 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
   const documentParameterIdsByDocument = yDoc.getMap(
     'documentParameterIdsByDocument',
   );
-  for (const inputKey of Object.keys(editorSchema.allInputs)) {
-    const input = editorSchema.allInputs[inputKey];
+  for (const inputKey of Object.keys(editorSchema.allEditorComponents)) {
+    const input = editorSchema.allEditorComponents[inputKey];
     switch (input.type) {
       case 'chat-text-user-images-with-parameters':
       case 'chat-text-with-parameters':

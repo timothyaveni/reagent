@@ -1,6 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
 const prisma = new PrismaClient();
 
 async function main() {
@@ -25,7 +23,9 @@ async function main() {
     },
   });
 
-  const gpt41106PreviewEditorSchema = require('./openai_gpt41106PreviewEditorSchema.json');
+  const { default: gpt41106PreviewEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-4-1106-preview.js'
+  );
 
   const gpt41106Preview = await prisma.aIModel.upsert({
     where: {
@@ -46,7 +46,9 @@ async function main() {
     },
   });
 
-  const gpt35Turbo1106EditorSchema = require('./openai_gpt35Turbo1106EditorSchema.json');
+  const { default: gpt35Turbo1106EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-4-1106-preview.js'
+  );
 
   const gpt35Turbo1106 = await prisma.aIModel.upsert({
     where: {
@@ -67,7 +69,9 @@ async function main() {
     },
   });
 
-  const gpt4VisionPreviewEditorSchema = require('./openai_gpt4VisionPreviewEditorSchema.json');
+  const { default: gpt4VisionPreviewEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-4-vision-preview.js'
+  );
 
   const gpt4VisionPreview = await prisma.aIModel.upsert({
     where: {
@@ -109,7 +113,9 @@ async function main() {
     },
   });
 
-  const sdxlEditorSchema = require('./replicate_sdxlEditorSchema.json');
+  const { default: sdxlEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/replicate_sdxl.js'
+  );
 
   const sdxl = await prisma.aIModel.upsert({
     where: {
@@ -132,7 +138,9 @@ async function main() {
     },
   });
 
-  const fofr_sdxlEmojiEditorSchema = require('./replicate_fofr_sdxlEmojiEditorSchema.json');
+  const { default: fofr_sdxlEmojiEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/fofr_sdxl-emoji.js'
+  );
 
   const fofr_sdxlEmoji = await prisma.aIModel.upsert({
     where: {
@@ -171,7 +179,9 @@ async function main() {
     },
   });
 
-  const unlimitedBreadsticksEditorSchema = require('./test_unlimitedBreadsticksEditorSchema.json');
+  const { default: unlimitedBreadsticksEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/test/unlimited-breadsticks.js'
+  );
 
   const unlimitedBreadsticks = await prisma.aIModel.upsert({
     where: {

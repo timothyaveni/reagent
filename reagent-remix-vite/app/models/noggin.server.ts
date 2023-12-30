@@ -3,13 +3,13 @@ import { requireUser } from '~/auth/auth.server';
 import prisma from '~/db';
 import { createInitialRevisionForNoggin_OMNIPOTENT } from './nogginRevision.server';
 
+import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import {
   NumberDictionary,
   adjectives,
   animals,
   uniqueNamesGenerator,
 } from 'unique-names-generator';
-import { EditorSchema } from '~/shared/editorSchema';
 
 export const createNoggin = async (
   context: AppLoadContext,

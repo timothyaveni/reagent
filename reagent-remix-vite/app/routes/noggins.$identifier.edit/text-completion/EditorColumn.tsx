@@ -1,9 +1,4 @@
-import HelpIcon from '@mui/icons-material/Help';
-import { FormControlLabel, FormGroup, Switch, Tooltip } from '@mui/material';
-
-import TextEditor from './slate/TextEditor.client';
-import T, { t } from '~/i18n/T';
-import { ModelInput } from '~/shared/editorSchema';
+import { ModelInput } from 'reagent-noggin-shared/types/editorSchema';
 import EditorComponentWithHeader from './EditorComponentWithHeader';
 
 export default function EditorColumn({

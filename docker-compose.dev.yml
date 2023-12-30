@@ -11,6 +11,10 @@ services:
     volumes:
       - ./reagent-remix-vite:/app
       - ./prisma:/app/prisma
+
+      - ./noggin-server/dist/reagent-noggin-shared:/noggin-server/dist/reagent-noggin-shared
+      - ./noggin-server/src/reagent-noggin-shared:/noggin-server/src/reagent-noggin-shared
+      - ./noggin-server/package.json:/noggin-server/package.json
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
       - Y_WEBSOCKET_SERVER_EXTERNAL_URL=ws://localhost:2347

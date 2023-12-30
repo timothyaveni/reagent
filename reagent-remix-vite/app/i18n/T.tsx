@@ -1,4 +1,4 @@
-import { I18nString } from "~/shared/editorSchema";
+import { I18nString } from '~/shared/i18nString';
 
 const T = ({
   children,
@@ -7,12 +7,10 @@ const T = ({
   children: React.ReactNode;
   flagged?: boolean; // for when you think this is going to be some i18n work
 }) => {
-  return <>
-    {children}
-  </>
+  return <>{children}</>;
 };
 
-export const t = (s: string | I18nString ) => {
+export const t = (s: string | I18nString) => {
   if (typeof s === 'string') {
     return s;
   }

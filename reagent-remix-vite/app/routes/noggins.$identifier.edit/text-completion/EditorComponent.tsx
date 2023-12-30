@@ -1,4 +1,4 @@
-import { ModelInput } from '~/shared/editorSchema';
+import { ModelInput } from 'reagent-noggin-shared/types/editorSchema';
 import { TextEditorWrapper } from './slate/TextEditorWrapper';
 
 export default function EditorComponent({

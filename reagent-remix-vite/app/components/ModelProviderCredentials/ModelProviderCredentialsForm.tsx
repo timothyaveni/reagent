@@ -2,7 +2,7 @@ import { Button, TextField } from '@mui/material';
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 import T, { t } from '~/i18n/T';
-import { I18nString } from '~/shared/editorSchema';
+import { I18nString } from '~/shared/i18nString';
 
 import './ModelProviderCredentialsForm.css';
 

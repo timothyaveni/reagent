@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
+import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
-import { EditorSchema } from '~/shared/editorSchema';
 import './Editor.css';
 import EditorColumn from './EditorColumn';
 import { AllParameterOptionControls } from './ParameterOptionControls';
@@ -26,7 +26,7 @@ const Editor: React.FC<EditorProps> = (props) => {
         <EditorColumn
           inputs={editorSchema.modelInputComponents.map((inputKey) => ({
             inputKey,
-            input: editorSchema.allInputs[inputKey],
+            input: editorSchema.allEditorComponents[inputKey],
           }))}
         />
       </div>
