@@ -19,8 +19,8 @@ const NewRunVariablesFormInner = () => {
         if (parameter.type === 'image') {
           return (
             <div key={id}>
-              {parameter.name} is an image parameter, not yet implemented in the
-              reagent UI
+              <strong>{parameter.name}</strong> is an image parameter, not yet
+              implemented in the reagent UI
             </div>
           ); // TODO
         }

@@ -11,9 +11,17 @@ async function main() {
     update: {},
     create: {
       name: 'openai',
+      friendlyName: 'OpenAI',
+      credentialsSchemaVersion: 1,
       credentialsSchema: {
-        apiKey: { type: 'string', name: { en_US: 'API Key' } },
+        apiKey: {
+          type: 'string',
+          name: {
+            en_US: 'API Key',
+          },
+        },
       },
+      needsCredentials: true,
     },
   });
 
@@ -87,6 +95,8 @@ async function main() {
     update: {},
     create: {
       name: 'replicate',
+      friendlyName: 'Replicate',
+      credentialsSchemaVersion: 1,
       credentialsSchema: {
         apiToken: {
           type: 'string',
@@ -95,6 +105,7 @@ async function main() {
           },
         },
       },
+      needsCredentials: true,
     },
   });
 
@@ -151,9 +162,12 @@ async function main() {
     update: {},
     create: {
       name: 'test',
+      friendlyName: 'Test',
+      credentialsSchemaVersion: 1,
       credentialsSchema: {
         // apiKey: { type: 'string', name: { en_US: 'API Key' } },
       },
+      needsCredentials: false,
     },
   });
 

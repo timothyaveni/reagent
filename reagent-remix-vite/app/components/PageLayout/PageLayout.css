@@ -1,5 +1,8 @@
 main {
-  /* max-width: 960px; */
-  max-width: 1200px;
+  max-width: 960px;
+
+  &.wide {
+    max-width: 1200px;
+  }
   margin: 0 auto;
 }

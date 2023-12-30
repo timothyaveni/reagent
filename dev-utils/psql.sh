@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker compose exec postgres psql -U postgres postgres
+docker compose -f docker-compose.dev.yml exec postgres psql -U postgres postgres

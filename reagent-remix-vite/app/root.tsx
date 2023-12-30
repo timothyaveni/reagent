@@ -8,20 +8,29 @@ import {
   useLoaderData,
 } from '@remix-run/react';
 
-import './styles/global.css';
-import { PageLayout } from './components/PageLayout/PageLayout';
-import { ContextType } from 'server-types';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { LoaderFunctionArgs, json } from '@remix-run/node';
+import { PageLayout } from './components/PageLayout/PageLayout';
+import './styles/global.css';
 
-export const loader = async ({
-  context
-}: LoaderFunctionArgs) => {
+export const loader = async ({ context }: LoaderFunctionArgs) => {
   if (context.user) {
     return json({ loggedIn: true });
   } else {
     return json({ loggedIn: false });
   }
 };
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#3d1a96',
+    },
+  },
+  typography: {
+    fontFamily: 'Lato, sans-serif',
+  },
+});
 
 export default function App() {
   const { loggedIn } = useLoaderData<typeof loader>();
@@ -41,9 +50,11 @@ export default function App() {
         />
       </head>
       <body>
-        <PageLayout loggedIn={loggedIn}>
-          <Outlet />
-        </PageLayout>
+        <ThemeProvider theme={theme}>
+          <PageLayout loggedIn={loggedIn}>
+            <Outlet />
+          </PageLayout>
+        </ThemeProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

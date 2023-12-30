@@ -28,9 +28,10 @@ model User {
 
   editedNogginRevisions NogginRevision[]
 
-  teams         Team[]
-  organizations OrganizationMembership[]
-  noggins       Noggin[]
+  teams                            Team[]
+  organizations                    OrganizationMembership[]
+  noggins                          Noggin[]
+  modelProviderPersonalCredentials ModelProviderPersonalCredentials[]
 }
 
 model GitHubAuth {
@@ -312,10 +313,32 @@ model ModelProvider {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  name   String    @unique
-  models AIModel[]
+  name         String    @unique
+  friendlyName String
+  models       AIModel[]
 
-  credentialsSchema Json
+  credentialsSchema                Json
+  credentialsSchemaVersion         Int
+  needsCredentials                 Boolean
+  modelProviderPersonalCredentials ModelProviderPersonalCredentials[]
+}
+
+model ModelProviderPersonalCredentials {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  modelProvider   ModelProvider @relation(fields: [modelProviderId], references: [id])
+  modelProviderId Int
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  credentials        Json
+  credentialsVersion Int
+
+  @@unique([modelProviderId, userId, credentialsVersion])
 }
 
 model AIModel {
