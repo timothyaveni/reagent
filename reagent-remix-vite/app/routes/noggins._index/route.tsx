@@ -34,9 +34,7 @@ function NogginCard({ noggin }: { noggin: any }) {
           onClick={() => navigate(`/noggins/${noggin.slug}/edit`)}
         >
           <CardContent>
-            <Typography variant="h5" component="h3">
-              {noggin.title}
-            </Typography>
+            <Typography variant="h2">{noggin.title}</Typography>
             <Typography
               variant="body2"
               color="textSecondary"
@@ -69,9 +67,9 @@ export default function NogginList() {
         mt={4}
         sx={{ justifyContent: 'space-between' }}
       >
-        <h1>
+        <Typography variant="h1">
           <T>Noggins</T>
-        </h1>
+        </Typography>
         <Button
           sx={{
             textTransform: 'none',

@@ -42,6 +42,7 @@ export default function NogginRun() {
   const params = useParams();
 
   const [outputText, setOutputText] = useState('');
+  const [outputAssetURL, setOutputAssetURL] = useState('');
 
   useEffect(() => {
     // ws url:
@@ -52,10 +53,13 @@ export default function NogginRun() {
 
     ws.onmessage = (event) => {
       const obj = JSON.parse(event.data);
+      console.log({ obj });
       if (obj.type === 'incremental output') {
         setOutputText((prev) => prev + obj.text);
-      } else if (obj.type === 'final output') {
+      } else if (obj.type === 'final output text') {
         setOutputText(obj.text);
+      } else if (obj.type === 'final output asset URL') {
+        setOutputAssetURL(obj.assetUrl);
       }
     };
 
@@ -64,5 +68,13 @@ export default function NogginRun() {
     };
   }, [params.runId, apiKey]);
 
-  return <div className="noggin-run-text-output">{outputText}</div>;
+  return (
+    <div className="noggin-run-text-output">
+      {outputAssetURL ? (
+        <img src={outputAssetURL} alt="output asset" />
+      ) : (
+        outputText
+      )}
+    </div>
+  );
 }

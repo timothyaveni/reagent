@@ -1,4 +1,5 @@
-import { Form, Link } from '@remix-run/react';
+import { Button, Typography } from '@mui/material';
+import { Form } from '@remix-run/react';
 import { LTIConnectionOwnerVisibleParams } from '~/shared/ltiConnection';
 
 // const LTI_HOST = 'rea.gent';
@@ -36,17 +37,14 @@ export default function LTIConnectionConfig({
     return (
       <div>
         <Form method="post">
-          <input type="hidden"
-          name="action"
-          value="createLTIConnection"
-          />
-          <button
-            type="submit"
-            style={{ display: 'block' }}
-          >
+          <input type="hidden" name="action" value="createLTIConnection" />
+          <Typography variant="body1">
             Set up an LTI connection to allow users to join the organization
             through your course site.
-          </button>
+          </Typography>
+          <Button variant="outlined" type="submit" style={{ display: 'block' }}>
+            Create LTI connection
+          </Button>
         </Form>
       </div>
     );
@@ -54,13 +52,15 @@ export default function LTIConnectionConfig({
 
   return (
     <div>
-      <p>This organization can be joined through LTI.</p>
-      <p>
+      <Typography variant="body1" component="p">
+        This organization can be joined through LTI.
+      </Typography>
+      <Typography variant="body1" component="p">
         LTI consumer key: <code>{ltiConnection.consumerKey}</code>
-      </p>
-      <p>
+      </Typography>
+      <Typography variant="body1" component="p">
         LTI consumer sercret: <code>{ltiConnection.consumerSecret}</code>
-      </p>
+      </Typography>
       <p>
         LTI XML: <code>{ltiXml}</code>
       </p>

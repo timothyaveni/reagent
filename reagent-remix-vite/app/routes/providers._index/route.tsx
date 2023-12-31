@@ -6,6 +6,7 @@ import {
   CardMedia,
   Grid,
   Stack,
+  Typography,
 } from '@mui/material';
 import { useNavigate } from '@remix-run/react';
 import T from '~/i18n/T';
@@ -20,9 +21,9 @@ export default function Providers() {
     <div>
       {/* a little overkill but matches the headers with buttons */}
       <Stack direction="row" spacing={2} alignItems="center" mb={4} mt={4}>
-        <h1>
+        <Typography variant="h1">
           <T>Providers</T>
-        </h1>
+        </Typography>
       </Stack>
 
       <Box mb={6}>

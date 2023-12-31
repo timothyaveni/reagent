@@ -1,7 +1,6 @@
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { LoaderFunctionArgs } from '@remix-run/server-runtime';
-import { useEffect, useState } from 'react';
 import { requireUser } from '~/auth/auth.server';
 import {
   getNogginEditorSchema_OMNISCIENT,
@@ -26,16 +25,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 };
 
 export default function NogginEditor() {
-  const [isMounted, setIsMounted] = useState(false);
   const { noggin, editorSchema } = useLoaderData<typeof loader>();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    return null; // TODO
-  }
 
   return <Editor noggin={noggin} editorSchema={editorSchema} />;
 }

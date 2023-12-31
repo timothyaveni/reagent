@@ -201,6 +201,29 @@ async function main() {
       editorSchema: unlimitedBreadsticksEditorSchema,
     },
   });
+
+  const { default: identiconEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/test/identicon.js'
+  );
+
+  const identicon = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: testProvider.id,
+        name: 'identicon',
+        revision: '2023-12-31',
+      },
+    },
+    update: {
+      editorSchema: identiconEditorSchema,
+    },
+    create: {
+      modelProviderId: testProvider.id,
+      name: 'identicon',
+      revision: '2023-12-31',
+      editorSchema: identiconEditorSchema,
+    },
+  });
 }
 
 export default main;

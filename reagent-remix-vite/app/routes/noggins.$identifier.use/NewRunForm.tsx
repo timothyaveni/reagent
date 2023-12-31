@@ -80,7 +80,7 @@ export default function NewRunForm({
 }) {
   return (
     <div className="new-run-form">
-      <Typography variant="h5" component="h2" gutterBottom>
+      <Typography variant="h2" gutterBottom>
         Run this noggin
       </Typography>
       <Grid container spacing={8}>

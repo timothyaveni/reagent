@@ -1,4 +1,4 @@
-import HelpIcon from '@mui/icons-material/Help';
+import { Help as HelpIcon } from '@mui/icons-material';
 import { Box, Tooltip, Typography } from '@mui/material';
 
 import { ModelInput } from 'reagent-noggin-shared/types/editorSchema';
@@ -16,7 +16,7 @@ export default function EditorComponentWithHeader({
     <>
       <div className="editor-header">
         <Box alignItems={'center'} display="flex" mt={1}>
-          <Typography variant="h6" component="h3">
+          <Typography variant="h3" component="h3">
             {t(input.name)}
           </Typography>
           <Tooltip title={t(input.description)}>

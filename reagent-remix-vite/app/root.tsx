@@ -34,6 +34,21 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: 'Lato, sans-serif',
+    h1: {
+      fontWeight: 700,
+      fontSize: '2rem',
+      color: '#111',
+    },
+    h2: {
+      fontWeight: 700,
+      fontSize: '1.5rem',
+      color: '#333',
+    },
+    h3: {
+      fontWeight: 400,
+      fontSize: '1.3rem',
+      color: '#333',
+    },
   },
 });
 

@@ -10,7 +10,8 @@ export default function NogginTitleInput({
       value={noggin.title}
       sx={{
         fontSize: '2rem',
-        fontWeight: 'bold',
+        fontWeight: 700,
+        color: '#111',
         borderBottom: '1px solid transparent',
         width: '100%',
 

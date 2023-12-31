@@ -1,5 +1,5 @@
 import { ModelInput } from 'reagent-noggin-shared/types/editorSchema';
-import SimpleSchemaEditor from './simple-schema-editor/SimpleSchemaEditor';
+import SimpleSchemaEditorWrapper from './simple-schema-editor/SimpleSchemaEditor';
 import { TextEditorWrapper } from './slate/TextEditorWrapper';
 
 export default function EditorComponent({
@@ -44,6 +44,8 @@ export default function EditorComponent({
     case 'select':
       return <>Not implemented</>;
     case 'simple-schema':
-      return <SimpleSchemaEditor inputKey={inputKey} input={input} />;
+      return <SimpleSchemaEditorWrapper inputKey={inputKey} input={input} />;
+    default:
+      const _exhaustiveCheck: never = input;
   }
 }

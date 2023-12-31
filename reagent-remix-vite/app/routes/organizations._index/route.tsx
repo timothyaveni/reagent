@@ -33,9 +33,9 @@ export default function OrganizationsList() {
         mt={4}
         sx={{ justifyContent: 'space-between' }}
       >
-        <h1>
+        <Typography variant="h1">
           <T>Organizations</T>
-        </h1>
+        </Typography>
         <Button
           sx={{
             textTransform: 'none',
@@ -67,9 +67,7 @@ export default function OrganizationsList() {
                 onClick={() => navigate(`/organizations/${organization.id}`)}
               >
                 <CardContent>
-                  <Typography variant="h5" component="h3">
-                    {organization.name}
-                  </Typography>
+                  <Typography variant="h2">{organization.name}</Typography>
                   <Typography
                     variant="body2"
                     color="textSecondary"
