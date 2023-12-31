@@ -8,11 +8,15 @@ import {
   useLoaderData,
 } from '@remix-run/react';
 
+import { withEmotionCache } from '@emotion/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { json } from '@remix-run/node';
 import { LoaderFunctionArgs } from '@remix-run/server-runtime';
+import { useContext, useEffect, useRef } from 'react';
 import { PageLayout } from './components/PageLayout/PageLayout';
+import ClientStyleContext from './styles/client.context';
 import './styles/global.css';
+import ServerStyleContext from './styles/server.context';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   if (context.user) {
@@ -33,33 +37,82 @@ const theme = createTheme({
   },
 });
 
+interface DocumentProps {
+  children: React.ReactNode;
+  title?: string;
+}
+
+const Document = withEmotionCache(
+  ({ children, title }: DocumentProps, emotionCache) => {
+    const serverStyleData = useContext(ServerStyleContext);
+    const clientStyleData = useContext(ClientStyleContext);
+    const reinjectStylesRef = useRef(true);
+
+    // Only executed on client
+    // When a top level ErrorBoundary or CatchBoundary are rendered,
+    // the document head gets removed, so we have to create the style tags
+    useEffect(() => {
+      if (!reinjectStylesRef.current) {
+        return;
+      }
+      // re-link sheet container
+      emotionCache.sheet.container = document.head;
+
+      // re-inject tags
+      const tags = emotionCache.sheet.tags;
+      emotionCache.sheet.flush();
+      tags.forEach((tag) => {
+        (emotionCache.sheet as any)._insertTag(tag);
+      });
+
+      // reset cache to re-apply global styles
+      clientStyleData.reset();
+      // ensure we only do this once per mount
+      reinjectStylesRef.current = false;
+    }, [clientStyleData, emotionCache.sheet]);
+
+    // TODO what is title
+    return (
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <Meta />
+          <Links />
+          {serverStyleData?.map(({ key, ids, css }) => (
+            <style
+              key={key}
+              data-emotion={`${key} ${ids.join(' ')}`}
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: css }}
+            />
+          ))}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          {/* <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" /> */}
+          <link
+            href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap"
+            rel="stylesheet"
+          />
+        </head>
+        <body>
+          <ThemeProvider theme={theme}>{children}</ThemeProvider>
+          <ScrollRestoration />
+          <Scripts />
+          <LiveReload />
+        </body>
+      </html>
+    );
+  },
+);
+
 export default function App() {
   const { loggedIn } = useLoaderData<typeof loader>();
 
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        {/* <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" /> */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>
-        <ThemeProvider theme={theme}>
-          <PageLayout loggedIn={loggedIn}>
-            <Outlet />
-          </PageLayout>
-        </ThemeProvider>
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
+    <Document>
+      <PageLayout loggedIn={loggedIn}>
+        <Outlet />
+      </PageLayout>
+    </Document>
   );
 }
