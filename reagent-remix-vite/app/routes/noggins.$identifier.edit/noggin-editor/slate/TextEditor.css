@@ -24,8 +24,8 @@
 }
 
 .slate-wrapper {
-  margin: auto;
-  margin-top: 20px;
+  /* margin: auto; */
+  /* margin-top: 20px; */
 }
 
 .slate-wrapper [role='textbox'] {

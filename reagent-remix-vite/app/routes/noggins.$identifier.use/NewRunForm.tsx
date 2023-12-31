@@ -1,4 +1,11 @@
-import { Button, Grid, Skeleton, TextField } from '@mui/material';
+import {
+  Button,
+  Grid,
+  Paper,
+  Skeleton,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
 import {
@@ -10,41 +17,44 @@ import './NewRunForm.css';
 const NewRunVariablesFormInner = () => {
   const parameters = useEditorParameters();
   const [parameterValues, setParameterValues] = useState<Record<string, any>>(
-    {},
+    Object.fromEntries(
+      parameters.map(({ id, parameter: { defaultValue } }) => [
+        id,
+        defaultValue || '',
+      ]),
+    ),
   );
 
-  return (
-    <Form method="post">
-      {parameters.map(({ id, parameter }) => {
-        if (parameter.type === 'image') {
-          return (
-            <div key={id}>
-              <strong>{parameter.name}</strong> is an image parameter, not yet
-              implemented in the reagent UI
-            </div>
-          ); // TODO
-        }
+  return parameters.map(({ id, parameter }) => {
+    if (parameter.type === 'image') {
+      return (
+        <div key={id}>
+          <strong>{parameter.name}</strong> is an image parameter, not yet
+          implemented in the reagent UI
+        </div>
+      ); // TODO
+    }
 
-        return (
-          <div className="new-run-variable" key={id}>
-            <TextField
-              name={`_reagent_param_${parameter.name}`}
-              label={parameter.name}
-              value={parameterValues[id] ?? ''}
-              onChange={(e) => {
-                setParameterValues((prev) => ({
-                  ...prev,
-                  [id]: e.target.value,
-                }));
-              }}
-            />
-          </div>
-        );
-      })}
-
-      <Button type="submit">Run</Button>
-    </Form>
-  );
+    return (
+      <div key={id}>
+        <TextField
+          fullWidth
+          sx={{
+            mb: 2,
+          }}
+          name={`_reagent_param_${parameter.name}`}
+          label={parameter.name}
+          value={parameterValues[id] ?? ''}
+          onChange={(e) => {
+            setParameterValues((prev) => ({
+              ...prev,
+              [id]: e.target.value,
+            }));
+          }}
+        />
+      </div>
+    );
+  });
 };
 
 const NewRunVariablesForm = () => {
@@ -70,14 +80,26 @@ export default function NewRunForm({
 }) {
   return (
     <div className="new-run-form">
-      <h2>Run this noggin</h2>
-      <Grid container spacing={2}>
+      <Typography variant="h5" component="h2" gutterBottom>
+        Run this noggin
+      </Typography>
+      <Grid container spacing={8}>
         <Grid item xs={12} md={6}>
-          <NewRunVariablesForm />
-          <NewRunOverrides />
+          <Paper elevation={2} sx={{ padding: 2 }}>
+            <Form method="post">
+              <NewRunVariablesForm />
+              <NewRunOverrides />
+
+              <Button variant="contained" type="submit">
+                Run
+              </Button>
+            </Form>
+          </Paper>
         </Grid>
-        <Grid>
-          http://localhost:2358/{noggin.slug}?key={apiKey}
+        <Grid item xs={12} md={6}>
+          <code>
+            http://localhost:2358/{noggin.slug}?key={apiKey}
+          </code>
         </Grid>
       </Grid>
     </div>

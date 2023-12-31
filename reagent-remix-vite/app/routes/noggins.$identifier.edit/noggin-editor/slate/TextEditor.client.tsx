@@ -7,6 +7,7 @@ import { useSyncedStore } from '@syncedstore/react';
 
 import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 
+import { Box } from '@mui/material';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 import { Cursors } from '../Cursors';
 import {
@@ -141,7 +142,9 @@ const TextEditor = ({
   }, [editor]);
 
   return (
-    <div
+    <Box
+      mt={1}
+      mb={2}
       className={
         'slate-wrapper ' +
         (editorHeight === 'primary' ? 'slate-wrapper-main' : '')
@@ -168,7 +171,7 @@ const TextEditor = ({
           />
         </Cursors>
       </Slate>
-    </div>
+    </Box>
   );
 };
 

@@ -1,5 +1,5 @@
 import { json, redirect } from '@remix-run/node';
-import { useLoaderData, useNavigate } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
 import {
   OrganizationLoadResponse,
   loadOrganization,
@@ -13,8 +13,8 @@ import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from '@remix-run/server-runtime';
-import { createNewLTIConnection } from '~/models/ltiConnection.server';
 import MUILink from '~/components/MUILink';
+import { createNewLTIConnection } from '~/models/ltiConnection.server';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const { id } = params;
@@ -83,7 +83,6 @@ function OrganizationView({
 
 export default function Organization() {
   const organizationData = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
 
   return (
     <Box mt={4}>

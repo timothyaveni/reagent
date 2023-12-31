@@ -121,6 +121,19 @@ export const loadNogginBySlug = async (
       id: true,
       slug: true,
       title: true,
+      aiModel: {
+        // todo -- is it a mistake to grab all this here
+        select: {
+          id: true,
+          name: true,
+          modelProvider: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
       userOwnerId: true,
     },
   });

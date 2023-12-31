@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
 
+import { Paper, Stack, Typography } from '@mui/material';
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 import './Editor.css';
@@ -21,28 +22,39 @@ const Editor: React.FC<EditorProps> = (props) => {
   console.log({ editorSchema });
 
   return (
-    <div className="editor">
-      <div className="editor-main-column">
-        <h2>Model inputs</h2>
-        <EditorColumn
-          inputs={editorSchema.modelInputComponents.map((inputKey) => ({
-            inputKey,
-            input: editorSchema.allEditorComponents[inputKey],
-          }))}
-        />
+    <Stack direction={'row'} spacing={2} alignItems={'top'}>
+      <Stack spacing={2} sx={{ flex: 2 }}>
+        <Paper elevation={2} sx={{ padding: 2 }}>
+          <Typography variant="h5" component="h2">
+            Model inputs
+          </Typography>
+          <EditorColumn
+            inputs={editorSchema.modelInputComponents.map((inputKey) => ({
+              inputKey,
+              input: editorSchema.allEditorComponents[inputKey],
+            }))}
+          />
+        </Paper>
 
-        <h2>Model output</h2>
-        <ModelOutputEditor
-          outputFormats={editorSchema.outputFormats}
-          editorComponents={editorSchema.allEditorComponents} // TODO this maybe goes in context or we filter it in the prop-drill
-        />
-      </div>
-      <div className="editor-side-column">
-        <AllParameterOptionControls
-          documents={editorSchema.modelInputComponents}
-        />
-      </div>
-    </div>
+        <Paper elevation={2} sx={{ padding: 3 }}>
+          <Typography variant="h5" component="h2">
+            Model output
+          </Typography>
+          <ModelOutputEditor
+            outputFormats={editorSchema.outputFormats}
+            editorComponents={editorSchema.allEditorComponents} // TODO this maybe goes in context or we filter it in the prop-drill
+          />
+        </Paper>
+      </Stack>
+
+      <Stack spacing={2} sx={{ flex: 1 }}>
+        <Paper elevation={0} sx={{ padding: 2 }}>
+          <AllParameterOptionControls
+            documents={editorSchema.modelInputComponents}
+          />
+        </Paper>
+      </Stack>
+    </Stack>
   );
 };
 

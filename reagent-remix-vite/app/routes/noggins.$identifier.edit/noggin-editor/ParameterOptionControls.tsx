@@ -3,21 +3,24 @@ import { useSyncedStore } from '@syncedstore/react';
 import { uniq } from 'underscore';
 
 import {
+  Card,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   Skeleton,
+  Stack,
   TextField,
+  Typography,
 } from '@mui/material';
-import T from '~/i18n/T';
-import './ParameterControls.css';
-import { useEditorStore, useHasPopulatedStore } from './editor-utils';
 import {
   DocumentImageParameter,
   DocumentParameter,
   DocumentTextParameter,
-} from './store.client';
+} from 'reagent-noggin-shared/types/DocType';
+import T from '~/i18n/T';
+import './ParameterControls.css';
+import { useEditorStore, useHasPopulatedStore } from './editor-utils';
 
 type Props = {
   // for now this is a prop, but it won't actually change throughout the lifetime of the app
@@ -41,24 +44,34 @@ export const AllParameterOptionControls = (props: Props) => {
 
   return (
     <div>
-      <h2>
+      <Typography variant="h5" component="h2">
         <T>Noggin variables</T>
-      </h2>
-      <p>
+      </Typography>
+      <Typography
+        variant="body2"
+        component="p"
+        color="textSecondary"
+        gutterBottom
+      >
         <T>
           These variables can be used in text prompts. When using the noggin,
           you can provide values for these variables, and they will be inserted
           into the text prompts you write here.
         </T>
-      </p>
+      </Typography>
       {parameterElementIds.length === 0 && (
         <>
-          <p>
+          <Typography
+            variant="body1"
+            component="p"
+            color="textPrimary"
+            gutterBottom
+          >
             <T>
               Your prompts don't contain any variables! You can add one by
               typing "@" into the pane to the left.
             </T>
-          </p>
+          </Typography>
 
           {/* TODO */}
           {/* <Button variant="outlined">
@@ -132,6 +145,8 @@ function NameField({ parameter }: { parameter: DocumentParameter }) {
   // TODO: also prevent reserved params like 'key'... hmm we don't love this but the idea is simple api even if it's worse practice
   return (
     <TextField
+      fullWidth
+      sx={{ flex: 2 }}
       variant="standard"
       // @ts-ignore
       value={parameter.name}
@@ -152,7 +167,7 @@ function TypeField({
 }) {
   // this will retain old parameter info in the param object, but that's okay. for now, anyway. makes it easier to switch back and forth, if you want to for some reason
   return (
-    <FormControl variant="standard">
+    <FormControl variant="standard" fullWidth sx={{ flex: 1 }}>
       <InputLabel id={`parameter-type-field-${parameterId}`}>
         <T>Type</T>
       </InputLabel>
@@ -163,6 +178,7 @@ function TypeField({
           // @ts-ignore
           parameter.type = event.target.value;
         }}
+        fullWidth
       >
         <MenuItem value="text">
           <T>Text</T>
@@ -185,12 +201,24 @@ function TextParameterOptionControls({
   // TODO: do not render type parameter if the editor does not have this feature enabled
 
   return (
-    <div key={id} className="parameter-control">
-      <NameField parameter={parameter} />
-      <TypeField parameterId={id} parameter={parameter} />
-      <br />
+    <Card elevation={2} key={id} sx={{ my: 2, p: 2 }}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          mb: 2,
+        }}
+        alignItems={'end'}
+      >
+        <NameField parameter={parameter} />
+        <TypeField parameterId={id} parameter={parameter} />
+      </Stack>
 
       <TextField
+        fullWidth
+        sx={{
+          mb: 2,
+        }}
         // @ts-ignore
         value={parameter.maxLength}
         onChange={(event) => {
@@ -201,9 +229,13 @@ function TextParameterOptionControls({
         label="Max length"
       />
 
-      <br />
-
       <TextField
+        fullWidth
+        sx={
+          {
+            // mb: 2,
+          }
+        }
         // @ts-ignore
         value={parameter.defaultValue}
         onChange={(event) => {
@@ -212,7 +244,7 @@ function TextParameterOptionControls({
         }}
         label="Default value"
       />
-    </div>
+    </Card>
   );
 }
 
@@ -224,12 +256,20 @@ function ImageParameterOptionControls({
   parameter: DocumentImageParameter;
 }) {
   return (
-    <div key={id} className="parameter-control">
-      <NameField parameter={parameter} />
-      <TypeField parameterId={id} parameter={parameter} />
-      <br />
+    <Card elevation={2} key={id} sx={{ my: 2, p: 2 }}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          mb: 2,
+        }}
+        alignItems={'end'}
+      >
+        <NameField parameter={parameter} />
+        <TypeField parameterId={id} parameter={parameter} />
+      </Stack>
 
-      <FormControl variant="standard">
+      <FormControl variant="standard" fullWidth>
         <InputLabel id={`parameter-image-quality-field-${id}`}>
           <T>Image quality</T>
         </InputLabel>
@@ -252,6 +292,6 @@ function ImageParameterOptionControls({
           </MenuItem>
         </Select>
       </FormControl>
-    </div>
+    </Card>
   );
 }
