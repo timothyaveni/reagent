@@ -16,7 +16,7 @@ export default function EditorComponentWithHeader({
     <>
       <div className="editor-header">
         <Box alignItems={'center'} display="flex" mt={1}>
-          <Typography variant="h3" component="h3">
+          <Typography variant="h3" gutterBottom>
             {t(input.name)}
           </Typography>
           <Tooltip title={t(input.description)}>
