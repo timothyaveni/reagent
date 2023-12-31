@@ -1,6 +1,5 @@
 import { json, redirect } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
-import T from '~/i18n/T';
 import {
   OrganizationLoadResponse,
   loadOrganization,
@@ -9,12 +8,13 @@ import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
 import LTIConnectionConfig from './LTIConnectionConfig';
 
-import { Box, Breadcrumbs, Link as MUILink } from '@mui/material';
+import { Box, Breadcrumbs, Typography } from '@mui/material';
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from '@remix-run/server-runtime';
 import { createNewLTIConnection } from '~/models/ltiConnection.server';
+import MUILink from '~/components/MUILink';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const { id } = params;
@@ -88,17 +88,10 @@ export default function Organization() {
   return (
     <Box mt={4}>
       <Breadcrumbs>
-        <MUILink
-          href="/organizations"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate('/organizations');
-          }}
-          underline="hover"
-        >
+        <MUILink to="/organizations" underline="hover">
           Organizations
         </MUILink>
-        <T>{organizationData.name}</T>
+        <Typography color="text.primary">{organizationData.name}</Typography>
       </Breadcrumbs>
       <h1>{organizationData.name}</h1>
 

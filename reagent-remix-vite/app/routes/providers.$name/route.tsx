@@ -1,4 +1,4 @@
-import { Alert } from '@mui/material';
+import { Alert, Box, Breadcrumbs, Typography } from '@mui/material';
 import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
 import {
   ActionFunctionArgs,
@@ -15,6 +15,7 @@ import {
 import { notFound } from '~/route-utils/status-code';
 
 import { json } from '@remix-run/node';
+import MUILink from '~/components/MUILink';
 import './Provider.css';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
@@ -77,7 +78,14 @@ export default function Provider() {
   const submit = useSubmit();
 
   return (
-    <div>
+    <Box mt={4}>
+      <Breadcrumbs>
+        <MUILink to="/providers" underline="hover">
+          Providers
+        </MUILink>
+        <Typography color="text.primary">{provider.friendlyName}</Typography>
+      </Breadcrumbs>
+
       <h1>{provider.friendlyName}</h1>
 
       <h2>Credentials</h2>
@@ -130,6 +138,6 @@ export default function Provider() {
       {actionResponse?.success ? (
         <Alert severity="success">Credentials saved!</Alert>
       ) : null}
-    </div>
+    </Box>
   );
 }
