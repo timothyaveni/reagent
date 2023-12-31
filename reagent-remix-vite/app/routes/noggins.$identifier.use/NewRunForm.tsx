@@ -61,7 +61,13 @@ const NewRunOverrides = () => {
   return null;
 };
 
-export default function NewRunForm() {
+export default function NewRunForm({
+  noggin,
+  apiKey,
+}: {
+  noggin: any;
+  apiKey: string;
+}) {
   return (
     <div className="new-run-form">
       <h2>Run this noggin</h2>
@@ -70,7 +76,9 @@ export default function NewRunForm() {
           <NewRunVariablesForm />
           <NewRunOverrides />
         </Grid>
-        <Grid>http://localhost:2358/noggin?key=asdf</Grid>
+        <Grid>
+          http://localhost:2358/{noggin.slug}?key={apiKey}
+        </Grid>
       </Grid>
     </div>
   );

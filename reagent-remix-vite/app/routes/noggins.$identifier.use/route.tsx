@@ -80,7 +80,8 @@ export default function UseNoggin() {
 
   return (
     <div>
-      <NewRunForm />
+      <NewRunForm noggin={noggin} apiKey={uiApiKey} />{' '}
+      {/* todo don't use that key */}
     </div>
   );
 }

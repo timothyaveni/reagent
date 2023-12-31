@@ -23,6 +23,7 @@
   border-radius: 4px;
   background-color: #f5f5f5;
   font-family: monospace;
+  word-break: break-all;
 }
 
 .list-of-type {
