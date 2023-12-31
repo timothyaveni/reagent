@@ -2,7 +2,13 @@ import { AppLoadContext } from '@remix-run/server-runtime';
 import { prisma } from 'db/db';
 import { requireUser } from '~/auth/auth.server';
 
-export const getProviderPublicData = async (provider: string) => {
+export const getProviderPublicData = async (
+  provider: string | null | undefined,
+) => {
+  if (!provider) {
+    return null;
+  }
+
   return await prisma.modelProvider.findUnique({
     where: {
       name: provider,

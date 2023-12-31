@@ -1,15 +1,18 @@
-import { LoaderFunctionArgs, json, redirect } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
-import { AppLoadContext } from '@remix-run/server-runtime';
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
 import { createNoggin } from '~/models/noggin.server';
 import { indexOrganizations } from '~/models/organization.server';
 
-import './NewNoggin.css';
 import { Autocomplete, Button, Switch, TextField } from '@mui/material';
+import { useState } from 'react';
 import T, { t } from '~/i18n/T';
 import { indexAIModels } from '~/models/aiModel.server';
-import { useState } from 'react';
+import './NewNoggin.css';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
@@ -21,38 +24,35 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   return json({ orgs, aiModels });
 };
 
-// TODO type
-export const action = async ({ request, context }: { request: any; context: AppLoadContext }) => {
+export const action = async ({ request, context }: ActionFunctionArgs) => {
   const user = requireUser(context);
 
   const formData = await request.formData();
-  const aiModelIdString = formData.get('aiModelId');
+  const aiModelIdString = formData.get('aiModelId')?.toString();
   if (!aiModelIdString) {
     throw new Error('aiModelId is required');
   }
 
-  const aiModelId = parseInt(aiModelIdString,10);
+  const aiModelId = parseInt(aiModelIdString, 10);
 
-  const name = formData.get('name').toString();
+  const name = formData.get('name')?.toString();
+
+  if (name === undefined || name === '') {
+    throw new Error('name is required');
+  }
 
   const noggin = await createNoggin(context, {
     ownerType: 'user',
     ownerId: user.id,
     aiModelId,
-    name: name === '' ? null : name,
+    name,
   });
 
   return redirect(`/noggins/${noggin.slug}/edit`);
 };
 
 export default function NewNoggin() {
-  const {
-    orgs,
-    aiModels,
-  }: {
-    orgs: any;
-    aiModels: Awaited<ReturnType<typeof indexAIModels>>;
-  } = useLoaderData<typeof loader>();
+  const { orgs, aiModels } = useLoaderData<typeof loader>();
 
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
   const [nogginOwnershipType, setNogginOwnershipType] = useState<

@@ -1,12 +1,10 @@
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import { indexOrganizations } from '~/models/organization.server';
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import T from '~/i18n/T';
-import { AppLoadContext } from '@remix-run/server-runtime';
+import { indexOrganizations } from '~/models/organization.server';
 
-export const loader = async ({ context }: {
-  context: AppLoadContext;
-}) => {
+export const loader = async ({ context }: LoaderFunctionArgs) => {
   const organizations = await indexOrganizations(context);
 
   return json({ organizations });
@@ -20,9 +18,11 @@ export default function OrganizationsList() {
       <h1>Organizations</h1>
 
       <div>
-        {
-          organizations.length > 0 ? <T>These are the organizations you're a member of.</T> : <T>You're not a member of any organizations.</T>
-        }
+        {organizations.length > 0 ? (
+          <T>These are the organizations you're a member of.</T>
+        ) : (
+          <T>You're not a member of any organizations.</T>
+        )}
       </div>
 
       <div>

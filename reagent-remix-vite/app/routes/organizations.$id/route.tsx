@@ -1,14 +1,18 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import T from '~/i18n/T';
 import {
   OrganizationLoadResponse,
-  loadOrganization
+  loadOrganization,
 } from '~/models/organization.server';
-import LTIConnectionConfig from './LTIConnectionConfig';
 import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
+import LTIConnectionConfig from './LTIConnectionConfig';
 
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from '@remix-run/server-runtime';
 import { createNewLTIConnection } from '~/models/ltiConnection.server';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
@@ -29,7 +33,11 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   return json(organizationData);
 };
 
-export const action = async ({ request, params, context }: ActionFunctionArgs) => {
+export const action = async ({
+  request,
+  params,
+  context,
+}: ActionFunctionArgs) => {
   const formData = await request.formData();
   const { id } = params;
 
@@ -38,7 +46,7 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
   }
 
   const postAction = formData.get('action')?.toString();
-  
+
   console.log('postAction', postAction, formData);
 
   if (postAction === 'createLTIConnection') {
@@ -50,7 +58,7 @@ export const action = async ({ request, params, context }: ActionFunctionArgs) =
   }
 
   throw notFound();
-}
+};
 
 function OrganizationView({
   organizationData,
@@ -59,12 +67,16 @@ function OrganizationView({
 }) {
   if (organizationData.userOrganizationRole === OrganizationRole.MEMBER) {
     return null;
-  } else if (organizationData.userOrganizationRole === OrganizationRole.MANAGER) {
+  } else if (
+    organizationData.userOrganizationRole === OrganizationRole.MANAGER
+  ) {
     return null;
   } else {
-    return <>
-      <LTIConnectionConfig ltiConnection={organizationData.ltiConnection} />
-    </>
+    return (
+      <>
+        <LTIConnectionConfig ltiConnection={organizationData.ltiConnection} />
+      </>
+    );
   }
 }
 

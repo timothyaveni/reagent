@@ -1,14 +1,11 @@
-import {
-  json,
-  type LoaderFunctionArgs,
-  type MetaFunction,
-} from '@remix-run/node';
+import { json, type MetaFunction } from '@remix-run/node';
 import { useEffect, useState } from 'react';
 import { loadNogginBySlug } from '~/models/noggin.server';
 
 import jwt from 'jsonwebtoken';
 
 import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
 import { WebsocketProvider } from 'y-websocket';
 import { notFound } from '~/route-utils/status-code';
@@ -31,7 +28,7 @@ export const meta: MetaFunction = () => {
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const { identifier } = params;
 
-  const noggin = await loadNogginBySlug(context, { slug: identifier });
+  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
 
   if (!noggin) {
     throw notFound();
@@ -52,7 +49,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   return json({
     Y_WEBSOCKET_SERVER_EXTERNAL_URL:
-      process.env.Y_WEBSOCKET_SERVER_EXTERNAL_URL,
+      process.env.Y_WEBSOCKET_SERVER_EXTERNAL_URL || '',
     noggin,
     authToken,
   });

@@ -5,11 +5,13 @@ import { useEffect, useState } from 'react';
 import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiKey.server';
 import { notFound } from '~/route-utils/status-code';
 
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import './NogginRun.css';
 
-export const loader = async ({ params, context }: any) => {
+export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   // TODO important make sure they own this noggin lol
   // i mean, we're going to fix the key function right
+  // TODO also this should be in a model file..
   const run = await prisma.nogginRun.findUnique({
     where: {
       uuid: params.runId,
@@ -35,7 +37,7 @@ export const loader = async ({ params, context }: any) => {
   return json({ apiKey });
 };
 
-export default function NogginRun(props: any) {
+export default function NogginRun() {
   const { apiKey } = useLoaderData<typeof loader>();
   const params = useParams();
 

@@ -1,5 +1,6 @@
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import { useEffect, useState } from 'react';
 import { requireUser } from '~/auth/auth.server';
 import {
@@ -9,11 +10,11 @@ import {
 import { notFound } from '~/route-utils/status-code';
 import Editor from './noggin-editor/Editor';
 
-export const loader = async ({ params, context }: any) => {
+export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
   const { identifier } = params;
 
-  const noggin = await loadNogginBySlug(context, { slug: identifier });
+  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
 
   if (!noggin) {
     throw notFound();

@@ -1,6 +1,10 @@
 import { json, redirect } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from '@remix-run/server-runtime';
 import axios from 'axios';
 import { requireUser } from '~/auth/auth.server';
 import { loadNogginBySlug } from '~/models/noggin.server';
@@ -8,12 +12,12 @@ import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiK
 import { notFound } from '~/route-utils/status-code';
 import NewRunForm from './NewRunForm';
 
-export const loader = async ({ params, context }: any) => {
+export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
 
   const { identifier } = params;
 
-  const noggin = await loadNogginBySlug(context, { slug: identifier });
+  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
 
   if (!noggin) {
     throw notFound();
@@ -31,13 +35,17 @@ export const loader = async ({ params, context }: any) => {
   });
 };
 
-export const action = async ({ request, params, context }: any) => {
+export const action = async ({
+  request,
+  params,
+  context,
+}: ActionFunctionArgs) => {
   const user = requireUser(context);
 
   const { identifier } = params;
 
   // TODO we can simplify this a bit once we authenticate the below code properly
-  const noggin = await loadNogginBySlug(context, { slug: identifier });
+  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
 
   if (!noggin) {
     throw notFound();
@@ -55,7 +63,7 @@ export const action = async ({ request, params, context }: any) => {
   const filteredParams: Record<string, string> = {};
   for (const [key, value] of bodyParams.entries()) {
     if (key.startsWith('_reagent_param_')) {
-      filteredParams[key.slice('_reagent_param_'.length)] = value;
+      filteredParams[key.slice('_reagent_param_'.length)] = value.toString();
     }
   }
 
@@ -81,7 +89,7 @@ export default function UseNoggin() {
   return (
     <div>
       <NewRunForm noggin={noggin} apiKey={uiApiKey} />{' '}
-      {/* todo don't use that key */}
+      {/* todo don't render that key */}
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
   animals,
   uniqueNamesGenerator,
 } from 'unique-names-generator';
+import { notFound } from '~/route-utils/status-code';
 
 export const createNoggin = async (
   context: AppLoadContext,
@@ -110,7 +111,7 @@ export const loadNogginBySlug = async (
   context: AppLoadContext,
   { slug }: { slug: string },
 ) => {
-  const user = await requireUser(context);
+  requireUser(context);
 
   const noggin = await prisma.noggin.findUnique({
     where: {
@@ -120,8 +121,18 @@ export const loadNogginBySlug = async (
       id: true,
       slug: true,
       title: true,
+      userOwnerId: true,
     },
   });
+
+  if (!noggin) {
+    throw notFound();
+  }
+
+  // temp
+  if (noggin.userOwnerId !== context.user?.id) {
+    throw notFound();
+  }
 
   // TODO
   // show if:

@@ -9,7 +9,8 @@ import {
 } from '@remix-run/react';
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { LoaderFunctionArgs, json } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import { PageLayout } from './components/PageLayout/PageLayout';
 import './styles/global.css';
 

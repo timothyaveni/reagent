@@ -24,6 +24,7 @@
     "@remix-run/express": "^2.4.0",
     "@remix-run/node": "^2.4.0",
     "@remix-run/react": "^2.4.0",
+    "@remix-run/server-runtime": "^2.4.1",
     "@slate-yjs/core": "^1.0.2",
     "@slate-yjs/react": "^1.1.0",
     "@syncedstore/core": "^0.6.0",

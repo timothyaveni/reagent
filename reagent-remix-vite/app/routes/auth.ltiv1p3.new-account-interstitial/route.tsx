@@ -1,18 +1,17 @@
 import { Button } from '@mui/material';
 import { json, redirect } from '@remix-run/node';
 import { Form, Link, useLoaderData } from '@remix-run/react';
-import { AppLoadContext } from '@remix-run/server-runtime';
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from '@remix-run/server-runtime';
 import { createLTIUser } from 'auth/lti';
 import T from '~/i18n/T';
 import { getLTIConnectionNameWithOrgNameAndId_OMNISCIENT } from '~/models/ltiConnection.server';
 import { addUserToOrganization_OMNIPOTENT } from '~/models/organization.server';
 import { OrganizationRole } from '~/shared/organization';
 
-export async function loader({
-  context,
-}: {
-  context: AppLoadContext; // TODO idk why LoaderFunctionArgs isn't working
-}) {
+export async function loader({ context }: LoaderFunctionArgs) {
   const user = null; // todo
   const { lastLTILaunch } = context.session;
 
@@ -41,11 +40,7 @@ export async function loader({
   });
 }
 
-export async function action({
-  context,
-}: {
-  context: AppLoadContext; // TODO same here -- ActionFunctionArgs?
-}) {
+export async function action({ context }: ActionFunctionArgs) {
   const { lastLTILaunch } = context.session;
 
   if (!lastLTILaunch) {

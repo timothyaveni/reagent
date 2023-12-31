@@ -1,9 +1,9 @@
-import { LoaderFunctionArgs, json } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
-import { AppLoadContext } from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
 import { loadNogginsIndex } from '~/models/noggin.server';
 
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import './NogginList.css';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
@@ -33,12 +33,9 @@ export default function NogginList() {
       <h1>Noggins</h1>
       <Link to="/noggins/new">New noggin</Link>
 
-      {
-        // @ts-expect-error ugh idk why the types are wonky from loader data
-        noggins.map((noggin) => (
-          <NogginCard key={noggin.slug} noggin={noggin} />
-        ))
-      }
+      {noggins.map((noggin) => (
+        <NogginCard key={noggin.slug} noggin={noggin} />
+      ))}
     </div>
   );
 }

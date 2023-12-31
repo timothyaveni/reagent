@@ -1,6 +1,9 @@
 import { Alert } from '@mui/material';
 import { useActionData, useLoaderData, useSubmit } from '@remix-run/react';
-import { AppLoadContext } from '@remix-run/server-runtime';
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
 import { ModelProviderCredentialsForm } from '~/components/ModelProviderCredentials/ModelProviderCredentialsForm';
 import { indexOrganizations } from '~/models/organization.server';
@@ -14,13 +17,7 @@ import { notFound } from '~/route-utils/status-code';
 import { json } from '@remix-run/node';
 import './Provider.css';
 
-export const loader = async ({
-  params,
-  context,
-}: {
-  params: any;
-  context: AppLoadContext;
-}) => {
+export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   requireUser(context);
 
   const { name } = params;
@@ -50,11 +47,7 @@ export const action = async ({
   request,
   params,
   context,
-}: {
-  request: any;
-  params: any;
-  context: AppLoadContext;
-}) => {
+}: ActionFunctionArgs) => {
   const data: {
     credentials: Record<string, unknown>;
     credentialsVersion: number;
@@ -68,7 +61,7 @@ export const action = async ({
   const { name } = params;
 
   await upsertProviderCredentialsForUser(context, {
-    providerName: name,
+    providerName: name || '',
     credentials: data.credentials,
     credentialsSchemaVersion: data.credentialsVersion,
   });
@@ -79,8 +72,8 @@ export const action = async ({
 };
 
 export default function Provider() {
-  const { provider, orgs, currentCredentials } = useLoaderData();
-  const actionResponse = useActionData();
+  const { provider, orgs, currentCredentials } = useLoaderData<typeof loader>();
+  const actionResponse = useActionData<typeof action>();
   const submit = useSubmit();
 
   return (
@@ -116,8 +109,10 @@ export default function Provider() {
       ) : null}
 
       <ModelProviderCredentialsForm
-        credentialsSchema={provider.credentialsSchema}
-        currentCredentials={currentCredentials}
+        credentialsSchema={
+          provider.credentialsSchema as any // TODO get this type outta there
+        }
+        currentCredentials={currentCredentials as Record<string, string>}
         onSubmit={(credentials: any) => {
           // alert(JSON.stringify(credentials));
           submit(
