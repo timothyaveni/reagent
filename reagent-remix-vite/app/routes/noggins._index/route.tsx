@@ -1,9 +1,18 @@
 import { json } from '@remix-run/node';
-import { Link, useLoaderData } from '@remix-run/react';
+import { useLoaderData, useNavigate } from '@remix-run/react';
 import { requireUser } from '~/auth/auth.server';
 import { loadNogginsIndex } from '~/models/noggin.server';
 
+import {
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { LoaderFunctionArgs } from '@remix-run/server-runtime';
+import T from '~/i18n/T';
 import './NogginList.css';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
@@ -16,26 +25,71 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 
 // TODO type
 function NogginCard({ noggin }: { noggin: any }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="noggin-card">
-      <Link to={`/noggins/${noggin.slug}/edit`} key={noggin.slug}>
-        {noggin.title}
-      </Link>
+    <div className="noggin-card" key={noggin.slug}>
+      <Card variant="outlined">
+        <CardActionArea
+          onClick={() => navigate(`/noggins/${noggin.slug}/edit`)}
+        >
+          <CardContent>
+            <Typography variant="h5" component="h3">
+              {noggin.title}
+            </Typography>
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              component="p"
+              className="noggin-description"
+            >
+              <T flagged>
+                {noggin.aiModel.modelProvider.name}/
+                <strong>{noggin.aiModel.name}</strong>
+              </T>
+            </Typography>
+          </CardContent>
+        </CardActionArea>
+      </Card>
     </div>
   );
 }
 
 export default function NogginList() {
   const { noggins } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
 
   return (
     <div className="noggin-list">
-      <h1>Noggins</h1>
-      <Link to="/noggins/new">New noggin</Link>
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        mb={6}
+        mt={4}
+        sx={{ justifyContent: 'space-between' }}
+      >
+        <h1>
+          <T>Noggins</T>
+        </h1>
+        <Button
+          sx={{
+            textTransform: 'none',
+          }}
+          variant="contained"
+          onClick={() => navigate('/noggins/new')}
+        >
+          <T>
+            <Typography variant="button">+ new noggin</Typography>
+          </T>
+        </Button>
+      </Stack>
 
-      {noggins.map((noggin) => (
-        <NogginCard key={noggin.slug} noggin={noggin} />
-      ))}
+      <Stack spacing={2}>
+        {noggins.map((noggin) => (
+          <NogginCard key={noggin.slug} noggin={noggin} />
+        ))}
+      </Stack>
     </div>
   );
 }

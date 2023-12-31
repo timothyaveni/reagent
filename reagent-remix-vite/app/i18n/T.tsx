@@ -18,4 +18,19 @@ export const t = (s: string | I18nString) => {
   return s.en_US;
 };
 
+export const pluralize = (
+  count: number,
+  singular: string,
+  plural: string,
+  includeCount = false,
+) => {
+  const word = count === 1 ? singular : plural;
+
+  if (includeCount) {
+    return `${count} ${word}`;
+  }
+
+  return word;
+};
+
 export default T;

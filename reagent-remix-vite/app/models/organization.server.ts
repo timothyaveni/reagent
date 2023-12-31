@@ -18,6 +18,11 @@ export const indexOrganizations = async (context: AppLoadContext) => {
     select: {
       id: true,
       name: true,
+      _count: {
+        select: {
+          members: true,
+        },
+      },
     },
   });
 
@@ -57,13 +62,16 @@ export const requireUserOrganizationRole = async (
   if (!roles.includes(membership.role as OrganizationRole)) {
     throw new Error('User does not have the required role');
   }
-}
+};
 
-export const createOrganization = async (context: AppLoadContext, {
-  name,
-}: {
-  name: string;
-}) => {
+export const createOrganization = async (
+  context: AppLoadContext,
+  {
+    name,
+  }: {
+    name: string;
+  },
+) => {
   const owner = requireUser(context);
   const ownerId = owner.id;
 
@@ -224,4 +232,4 @@ export const addUserToOrganization_OMNIPOTENT = async ({
       role,
     },
   });
-}
+};

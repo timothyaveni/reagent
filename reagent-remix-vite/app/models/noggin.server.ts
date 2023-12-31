@@ -166,6 +166,16 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
           updatedAt: true,
         },
       },
+      aiModel: {
+        select: {
+          name: true,
+          modelProvider: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
     },
   });
 

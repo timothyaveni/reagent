@@ -1,4 +1,5 @@
 import {
+  Box,
   Card,
   CardActionArea,
   CardContent,
@@ -20,44 +21,46 @@ export default function Providers() {
         <T>Providers</T>
       </h1>
 
-      <p>
-        <T>
-          reagent does not directly host AI models on its servers. When you use
-          a noggin, the request is forwarded to an AI model hosted by one of
-          these providers.
-        </T>
-      </p>
-
-      <p>
-        <T>
-          Some AI models (e.g. open-source models like Llama and Whisper) may be
-          available through multiple providers. Even for the same model,
-          different providers may offer different speed, performance, features,
-          or cost.
-        </T>
-      </p>
-
-      <p>
-        <T>
-          Although reagent is free to use, AI models cost money to run. To
-          create a noggin and use a model through reagent, you must:
-        </T>
-      </p>
-
-      <ul>
-        <li>
-          <T flagged>
-            Create an account with the provider and then configure your provider
-            credentials on this page, OR
-          </T>
-        </li>
-        <li>
+      <Box mb={6}>
+        <p>
           <T>
-            Create <strong>organization-owned</strong> noggins, which are billed
-            to the organization you have joined.
+            reagent does not directly host AI models on its servers. When you
+            use a noggin, the request is forwarded to an AI model hosted by one
+            of these providers.
           </T>
-        </li>
-      </ul>
+        </p>
+
+        <p>
+          <T>
+            Some AI models (e.g. open-source models like Llama and Whisper) may
+            be available through multiple providers. Even for the same model,
+            different providers may offer different speed, performance,
+            features, or cost.
+          </T>
+        </p>
+
+        <p>
+          <T>
+            Although reagent is free to use, AI models cost money to run. To
+            create a noggin and use a model through reagent, you must:
+          </T>
+        </p>
+
+        <ul>
+          <li>
+            <T flagged>
+              Create an account with the provider and then configure your
+              provider credentials on this page, OR
+            </T>
+          </li>
+          <li>
+            <T>
+              Create <strong>organization-owned</strong> noggins, which are
+              billed to the organization you have joined.
+            </T>
+          </li>
+        </ul>
+      </Box>
 
       <div className="provider-list">
         <Grid container spacing={6}>
