@@ -15,8 +15,8 @@ import { notFound } from '~/route-utils/status-code';
 import {
   initializeStoreForNoggin,
   NogginEditorStore,
-} from '~/routes/noggins.$identifier.edit/text-completion/store.client';
-import { useRootHasPopulatedStore } from '../noggins.$identifier.edit/text-completion/editor-utils';
+} from '~/routes/noggins.$identifier.edit/noggin-editor/store.client';
+import { useRootHasPopulatedStore } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import EditorHeader from './EditorHeader';
 import { StoreContext } from './StoreContext';
 

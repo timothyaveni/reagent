@@ -24,6 +24,9 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
         break;
       case 'integer':
       case 'number':
+      case 'boolean':
+      case 'select':
+      case 'simple-schema':
         modelInputs.set(inputKey, input.default);
         break;
     }
@@ -42,10 +45,21 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
       case 'plain-text-with-parameters':
         documentParameterIdsByDocument.set(inputKey, new Y.Array());
         break;
+      case 'integer':
+      case 'number':
+      case 'boolean':
+      case 'select':
+      case 'simple-schema': // TODO ugh how many spots are there to update if we want parameters to work in a thing
+        break;
       default:
+        // throw ts error if not exhaustive
+        const _exhaustiveCheck: never = input;
         break;
     }
   }
+
+  const nogginOptions = yDoc.getMap('nogginOptions');
+  nogginOptions.set('chosenOutputFormatKey', editorSchema.outputFormats[0].key);
 
   const syncState = yDoc.getMap('syncState');
   syncState.set('synced', true);

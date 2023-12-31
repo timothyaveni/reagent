@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
   useEditorParameters,
   useHasPopulatedStore,
-} from '../noggins.$identifier.edit/text-completion/editor-utils';
+} from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import './NewRunForm.css';
 
 const NewRunVariablesFormInner = () => {

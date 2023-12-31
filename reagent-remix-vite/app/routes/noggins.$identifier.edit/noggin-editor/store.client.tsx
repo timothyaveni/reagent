@@ -29,6 +29,9 @@ type DocType = {
   documentParameters: Record<string, Y.Map<DocumentParameter>>;
   // using Object.keys on documentParameters doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
   documentParameterIdsByDocument: Record<string, string[]>;
+  nogginOptions: {
+    chosenOutputFormatKey: string;
+  };
   syncState: {
     synced?: boolean;
   };
@@ -52,6 +55,7 @@ export const initializeStoreForNoggin = (
       documentParameters: {},
       // using Object.keys on documentParameters doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
       documentParameterIdsByDocument: {},
+      nogginOptions: {},
       syncState: {},
     } as DocType,
     yDoc,

@@ -32,7 +32,7 @@ export const AllParameterOptionControls = (props: Props) => {
   const documentIdList: string[][] = [];
   for (const documentId of props.documents) {
     documentIdList.push(
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+      // eslint-disable-next-line react-hooks/rules-of-hooks i promise it's not dynamic
       useSyncedStore(store.documentParameterIdsByDocument)[documentId]!,
     );
   }

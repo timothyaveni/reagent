@@ -18,6 +18,13 @@ export const PageLayout = ({
       <>
         <TopBar />
         <main className={wide ? 'wide' : ''}>{children}</main>
+        <footer
+          style={{
+            marginTop: 400,
+          }}
+        >
+          by tim
+        </footer>
       </>
     );
   }

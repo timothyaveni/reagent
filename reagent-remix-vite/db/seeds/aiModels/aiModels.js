@@ -47,7 +47,7 @@ async function main() {
   });
 
   const { default: gpt35Turbo1106EditorSchema } = await import(
-    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-4-1106-preview.js'
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-3.5-turbo-1106.js'
   );
 
   const gpt35Turbo1106 = await prisma.aIModel.upsert({
