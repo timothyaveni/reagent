@@ -1,6 +1,7 @@
 import fs from 'fs';
 import http from 'http';
 import jwt from 'jsonwebtoken';
+import { StringDecoder } from 'string_decoder';
 import { debounce } from 'underscore';
 import { WebSocketServer } from 'ws';
 import * as Y from 'yjs';
@@ -40,6 +41,77 @@ const jwtPublicKey = fs.readFileSync(
 );
 
 const server = http.createServer((request, response) => {
+  // console.log('request', request);
+  if (request.method === 'POST' && request.url === '/immediate-sync') {
+    console.log('immediate-sync');
+    // Check for the correct Authorization header
+    const authHeader = request.headers['authorization'] || '';
+    const token = authHeader.split(' ')[1]; // Get the token part of the header
+
+    // thanks gpt
+    if (token === process.env.SHARED_Y_WEBSOCKET_SERVER_SECRET) {
+      console.log('token matches');
+      // Parse the request body to get the nogginId
+      let body = '';
+      const decoder = new StringDecoder('utf-8');
+      request.on('data', (chunk) => {
+        body += decoder.write(chunk);
+      });
+
+      request.on('end', () => {
+        body += decoder.end();
+
+        try {
+          console.log('body', body);
+          const parsedBody = JSON.parse(body);
+          const nogginId = parsedBody.nogginId;
+
+          if (nogginId) {
+            console.log('nogginId', nogginId);
+            const updateFunc = updateDocFunction[nogginId];
+
+            if (!updateFunc) {
+              console.log('no updateFunc');
+              response.writeHead(200, { 'Content-Type': 'text/plain' });
+              response.end('already up to date');
+              return;
+            }
+
+            updateDocFunction[nogginId]()
+              .then(() => {
+                console.log('synced noggin');
+                // When the function finishes, respond to the request
+                response.writeHead(200, { 'Content-Type': 'text/plain' });
+                response.end('');
+              })
+              .catch((error) => {
+                console.error(error);
+                // Handle errors from the async function
+                response.writeHead(500, { 'Content-Type': 'text/plain' });
+                response.end('Error syncing noggin');
+              });
+          } else {
+            console.log('no nogginId');
+            // nogginId not found in the body
+            response.writeHead(400, { 'Content-Type': 'text/plain' });
+            response.end('Missing nogginId parameter');
+          }
+        } catch (error) {
+          console.error(error);
+          // JSON parsing error
+          response.writeHead(400, { 'Content-Type': 'text/plain' });
+          response.end('Invalid JSON body');
+        }
+      });
+    } else {
+      console.log('token does not match');
+      // Invalid or missing Authorization header
+      response.writeHead(401, { 'Content-Type': 'text/plain' });
+      response.end('Unauthorized');
+    }
+    return;
+  }
+
   response.writeHead(200, { 'Content-Type': 'text/plain' });
   response.end('okay');
 });
@@ -57,7 +129,9 @@ const deserializeYDoc = (serialized: Buffer, ydoc: Y.Doc) => {
   return ydoc;
 };
 
+// todo memory leaks...
 const docLoaded = {};
+const updateDocFunction = {};
 
 setPersistence({
   provider: prisma, // i don't think this does anyhting
@@ -97,21 +171,20 @@ setPersistence({
       }
 
       docLoaded[docName] = true;
+      updateDocFunction[docName] = async (update) => {
+        console.log('update');
+        const serialized = serializeYDoc(ydoc);
+        console.log({ serialized });
+        // todo: create new revision only conditionally -- >5minutes or lots of change or if the row has been used by a noggin run -- otherwise just update the highest-ID row (this will require db txns...)
+        await prisma.nogginRevision.create({
+          data: {
+            nogginId: parseInt(docName, 10),
+            content: serialized,
+          },
+        });
+      };
 
-      ydoc.on(
-        'update',
-        debounce(async (update) => {
-          console.log('update');
-          const serialized = serializeYDoc(ydoc);
-          // todo: create new revision only conditionally -- >5minutes or lots of change or if the row has been used by a noggin run -- otherwise just update the highest-ID row (this will require db txns...)
-          await prisma.nogginRevision.create({
-            data: {
-              nogginId: parseInt(docName, 10),
-              content: serialized,
-            },
-          });
-        }, 5000),
-      );
+      ydoc.on('update', debounce(updateDocFunction[docName], 5000));
     } catch (e) {
       console.error(e);
       console.trace();

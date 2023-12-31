@@ -8,16 +8,19 @@ import SubjectIcon from '@mui/icons-material/Subject';
 
 import {
   Autocomplete,
+  Button,
   Chip,
   MenuItem,
   Select,
   Skeleton,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
   TextField,
+  Typography,
 } from '@mui/material';
 import { getYjsValue } from '@syncedstore/core';
 import { useSyncedStore } from '@syncedstore/react';
@@ -26,6 +29,8 @@ import { ModelInput } from 'reagent-noggin-shared/types/editorSchema';
 import * as Y from 'yjs';
 import T, { t } from '~/i18n/T';
 import { useEditorStore, useHasPopulatedStore } from '../editor-utils';
+
+import './SimpleSchemaEditor.css';
 
 type SimpleSchemaEditorProps = {
   inputKey: string;
@@ -60,7 +65,7 @@ const createSchema = (type: PermittedType): JSONSchema7 => {
     case 'string-enum':
       return {
         type: 'string',
-        enum: [''],
+        enum: [],
       };
     case 'number':
       return {
@@ -117,12 +122,12 @@ function SimpleSchemaEditor({ inputKey, input }: SimpleSchemaEditorProps) {
         value={value}
         setValue={(v) => {
           modelInputsYjsDoc.set(inputKey, {
-            $schema: 'http://json-schema.org/draft-07/schema#',
+            // $schema: 'http://json-schema.org/draft-07/schema#',
             ...v,
           });
         }}
       />
-      {JSON.stringify(value)}
+      <div className="schema-preview">{JSON.stringify(value)}</div>
     </div>
   );
 }
@@ -138,61 +143,99 @@ function IndividualTypeEditor({
   return (
     <>
       <Select
+        className="structure-type-select"
         value={getInputType(value) || 'string'}
         onChange={(e) => {
           setValue(createSchema(e.target.value as PermittedType));
         }}
       >
-        <MenuItem value="string">
-          <SubjectIcon /> <T>Freeform text</T>
+        <MenuItem className="structure-type-item" value="string">
+          <div className="structure-type-item-icon">
+            <SubjectIcon />
+          </div>
+          <div className="structure-type-item-text">
+            <T>Freeform text</T>
+          </div>
         </MenuItem>
-        <MenuItem value="string-enum">
-          <FormatListBulletedIcon /> <T>Choice</T>
+        <MenuItem className="structure-type-item" value="string-enum">
+          <div className="structure-type-item-icon">
+            <FormatListBulletedIcon />
+          </div>
+          <div className="structure-type-item-text">
+            <T>Choice</T>
+          </div>
         </MenuItem>
-        <MenuItem value="number">
-          <DialpadIcon /> <T>Number</T>
+        <MenuItem className="structure-type-item" value="number">
+          <div className="structure-type-item-icon">
+            <DialpadIcon />
+          </div>
+          <div className="structure-type-item-text">
+            <T>Number</T>
+          </div>
         </MenuItem>
-        <MenuItem value="boolean">
-          <CheckIcon /> <T>True/False</T>
+        <MenuItem className="structure-type-item" value="boolean">
+          <div className="structure-type-item-icon">
+            <CheckIcon />
+          </div>
+          <div className="structure-type-item-text">
+            <T>True/False</T>
+          </div>
         </MenuItem>
-        <MenuItem value="array">
-          <ListIcon /> <T>List</T>
+        <MenuItem className="structure-type-item" value="array">
+          <div className="structure-type-item-icon">
+            <ListIcon />
+          </div>
+          <div className="structure-type-item-text">
+            <T>List</T>
+          </div>
         </MenuItem>
-        <MenuItem value="object">
-          <SplitscreenIcon /> <T>Multiple values</T>
+        <MenuItem className="structure-type-item" value="object">
+          <div className="structure-type-item-icon">
+            <SplitscreenIcon />
+          </div>
+          <div className="structure-type-item-text">
+            <T>Multiple values</T>
+          </div>
         </MenuItem>
       </Select>
 
       {isStringEnum(value) && (
-        <Autocomplete
-          multiple
-          options={[]}
-          defaultValue={[]}
-          freeSolo
-          renderTags={(value: readonly string[], getTagProps) =>
-            value.map((option: string, index: number) => (
-              <Chip
-                variant="outlined"
-                label={option}
-                {...getTagProps({ index })}
-              />
-            ))
-          }
-          renderInput={(params) => (
-            <TextField {...params} variant="filled" label={t('Choices')} />
-          )}
-          onChange={(e, v) => {
-            setValue({
-              ...value,
-              enum: v,
-            });
-          }}
-        />
+        <div className="choices-field">
+          <Autocomplete
+            multiple
+            options={[]}
+            value={value.enum}
+            freeSolo
+            renderTags={(value: readonly string[], getTagProps) =>
+              value.map((option: string, index: number) => (
+                <Chip
+                  variant="filled"
+                  label={option}
+                  {...getTagProps({ index })}
+                />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField {...params} variant="outlined" label={t('Choices')} />
+            )}
+            onChange={(e, v) => {
+              setValue({
+                ...value,
+                enum: v,
+              });
+            }}
+          />
+          <div className="choices-field-help">
+            <Typography variant="caption">
+              <T>Press enter to add a new choice for the model to output</T>
+            </Typography>
+          </div>
+        </div>
       )}
 
       {value.type === 'array' && (
         <>
-          of type
+          <div className="list-of-type">of type</div>
           <IndividualTypeEditor
             value={value.items as JSONSchema7}
             setValue={(v) => {
@@ -206,8 +249,8 @@ function IndividualTypeEditor({
       )}
 
       {value.type === 'object' && (
-        <>
-          <Table>
+        <Stack spacing={2}>
+          <Table className="object-properties-table">
             <TableHead>
               <TableRow>
                 <TableCell>Value</TableCell>
@@ -253,7 +296,7 @@ function IndividualTypeEditor({
                       />
                     </TableCell>
                     <TableCell>
-                      <button
+                      <Button
                         onClick={() => {
                           const entries = Object.entries(value.properties!);
                           const entryIndex = entries.findIndex(
@@ -270,14 +313,19 @@ function IndividualTypeEditor({
                         }}
                       >
                         <ClearIcon />
-                      </button>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ),
               )}
             </TableBody>
           </Table>
-          <button
+          <Button
+            sx={{
+              width: '30%',
+              alignSelf: 'flex-end',
+            }}
+            variant="outlined"
             onClick={() => {
               let newKey = 'answer';
               if (Object.keys(value.properties!).includes(newKey)) {
@@ -300,8 +348,8 @@ function IndividualTypeEditor({
             }}
           >
             Add
-          </button>
-        </>
+          </Button>
+        </Stack>
       )}
     </>
   );

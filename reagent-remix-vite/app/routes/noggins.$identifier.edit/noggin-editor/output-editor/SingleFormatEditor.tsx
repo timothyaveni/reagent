@@ -1,10 +1,13 @@
+import { Stack } from '@mui/material';
 import {
   ModelInput,
   OutputFormat,
 } from 'reagent-noggin-shared/types/editorSchema';
-import { MarkdownWithAdmonitions } from '~/components/MarkdownWithAdmonitions';
+import { MarkdownWithAdmonitions } from '~/components/MarkdownWithAdmonitions/MarkdownWithAdmonitions';
 import { t } from '~/i18n/T';
 import EditorComponent from '../EditorComponent';
+
+import './SingleFormatEditor.css';
 
 export type SingleFormatEditorProps = {
   outputFormat: OutputFormat;
@@ -20,20 +23,24 @@ export default function SingleFormatEditor({
 }: SingleFormatEditorProps) {
   return (
     <div>
-      <MarkdownWithAdmonitions>
-        {t(outputFormat.description)}
-      </MarkdownWithAdmonitions>
+      <div className="format-description">
+        <MarkdownWithAdmonitions>
+          {t(outputFormat.description)}
+        </MarkdownWithAdmonitions>
+      </div>
 
-      {editorComponents.map(({ inputKey, input }) => (
-        <div key={inputKey}>
-          <h3>{t(input.name)}</h3>
-          <div>
-            <p>{t(input.description)}</p>
+      <Stack spacing={2}>
+        {editorComponents.map(({ inputKey, input }) => (
+          <div key={inputKey}>
+            <h3>{t(input.name)}</h3>
+            <div>
+              <p>{t(input.description)}</p>
+            </div>
+
+            <EditorComponent inputKey={inputKey} input={input} />
           </div>
-
-          <EditorComponent inputKey={inputKey} input={input} />
-        </div>
-      ))}
+        ))}
+      </Stack>
     </div>
   );
 }

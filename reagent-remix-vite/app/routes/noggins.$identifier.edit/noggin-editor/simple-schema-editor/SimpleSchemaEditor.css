@@ -1,0 +1,35 @@
+.structure-type-item, .structure-type-select .MuiSelect-select {
+  display: flex;
+  align-items: center;
+  padding: 12px 12px 12px 12px;
+
+  & .structure-type-item-icon {
+    margin-right: 12px;
+
+    & .MuiSvgIcon-root {
+      vertical-align: middle;
+    }
+  }
+}
+
+.structure-type-select .MuiSelect-select {
+  width: 200px;
+}
+
+.schema-preview {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  font-family: monospace;
+}
+
+.list-of-type {
+  display: inline-block;
+  margin: 0 16px;
+}
+
+.choices-field {
+  margin-top: 16px;
+}

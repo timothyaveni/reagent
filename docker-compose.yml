@@ -32,6 +32,7 @@ services:
       - ./prisma:/app/prisma
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
+      - SHARED_Y_WEBSOCKET_SERVER_SECRET
     restart: on-failure:5
   noggin-server:
     build:
@@ -44,6 +45,8 @@ services:
       - ./prisma:/app/prisma
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
+      - Y_WEBSOCKET_SERVER_INTERNAL_URL=http://yjs-websocket:2347
+      - SHARED_Y_WEBSOCKET_SERVER_SECRET
     restart: on-failure:5
   postgres:
     image: postgres:16.0
