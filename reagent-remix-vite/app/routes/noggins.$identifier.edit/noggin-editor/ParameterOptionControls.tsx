@@ -41,7 +41,9 @@ export const AllParameterOptionControls = (props: Props) => {
 
   return (
     <div>
-      <h2>Input variables</h2>
+      <h2>
+        <T>Noggin variables</T>
+      </h2>
       <p>
         <T>
           These variables can be used in text prompts. When using the noggin,
