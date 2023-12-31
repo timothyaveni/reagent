@@ -94,6 +94,7 @@ function ControlsWrapper({
 function ParameterOptionControls({ id }: { id: string }) {
   const store = useEditorStore();
   const parameterOptions = useSyncedStore(store.documentParameters);
+  console.log({ parameterOptions: JSON.stringify(parameterOptions) });
   const thisParameter = parameterOptions[id];
   if (!thisParameter) {
     console.log(

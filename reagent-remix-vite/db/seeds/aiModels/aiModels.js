@@ -114,7 +114,7 @@ async function main() {
   });
 
   const { default: sdxlEditorSchema } = await import(
-    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/replicate_sdxl.js'
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/sdxl.js'
   );
 
   const sdxl = await prisma.aIModel.upsert({

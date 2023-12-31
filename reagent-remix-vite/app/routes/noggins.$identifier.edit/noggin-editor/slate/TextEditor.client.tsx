@@ -104,7 +104,11 @@ const TextEditor = ({
 
     const parameterElements = getParameterElements(editor);
     for (const element of parameterElements) {
-      console.log('sync', element);
+      console.log(
+        'sync',
+        element,
+        JSON.stringify(store.documentParameterIdsByDocument[documentKey]),
+      );
       if (
         !store.documentParameterIdsByDocument[documentKey]!.includes(
           element.parameterId,

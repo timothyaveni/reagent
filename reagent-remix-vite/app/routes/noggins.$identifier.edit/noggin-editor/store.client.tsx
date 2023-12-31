@@ -1,7 +1,7 @@
 import { syncedStore } from '@syncedstore/core';
+import { DocType } from 'reagent-noggin-shared/types/DocType';
 import { WebsocketProvider } from 'y-websocket';
 import * as Y from 'yjs';
-import { DocType } from './DocType';
 
 export type NogginEditorStore = ReturnType<
   typeof initializeStoreForNoggin

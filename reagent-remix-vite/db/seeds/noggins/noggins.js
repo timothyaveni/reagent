@@ -1,32 +1,21 @@
 import { PrismaClient } from '@prisma/client';
 import { createRequire } from 'node:module';
+import * as Y from 'yjs';
 
-import fs from 'fs';
-import path from 'path';
+import { importDocFromObject } from '../../../../../noggin-server/dist/reagent-noggin-shared/ydoc-io/importDocFromJSON.js';
 
 const require = createRequire(import.meta.url);
 const prisma = new PrismaClient();
 
 async function createNogginWithRevision({
-  filename,
+  yDocObject,
   title,
   slug,
   modelProviderName,
   modelName,
   modelRevision,
 }) {
-  // const base64Content = fs.readFileSync(
-  //   path.join(new URL(import.meta.url).pathname, '..', filename),
-  // );
-  const buffer = fs.readFileSync(
-    path.join(new URL(import.meta.url).pathname, '..', filename),
-  );
-
-  // const buffer = Buffer.from(hexContent, 'hex');
-  // console.log(slug, base64Content.toString());
-  // const buffer = Buffer.from(base64Content, 'base64');
-  // const buffer = Buffer.from(atob(base64Content.toString()));
-  // console.log(buffer);
+  console.log(`Seeding ${title}`);
 
   const modelProvider = await prisma.modelProvider.findUnique({
     where: {
@@ -34,28 +23,33 @@ async function createNogginWithRevision({
     },
   });
 
+  const aiModel = await prisma.aIModel.findUnique({
+    where: {
+      modelProviderId_name_revision: {
+        name: modelName,
+        modelProviderId: modelProvider.id,
+        revision: modelRevision,
+      },
+    },
+    select: {
+      id: true,
+      editorSchema: true,
+    },
+  });
+
+  const yDoc = importDocFromObject(aiModel.editorSchema, yDocObject);
+  const serializedYDoc = Buffer.from(Y.encodeStateAsUpdate(yDoc));
+
   const nogginData = {
     title,
     slug,
-    aiModel: {
-      connect: {
-        modelProviderId_name_revision: {
-          name: modelName,
-          modelProviderId: modelProvider.id,
-          revision: modelRevision,
-        },
-      },
-    },
+    aiModelId: aiModel.id,
     nogginRevisions: {
       create: {
-        content: buffer,
+        content: serializedYDoc,
       },
     },
-    userOwner: {
-      connect: {
-        id: 1,
-      },
-    },
+    userOwnerId: 1,
   };
 
   return await prisma.noggin.upsert({
@@ -69,7 +63,7 @@ async function createNogginWithRevision({
 
 async function main() {
   await createNogginWithRevision({
-    filename: './icon-generator.ydoc',
+    yDocObject: (await import('./icon-generator.ydoc.js')).default,
     title: 'Icon Generator',
     slug: 'icy-gorilla-0123',
     modelProviderName: 'replicate',
@@ -79,7 +73,7 @@ async function main() {
   });
 
   await createNogginWithRevision({
-    filename: './hex-color-converter.ydoc',
+    yDocObject: (await import('./hex-color-converter.ydoc.js')).default,
     title: 'Hex Color Converter',
     slug: 'heavy-crocodile-0123',
     modelProviderName: 'openai',
@@ -88,7 +82,7 @@ async function main() {
   });
 
   await createNogginWithRevision({
-    filename: './todo-list-classifier.ydoc',
+    yDocObject: (await import('./todo-list-classifier.ydoc.js')).default,
     title: 'Todo List Classifier',
     slug: 'total-cat-0123',
     modelProviderName: 'openai',
@@ -97,7 +91,7 @@ async function main() {
   });
 
   await createNogginWithRevision({
-    filename: './joke-teller.ydoc',
+    yDocObject: (await import('./joke-teller.ydoc.js')).default,
     title: 'Joke Teller',
     slug: 'joint-tiger-0123',
     modelProviderName: 'openai',
@@ -106,7 +100,7 @@ async function main() {
   });
 
   await createNogginWithRevision({
-    filename: './tree-lights.ydoc',
+    yDocObject: (await import('./tree-lights.ydoc.js')).default,
     title: 'Tree Lights',
     slug: 'tremendous-lion-0123',
     modelProviderName: 'openai',
@@ -115,7 +109,7 @@ async function main() {
   });
 
   await createNogginWithRevision({
-    filename: './bananagrams-checker.ydoc',
+    yDocObject: (await import('./bananagrams-checker.ydoc.js')).default,
     title: 'Bananagrams Checker',
     slug: 'balanced-cheetah-0123',
     modelProviderName: 'openai',
@@ -124,7 +118,7 @@ async function main() {
   });
 
   await createNogginWithRevision({
-    filename: './cat-detector.ydoc',
+    yDocObject: (await import('./cat-detector.ydoc.js')).default,
     title: 'Cat Detector',
     slug: 'capitalist-donkey-0123',
     modelProviderName: 'openai',

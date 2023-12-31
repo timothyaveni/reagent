@@ -12,7 +12,8 @@
     "dev": "node ./server.mjs",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "cross-env NODE_ENV=production node ./server.mjs",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "export-noggin": "node ./scripts/export-noggin.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
