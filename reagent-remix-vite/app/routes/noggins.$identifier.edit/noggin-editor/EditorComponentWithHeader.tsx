@@ -13,25 +13,23 @@ export default function EditorComponentWithHeader({
   input: ModelInput;
 }) {
   return (
-    <>
-      <div className="editor-header">
-        <Box alignItems={'center'} display="flex" mt={1}>
-          <Typography variant="h3" gutterBottom>
-            {t(input.name)}
-          </Typography>
-          <Tooltip title={t(input.description)}>
-            {/* TODO i think in theory we wanted this to be markdown, or at least for paragraphs */}
-            <HelpIcon
-              color="action"
-              sx={{
-                ml: 3,
-              }}
-            />
-          </Tooltip>
-        </Box>
-      </div>
+    <Box>
+      <Box alignItems={'center'} display="flex" mt={1}>
+        <Typography variant="h3" gutterBottom>
+          {t(input.name)}
+        </Typography>
+        <Tooltip title={t(input.description)}>
+          {/* TODO i think in theory we wanted this to be markdown, or at least for paragraphs */}
+          <HelpIcon
+            color="action"
+            sx={{
+              ml: 3,
+            }}
+          />
+        </Tooltip>
+      </Box>
 
       <EditorComponent inputKey={inputKey} input={input} />
-    </>
+    </Box>
   );
 }

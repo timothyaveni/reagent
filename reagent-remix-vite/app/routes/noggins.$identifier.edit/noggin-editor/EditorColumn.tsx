@@ -1,3 +1,4 @@
+import { Stack } from '@mui/material';
 import { ModelInput } from 'reagent-noggin-shared/types/editorSchema';
 import EditorComponentWithHeader from './EditorComponentWithHeader';
 
@@ -10,7 +11,7 @@ export default function EditorColumn({
   }[];
 }) {
   return (
-    <>
+    <Stack spacing={1}>
       {inputs.map(({ inputKey, input }) => (
         <EditorComponentWithHeader
           key={inputKey}
@@ -18,6 +19,6 @@ export default function EditorColumn({
           input={input}
         />
       ))}
-    </>
+    </Stack>
   );
 }
