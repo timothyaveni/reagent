@@ -10,6 +10,7 @@ export function MarkdownWithAdmonitions({
 }): JSX.Element {
   return (
     <Markdown
+      className="markdown-with-admonitions"
       components={{
         // todo: this is a hack mostly assuming we'll never use an actual code block in these markdowns
         pre: ({ children }) => <>{children}</>,

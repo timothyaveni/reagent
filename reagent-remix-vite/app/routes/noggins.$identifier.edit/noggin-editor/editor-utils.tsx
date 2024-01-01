@@ -3,12 +3,13 @@ import { ReactEditor } from 'slate-react';
 import { uniq } from 'underscore';
 import { ParameterNode } from './editor-types';
 
-import { Y, observeDeep } from '@syncedstore/core';
+import { Y, getYjsValue, observeDeep } from '@syncedstore/core';
 import { useSyncedStore } from '@syncedstore/react';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { DocumentParameter } from 'reagent-noggin-shared/types/DocType';
 import { v4 as uuid } from 'uuid';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
-import { DocumentParameter, NogginEditorStore } from './store.client';
+import { NogginEditorStore } from './store.client';
 
 export const useEditorStore = () => {
   const { store } = useContext(StoreContext);
@@ -151,3 +152,16 @@ export const addNewParameter = (
 
   Transforms.move(editor);
 };
+
+// not to be used for slate editors -- those are complex
+export function useInputValueState<T>(inputKey: string) {
+  const store = useEditorStore();
+  const modelInputs = useSyncedStore(store.modelInputs);
+  const inputValue = modelInputs[inputKey];
+  // const value: T = modelInputs[inputKey].value; // why do i need .value ???? -- i think it's because this isn't a yjs value -- the way syncedstore does automatically
+  // okay, i think i get it now -- https://syncedstore.org/docs/advanced/boxed -- maps are boxed, but syncedStore sees that this value from the server is not a YMap so assumes this one was boxed -- but other data types are not boxed. maybe we should do something about this before launch...
+  const value = inputValue.value ?? inputValue;
+  const modelInputsYjsDoc = getYjsValue(store.modelInputs)! as Y.Map<T>; // not really sure why i need to manually call set() but i don't want to think too hard about it right now
+
+  return [value, (v: T) => modelInputsYjsDoc.set(inputKey, v)] as const;
+}

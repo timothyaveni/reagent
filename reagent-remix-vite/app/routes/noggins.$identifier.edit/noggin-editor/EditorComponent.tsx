@@ -1,51 +1,44 @@
 import { ModelInput } from 'reagent-noggin-shared/types/editorSchema';
-import SimpleSchemaEditorWrapper from './simple-schema-editor/SimpleSchemaEditor';
-import { TextEditorWrapper } from './slate/TextEditorWrapper';
 
-export default function EditorComponent({
+export type EditorComponentProps = {
+  inputKey: string;
+  input: ModelInput;
+};
+
+import { Skeleton } from '@mui/material';
+import EditorComponentInner from './EditorComponentInner.client';
+import { useHasPopulatedStore } from './editor-utils';
+
+export default function EditorComponentWrapper({
   inputKey,
   input,
 }: {
   inputKey: string;
   input: ModelInput;
 }) {
-  switch (input.type) {
-    case 'chat-text-user-images-with-parameters':
-      return (
-        <TextEditorWrapper
-          documentKey={inputKey}
-          textType="chat"
-          allowImages="user"
-          editorHeight={input.editorHeight}
-        />
-      );
-    case 'chat-text-with-parameters':
-      return (
-        <TextEditorWrapper
-          documentKey={inputKey}
-          textType="chat"
-          editorHeight={input.editorHeight}
-        />
-      );
-    case 'plain-text-with-parameters':
-      return (
-        <TextEditorWrapper
-          documentKey={inputKey}
-          textType="plain"
-          editorHeight={input.editorHeight}
-        />
-      );
-    case 'integer':
-      return <>Not implemented</>;
-    case 'number':
-      return <>Not implemented</>;
-    case 'boolean':
-      return <>Not implemented</>;
-    case 'select':
-      return <>Not implemented</>;
-    case 'simple-schema':
-      return <SimpleSchemaEditorWrapper inputKey={inputKey} input={input} />;
-    default:
-      const _exhaustiveCheck: never = input;
+  const hasPopulatedStore = useHasPopulatedStore();
+
+  if (!hasPopulatedStore) {
+    switch (input.type) {
+      case 'chat-text-user-images-with-parameters':
+      case 'chat-text-with-parameters':
+      case 'plain-text-with-parameters':
+        return (
+          <Skeleton
+            variant="rounded"
+            height={input.editorHeight === 'primary' ? 400 : 75}
+          />
+        );
+      case 'integer':
+      case 'number':
+      case 'boolean':
+      case 'select':
+        return <Skeleton variant="rounded" height={50} />;
+      case 'simple-schema':
+        return <Skeleton variant="rounded" height={200} />;
+      default:
+    }
   }
+
+  return <EditorComponentInner inputKey={inputKey} input={input} />;
 }

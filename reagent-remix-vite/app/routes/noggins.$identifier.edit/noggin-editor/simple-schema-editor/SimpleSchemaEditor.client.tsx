@@ -7,6 +7,7 @@ import SplitscreenIcon from '@mui/icons-material/Splitscreen';
 import SubjectIcon from '@mui/icons-material/Subject';
 import {
   Autocomplete,
+  Box,
   Button,
   Chip,
   MenuItem,
@@ -20,13 +21,17 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { getYjsValue } from '@syncedstore/core';
-import { useSyncedStore } from '@syncedstore/react';
 import { JSONSchema7 } from 'json-schema';
-import * as Y from 'yjs';
+import { ModelInput_SimpleSchema } from 'reagent-noggin-shared/types/editorSchemaV1';
 import T, { t } from '~/i18n/T';
-import { useEditorStore } from '../editor-utils';
-import { SimpleSchemaEditorProps } from './SimpleSchemaEditor';
+import { useInputValueState } from '../editor-utils';
+
+import './SimpleSchemaEditor.css';
+
+type SimpleSchemaEditorProps = {
+  inputKey: string;
+  input: ModelInput_SimpleSchema;
+};
 
 type PermittedType =
   | 'string'
@@ -35,6 +40,7 @@ type PermittedType =
   | 'boolean'
   | 'array'
   | 'object';
+
 const createSchema = (type: PermittedType): JSONSchema7 => {
   switch (type) {
     case 'string':
@@ -72,6 +78,7 @@ const createSchema = (type: PermittedType): JSONSchema7 => {
       };
   }
 };
+
 const getInputType = (schema: JSONSchema7): PermittedType => {
   if (isStringEnum(schema)) {
     return 'string-enum';
@@ -79,37 +86,35 @@ const getInputType = (schema: JSONSchema7): PermittedType => {
 
   return schema.type as PermittedType;
 };
+
 const isStringEnum = (
   schema: JSONSchema7,
 ): schema is JSONSchema7 & { enum: string[] } => {
   return 'enum' in schema && schema.type === 'string';
 };
+
 export function SimpleSchemaEditor({
   inputKey,
   input,
 }: SimpleSchemaEditorProps) {
-  const store = useEditorStore();
-  const modelInputs = useSyncedStore(store.modelInputs);
-  const value: JSONSchema7 = modelInputs[inputKey].value; // why do i need .value ????
-  const modelInputsYjsDoc = getYjsValue(
-    store.modelInputs,
-  )! as Y.Map<JSONSchema7>; // not really sure why i need to manually call set() but i don't want to think too hard about it right now
+  const [value, setValue] = useInputValueState<JSONSchema7>(inputKey);
 
   return (
-    <div>
+    <Box sx={{ mt: 1 }}>
       <IndividualTypeEditor
         value={value}
         setValue={(v) => {
-          modelInputsYjsDoc.set(inputKey, {
+          setValue({
             // $schema: 'http://json-schema.org/draft-07/schema#',
             ...v,
           });
         }}
       />
       <div className="schema-preview">{JSON.stringify(value)}</div>
-    </div>
+    </Box>
   );
 }
+
 // todo this whole file is kinda half-assed
 function IndividualTypeEditor({
   value,

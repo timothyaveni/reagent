@@ -5,8 +5,8 @@ import {
 } from 'reagent-noggin-shared/types/editorSchema';
 import { MarkdownWithAdmonitions } from '~/components/MarkdownWithAdmonitions/MarkdownWithAdmonitions';
 import { t } from '~/i18n/T';
-import EditorComponent from '../EditorComponent';
 
+import EditorComponentWithHeader from '../EditorComponentWithHeader';
 import './SingleFormatEditor.css';
 
 export type SingleFormatEditorProps = {
@@ -31,14 +31,12 @@ export default function SingleFormatEditor({
 
       <Stack spacing={2}>
         {editorComponents.map(({ inputKey, input }) => (
-          <div key={inputKey}>
-            <h3>{t(input.name)}</h3>
-            <div>
-              <p>{t(input.description)}</p>
-            </div>
-
-            <EditorComponent inputKey={inputKey} input={input} />
-          </div>
+          <EditorComponentWithHeader
+            key={inputKey}
+            inputKey={inputKey}
+            input={input}
+            column="primary"
+          />
         ))}
       </Stack>
     </div>

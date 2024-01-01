@@ -37,11 +37,11 @@ export function ParameterControlsInner({
 
   if (parameterElementIds.length === 0) {
     return (
-      <>
+      <Card sx={{ p: 4, mt: 2 }} elevation={2}>
         <Typography
-          variant="body1"
-          component="p"
-          color="textPrimary"
+          variant="body2"
+          color="textSecondary"
+          align="center"
           gutterBottom
         >
           <T>
@@ -49,7 +49,7 @@ export function ParameterControlsInner({
             "@" into the pane to the left.
           </T>
         </Typography>
-      </>
+      </Card>
     );
   }
 
@@ -100,17 +100,19 @@ function NameField({ parameter }: { parameter: DocumentParameter }) {
   // TODO: prevent dupes, etc.
   // TODO: also prevent reserved params like 'key'... hmm we don't love this but the idea is simple api even if it's worse practice
   return (
-    <TextField
-      fullWidth
-      sx={{ flex: 2 }}
-      variant="standard"
-      // @ts-ignore
-      value={parameter.name}
-      onChange={(event) => {
+    <FormControl variant="standard" fullWidth sx={{ flex: 2 }}>
+      <TextField
+        label={<T>Variable name</T>}
+        fullWidth
+        variant="standard"
         // @ts-ignore
-        parameter.name = event.target.value;
-      }}
-    />
+        value={parameter.name}
+        onChange={(event) => {
+          // @ts-ignore
+          parameter.name = event.target.value;
+        }}
+      />
+    </FormControl>
   );
 }
 function TypeField({

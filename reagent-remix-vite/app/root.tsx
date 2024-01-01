@@ -49,6 +49,11 @@ const theme = createTheme({
       fontSize: '1.3rem',
       color: '#333',
     },
+    h4: {
+      fontWeight: 400,
+      fontSize: '1.1rem',
+      color: '#333',
+    },
   },
 });
 

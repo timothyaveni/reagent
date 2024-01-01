@@ -1,4 +1,4 @@
-import { MenuItem, Select, Skeleton } from '@mui/material';
+import { MenuItem, Select, Skeleton, Typography } from '@mui/material';
 import { useSyncedStore } from '@syncedstore/react';
 import {
   ModelInput,
@@ -20,7 +20,8 @@ export function ModelOutputEditor(
 
   if (!hasPopulatedStore) {
     // TODO: we can show the header, at least, if there's only one output format
-    return <Skeleton variant="rectangular" height={400} />;
+    // this is kinda doubled because the editor itself also does this -- but we need the store before that
+    return <Skeleton variant="rectangular" height={200} />;
   }
 
   return <ModelOutputEditorInner {...props} />;
@@ -57,7 +58,7 @@ function ModelOutputEditorInner({
   if (outputFormats.length === 1) {
     return (
       <>
-        <h3>{t(selectedOutputFormat.name)}</h3>
+        <Typography variant="h2">{t(selectedOutputFormat.name)}</Typography>
         {editor}
       </>
     );
@@ -70,10 +71,24 @@ function ModelOutputEditorInner({
           onChange={(e) => {
             nogginOptions.chosenOutputFormatKey = e.target.value;
           }}
+          sx={{
+            pr: 3,
+            mb: 1,
+          }}
+          MenuProps={{
+            PaperProps: {
+              sx: {
+                '& .MuiTypography-root': {
+                  fontSize: '1.2rem',
+                  fontWeight: 400,
+                },
+              },
+            },
+          }}
         >
           {outputFormats.map((outputFormat) => (
             <MenuItem value={outputFormat.key} key={t(outputFormat.name)}>
-              {t(outputFormat.name)}
+              <Typography variant="h2">{t(outputFormat.name)}</Typography>
             </MenuItem>
           ))}
         </Select>

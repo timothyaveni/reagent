@@ -2,8 +2,9 @@ import React from 'react';
 
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
+import T from '~/i18n/T';
 import './Editor.css';
-import EditorColumn from './EditorColumn';
+import InputsColumn from './InputsColumn';
 import { AllParameterOptionControls } from './ParameterOptionControls';
 import { ModelOutputEditor } from './output-editor/ModelOutputEditor';
 
@@ -18,18 +19,19 @@ const Editor: React.FC<EditorProps> = (props) => {
   const { editorSchema } = props;
 
   return (
-    <Stack direction={'row'} spacing={2} alignItems={'top'}>
-      <Stack spacing={4} sx={{ flex: 2 }}>
+    <Stack direction="row" spacing={3} alignItems="top">
+      <Stack spacing={6} sx={{ flex: 2 }}>
         <Box>
           <Typography variant="h2" mb={2}>
             Model inputs
           </Typography>
           <Paper elevation={2} sx={{ padding: 2 }}>
-            <EditorColumn
+            <InputsColumn
               inputs={editorSchema.modelInputComponents.map((inputKey) => ({
                 inputKey,
                 input: editorSchema.allEditorComponents[inputKey],
               }))}
+              column="primary"
             />
           </Paper>
         </Box>
@@ -47,12 +49,38 @@ const Editor: React.FC<EditorProps> = (props) => {
         </Box>
       </Stack>
 
-      <Stack spacing={2} sx={{ flex: 1 }}>
-        <Paper elevation={0} sx={{ padding: 2 }}>
-          <AllParameterOptionControls
-            documentIds={editorSchema.modelInputComponents}
-          />
-        </Paper>
+      <Stack spacing={6} sx={{ flex: 1 }}>
+        <AllParameterOptionControls
+          documentIds={editorSchema.modelInputComponents}
+        />
+        <Box>
+          <Typography variant="h2" gutterBottom>
+            Model parameters
+          </Typography>
+          <Typography
+            variant="body2"
+            component="p"
+            color="textSecondary"
+            // gutterBottom
+            mb={2}
+          >
+            <T flagged>
+              Tweak the model's behavior here. The default values are
+              reasonable, so you dont <em>need</em> to poke around in this
+              section, but you may find that your needs are better suited by
+              changing these parameters.
+            </T>
+          </Typography>
+          <Paper elevation={2} sx={{ padding: 2 }}>
+            <InputsColumn
+              inputs={editorSchema.modelParameterComponents.map((inputKey) => ({
+                inputKey,
+                input: editorSchema.allEditorComponents[inputKey],
+              }))}
+              column="secondary"
+            />
+          </Paper>
+        </Box>
       </Stack>
     </Stack>
   );

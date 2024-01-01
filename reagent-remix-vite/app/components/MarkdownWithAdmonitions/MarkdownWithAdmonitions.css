@@ -7,3 +7,13 @@
     margin-bottom: 0;
   }
 }
+
+.markdown-with-admonitions {
+  & p:first-child {
+    margin-top: 0.25rem;
+  }
+
+  & p:last-child {
+    margin-bottom: 0.25rem;
+  }
+}
