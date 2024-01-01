@@ -29,7 +29,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   );
 
   return json({
-    NOGGIN_SERVER_EXTERNAL_URL: process.env.NOGGIN_SERVER_EXTERNAL_URL,
+    NOGGIN_SERVER_EXTERNAL_URL: process.env.NOGGIN_SERVER_EXTERNAL_URL || '',
     noggin,
     uiApiKey,
   });
@@ -88,7 +88,11 @@ export default function UseNoggin() {
 
   return (
     <div>
-      <NewRunForm noggin={noggin} apiKey={uiApiKey} />{' '}
+      <NewRunForm
+        noggin={noggin}
+        apiKey={uiApiKey}
+        nogginServerUrl={NOGGIN_SERVER_EXTERNAL_URL}
+      />
       {/* todo don't render that key */}
     </div>
   );

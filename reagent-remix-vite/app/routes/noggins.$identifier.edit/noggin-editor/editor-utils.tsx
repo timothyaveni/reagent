@@ -67,7 +67,7 @@ export const useHasPopulatedStore = () => {
   return hasPopulatedStore;
 };
 
-type EditorParametersList = {
+export type EditorParametersList = {
   id: string;
   parameter: DocumentParameter;
 }[];
@@ -120,7 +120,7 @@ export const addNewParameter = (
   while (
     Object.values(store.documentParameters).some(
       // @ts-ignore
-      (p) => p?.name === `param${newIndex}`,
+      (p) => p?.name === `var${newIndex}`,
     )
   ) {
     newIndex++;
@@ -129,7 +129,7 @@ export const addNewParameter = (
   const id = uuid();
 
   store.documentParameters[id] = new Y.Map([
-    ['name', `param${newIndex}`],
+    ['name', `var${newIndex}`],
     ['type', 'text'],
     ['maxLength', 500],
     ['defaultValue', ''],
