@@ -1,4 +1,10 @@
-import { Skeleton, Stack, Typography } from '@mui/material';
+import {
+  Skeleton,
+  Stack,
+  Link as StyledLink,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import {
   EditorParametersList,
   useHasPopulatedStore,
@@ -43,7 +49,23 @@ function UrlSample({
         return (
           <Typography variant="body1" sx={{ pl: 2 }}>
             &{parameter.name}=
-            <strong>{encodeURIComponent(parameterValues[id])}</strong>
+            <Tooltip
+              title={
+                <Typography variant="body1">
+                  Variables are{' '}
+                  <StyledLink
+                    color="#ffffff"
+                    href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent"
+                    target="_blank"
+                  >
+                    URL-encoded
+                  </StyledLink>{' '}
+                  when used in a URL.
+                </Typography>
+              }
+            >
+              <strong>{encodeURIComponent(parameterValues[id])}</strong>
+            </Tooltip>
           </Typography>
         );
       })}
