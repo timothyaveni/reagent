@@ -74,6 +74,12 @@ function ModelOutputEditorInner({
           sx={{
             pr: 3,
             mb: 1,
+            '&::after': {
+              border: 'none',
+            },
+            '&::before': {
+              border: 'none',
+            },
           }}
           MenuProps={{
             PaperProps: {
