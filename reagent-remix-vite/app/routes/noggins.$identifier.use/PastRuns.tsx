@@ -1,7 +1,8 @@
-import { Pending } from '@mui/icons-material';
+import { BlurOn } from '@mui/icons-material';
 import {
   Box,
   Button,
+  Paper,
   Stack,
   Table,
   TableBody,
@@ -23,16 +24,26 @@ type PastRunsProps = {
 
 function NoRuns() {
   return (
-    // todo looks like NOT VERY GOOD
-    <Stack spacing={1} alignItems={'center'}>
-      <Pending htmlColor="#666" fontSize="large" />
-      <Typography variant="body1" color="textSecondary">
-        <T>
-          Looks like this noggin has never been used! Try it with the form
-          above.
-        </T>
-      </Typography>
-    </Stack>
+    <Paper
+      elevation={2}
+      // don't take up the full width:
+      sx={{
+        width: 'fit-content',
+        mx: 'auto',
+        p: 3,
+        mt: 2,
+      }}
+    >
+      <Stack spacing={2} alignItems={'center'}>
+        <BlurOn htmlColor="#666" fontSize="large" />
+        <Typography variant="body1" color="textSecondary">
+          <T>
+            Looks like this noggin has never been used! Try it with the form
+            above.
+          </T>
+        </Typography>
+      </Stack>
+    </Paper>
   );
 }
 
