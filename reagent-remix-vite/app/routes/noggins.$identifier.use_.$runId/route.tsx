@@ -5,10 +5,22 @@ import { useEffect, useState } from 'react';
 import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiKey.server';
 import { notFound } from '~/route-utils/status-code';
 
+import { Breadcrumbs, Typography } from '@mui/material';
 import { LoaderFunctionArgs } from '@remix-run/server-runtime';
+import MUILink from '~/components/MUILink';
 import './NogginRun.css';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
+  const noggin = await prisma.noggin.findUnique({
+    where: {
+      slug: params.identifier,
+    },
+  });
+
+  if (!noggin) {
+    throw notFound();
+  }
+
   // TODO important make sure they own this noggin lol
   // i mean, we're going to fix the key function right
   // TODO also this should be in a model file..
@@ -34,11 +46,11 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     run.nogginRevision.nogginId,
   );
 
-  return json({ apiKey });
+  return json({ noggin, apiKey });
 };
 
 export default function NogginRun() {
-  const { apiKey } = useLoaderData<typeof loader>();
+  const { noggin, apiKey } = useLoaderData<typeof loader>();
   const params = useParams();
 
   const [outputText, setOutputText] = useState('');
@@ -69,12 +81,20 @@ export default function NogginRun() {
   }, [params.runId, apiKey]);
 
   return (
-    <div className="noggin-run-text-output">
-      {outputAssetURL ? (
-        <img src={outputAssetURL} alt="output asset" />
-      ) : (
-        outputText
-      )}
-    </div>
+    <>
+      <Breadcrumbs>
+        <MUILink to={`/noggins/${params.identifier}/use`} underline="hover">
+          {noggin.title}
+        </MUILink>
+        <Typography color="text.primary">{params.runId}</Typography>
+      </Breadcrumbs>
+      <div className="noggin-run-text-output">
+        {outputAssetURL ? (
+          <img src={outputAssetURL} alt="output asset" />
+        ) : (
+          outputText
+        )}
+      </div>
+    </>
   );
 }

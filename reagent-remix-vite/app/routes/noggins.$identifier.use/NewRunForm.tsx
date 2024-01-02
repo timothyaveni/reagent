@@ -82,7 +82,16 @@ export default function NewRunFormWrapper(props: NewRunFormProps) {
   const hasPopulatedStore = useHasPopulatedStore();
 
   if (!hasPopulatedStore) {
-    return <Skeleton />;
+    // todo i really don't like that this entire page is a skeleton .. we'll need to be clever about how we set the editor parameters though
+    // definitely get rid of this header duplication
+    return (
+      <div className="new-run-form">
+        <Typography variant="h2" mb={4}>
+          Use this noggin
+        </Typography>
+        <Skeleton variant="rounded" height={400} />
+      </div>
+    );
   }
 
   return <NewRunForm {...props} />;

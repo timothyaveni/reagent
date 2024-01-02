@@ -9,8 +9,10 @@ import axios from 'axios';
 import { requireUser } from '~/auth/auth.server';
 import { loadNogginBySlug } from '~/models/noggin.server';
 import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiKey.server';
+import { getNogginRuns_OMNISCIENT } from '~/models/nogginRuns.server';
 import { notFound } from '~/route-utils/status-code';
 import NewRunForm from './NewRunForm';
+import PastRuns from './PastRuns';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
@@ -28,12 +30,18 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     noggin.id,
   );
 
+  // TODO paginate
+  const runs = await getNogginRuns_OMNISCIENT(noggin.id);
+
   return json({
     NOGGIN_SERVER_EXTERNAL_URL: process.env.NOGGIN_SERVER_EXTERNAL_URL || '',
     noggin,
     uiApiKey,
+    runs,
   });
 };
+
+export type NogginUseLoader = typeof loader;
 
 export const action = async ({
   request,
@@ -83,7 +91,7 @@ export const action = async ({
 };
 
 export default function UseNoggin() {
-  const { NOGGIN_SERVER_EXTERNAL_URL, noggin, uiApiKey } =
+  const { NOGGIN_SERVER_EXTERNAL_URL, noggin, uiApiKey, runs } =
     useLoaderData<typeof loader>();
 
   return (
@@ -94,6 +102,7 @@ export default function UseNoggin() {
         nogginServerUrl={NOGGIN_SERVER_EXTERNAL_URL}
       />
       {/* todo don't render that key */}
+      <PastRuns runs={runs} />
     </div>
   );
 }
