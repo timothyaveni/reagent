@@ -106,11 +106,14 @@ function NewRunForm({ noggin, apiKey, nogginServerUrl }: NewRunFormProps) {
 
   return (
     <div className="new-run-form">
-      <Typography variant="h2" gutterBottom>
-        Run this noggin
+      <Typography variant="h2" mb={4}>
+        Use this noggin
       </Typography>
-      <Grid container spacing={8}>
+      <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
+          <Typography variant="h3" mb={2}>
+            <T>Within reagent:</T>
+          </Typography>
           <Paper elevation={2} sx={{ padding: 2 }}>
             <Form method="post">
               <Box sx={{ mb: 2 }}>
@@ -136,13 +139,18 @@ function NewRunForm({ noggin, apiKey, nogginServerUrl }: NewRunFormProps) {
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
-          <CodeSamples
-            noggin={noggin}
-            apiKey={apiKey}
-            nogginServerUrl={nogginServerUrl}
-            parameters={parameters}
-            parameterValues={parameterValues}
-          />
+          <Typography variant="h3" mb={2}>
+            <T>Or with code:</T>
+          </Typography>
+          <Paper elevation={2} sx={{ padding: 2 }}>
+            <CodeSamples
+              noggin={noggin}
+              apiKey={apiKey}
+              nogginServerUrl={nogginServerUrl}
+              parameters={parameters}
+              parameterValues={parameterValues}
+            />
+          </Paper>
         </Grid>
       </Grid>
     </div>

@@ -1,10 +1,10 @@
 import { useSyncedStore } from '@syncedstore/react';
 import { useSelected } from 'slate-react';
 import { useEditorStore } from '../editor-utils';
-import { DocumentParameter } from '../store.client';
 
 // image icon
 import ImageIcon from '@mui/icons-material/Image';
+import { DocumentParameter } from 'reagent-noggin-shared/types/DocType';
 
 export const Parameter = ({
   attributes,

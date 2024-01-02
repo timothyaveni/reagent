@@ -41,6 +41,7 @@
     "react": "^18.3.0-canary-0cdfef19b-20231211",
     "react-dom": "^18.3.0-canary-0cdfef19b-20231211",
     "react-markdown": "^9.0.1",
+    "react-syntax-highlighter": "^15.5.0",
     "slate": "^0.101.1",
     "slate-history": "^0.100.0",
     "slate-react": "^0.101.2",

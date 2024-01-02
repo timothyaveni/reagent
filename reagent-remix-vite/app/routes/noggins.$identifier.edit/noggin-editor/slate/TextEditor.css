@@ -1,7 +1,6 @@
 /* todo hm, maybe we cycle through colors per parameter. same list every time though? */
 .parameter {
-  /* material blue */
-  background-color: #2196f3;
+  background-color: var(--reagent-purple);
   border: 1px solid white;
   color: white;
   padding: 2px 6px;

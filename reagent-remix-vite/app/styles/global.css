@@ -7,8 +7,10 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  /* font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', */
+    /* monospace; */
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px;
 }
 
 * {
