@@ -1,17 +1,26 @@
 import { Outlet } from '@remix-run/react';
 
-import './AuthWrapper.css';
+import { Box, Paper } from '@mui/material';
 import ReagentWordmark from '~/components/PageLayout/ReagentWordmark';
+import './AuthWrapper.css';
 
 export default function AuthWrapper() {
   return (
     <div className="auth-bg">
-      <div className="auth-wrapper">
+      <Box alignItems="center" display="flex" flexDirection="column">
         <ReagentWordmark />
-        <div className="auth-wrapper-inner">
+        <Paper
+          elevation={3}
+          sx={{
+            mt: 2,
+            p: 4,
+            width: '100%',
+            maxWidth: 480,
+          }}
+        >
           <Outlet />
-        </div>
-      </div>
+        </Paper>
+      </Box>
     </div>
   );
 }

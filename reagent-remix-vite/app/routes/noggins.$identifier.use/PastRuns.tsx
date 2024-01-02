@@ -14,6 +14,7 @@ import { useNavigate, useParams } from '@remix-run/react';
 import { SerializeFrom } from '@remix-run/server-runtime';
 import { formatDistance } from 'date-fns';
 import T from '~/i18n/T';
+import { renderNogginRunStatus } from '../noggins.$identifier.use_.$runId/status';
 import { NogginUseLoader } from './route';
 
 type PastRunsProps = {
@@ -60,7 +61,7 @@ function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
               <T>Status</T>
             </TableCell>
             <TableCell>
-              <T>Last update</T>
+              <T>Credit cost</T>
             </TableCell>
             <TableCell></TableCell>
           </TableRow>
@@ -78,13 +79,14 @@ function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
                 </TableCell>
                 {/* TODO variables */}
                 <TableCell></TableCell>
-                <TableCell>{run.status}</TableCell>
+                <TableCell>{renderNogginRunStatus(run.status)}</TableCell>
                 <TableCell>
-                  <T flagged>
-                    {formatDistance(new Date(run.updatedAt), new Date(), {
-                      addSuffix: true,
-                    })}
-                  </T>
+                  {/* todo */}
+                  {run.status === 'running' ? (
+                    <T>{run.estimatedCost} (estimated)</T>
+                  ) : (
+                    <T>{run.computedCost}</T>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Button

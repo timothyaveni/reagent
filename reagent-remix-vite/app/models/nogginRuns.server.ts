@@ -16,6 +16,8 @@ export async function getNogginRuns_OMNISCIENT(
       createdAt: true,
       status: true,
       updatedAt: true,
+      computedCost: true,
+      estimatedCost: true,
     },
     orderBy: {
       createdAt: 'desc',
