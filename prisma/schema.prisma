@@ -229,7 +229,8 @@ model NogginRun {
   evaluatedParameters Json?
   evaluatedOverrides  Json?
 
-  computedCost Float?
+  computedCost            Float?
+  nogginOutputAssetObject NogginOutputAssetObject[]
 }
 
 enum NogginRunLogLevel {
@@ -358,4 +359,22 @@ model AIModel {
   Noggin Noggin[]
 
   @@unique([modelProviderId, name, revision])
+}
+
+//
+
+model NogginOutputAssetObject {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  nogginRun   NogginRun @relation(fields: [nogginRunId], references: [id])
+  nogginRunId Int
+
+  mimeType String
+
+  uuid     String @unique
+  filename String
+  url      String
 }
