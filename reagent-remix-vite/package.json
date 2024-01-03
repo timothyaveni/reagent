@@ -30,6 +30,7 @@
     "@slate-yjs/react": "^1.1.0",
     "@syncedstore/core": "^0.6.0",
     "@syncedstore/react": "^0.6.0",
+    "@timothyaveni/minio": "^7.1.4",
     "axios": "^1.6.2",
     "date-fns": "^3.0.6",
     "express": "^4.18.2",

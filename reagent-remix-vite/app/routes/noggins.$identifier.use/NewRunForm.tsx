@@ -18,6 +18,7 @@ import {
 } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import CodeSamples from './CodeSamples';
 import './NewRunForm.css';
+import { SingleImagePresignedInput } from './SingleImagePresignedInput';
 
 const NewRunVariablesForm = ({
   parameters,
@@ -47,11 +48,18 @@ const NewRunVariablesForm = ({
       {parameters.map(({ id, parameter }) => {
         if (parameter.type === 'image') {
           return (
-            <div key={id}>
-              <strong>{parameter.name}</strong> is an image parameter, not yet
-              implemented in the reagent UI
-            </div>
-          ); // TODO
+            <Stack key={id} direction={'row'} spacing={2} alignItems={'center'}>
+              {/* todo allow image URL toggle like the noggin server does */}
+              <Typography variant="body1">{parameter.name}</Typography>
+              <SingleImagePresignedInput
+                onFinishUpload={(url: string) => {
+                  setParameterValue(id, url);
+                }}
+                currentUrl={parameterValues[id]}
+                name={`_reagent_param_${parameter.name}`}
+              />
+            </Stack>
+          );
         }
 
         return (

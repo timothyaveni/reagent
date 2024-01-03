@@ -100,15 +100,6 @@ function UrlSample({
           <code>?key={apiKey}</code>
         </Box>
         {parameters.map(({ id, parameter }) => {
-          if (parameter.type === 'image') {
-            return (
-              <div key={id}>
-                <strong>{parameter.name}</strong> is an image parameter, not yet
-                implemented in the reagent UI
-              </div>
-            ); // TODO
-          }
-
           return (
             <Box sx={{ pl: 2 }}>
               <code>
@@ -194,10 +185,6 @@ const response = await fetch(
     body: JSON.stringify({
       ${props.parameters
         .map(({ id, parameter }) => {
-          if (parameter.type === 'image') {
-            return `// ${parameter.name} is an image parameter, not yet implemented in the reagent UI`;
-          }
-
           return `${parameter.name}: ${JSON.stringify(
             props.parameterValues[id],
           )},`;
@@ -224,10 +211,6 @@ response = requests.post(
   json={
     ${props.parameters
       .map(({ id, parameter }) => {
-        if (parameter.type === 'image') {
-          return `# ${parameter.name} is an image parameter, not yet implemented in the reagent UI`;
-        }
-
         return `'${parameter.name}': ${JSON.stringify(
           props.parameterValues[id],
         )},`;
@@ -251,10 +234,6 @@ function KotlinSample(props: CodeSamplesProps) {
   json = mapOf(
     ${props.parameters
       .map(({ id, parameter }) => {
-        if (parameter.type === 'image') {
-          return `// ${parameter.name} is an image parameter, not yet implemented in the reagent UI`;
-        }
-
         return `"${parameter.name}" to ${JSON.stringify(
           props.parameterValues[id],
         )},`;
