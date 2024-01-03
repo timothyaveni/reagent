@@ -88,7 +88,11 @@ function UrlSample({
         <ContentCopyIcon color="primary" />
       </ButtonBase>
 
-      <Stack>
+      <Stack
+        sx={{
+          wordBreak: 'break-all',
+        }}
+      >
         <code>
           {nogginServerUrl}/{noggin.slug}
         </code>
