@@ -1,5 +1,6 @@
 main {
   max-width: 960px;
+  padding: 0 1rem;
 
   &.wide {
     max-width: 1200px;
