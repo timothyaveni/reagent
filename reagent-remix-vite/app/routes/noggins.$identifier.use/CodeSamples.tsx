@@ -106,17 +106,30 @@ function UrlSample({
                 &{parameter.name}=
                 <Tooltip
                   title={
-                    <Typography variant="body1">
-                      Variables are{' '}
-                      <StyledLink
-                        color="#ffffff"
-                        href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent"
-                        target="_blank"
-                      >
-                        URL-encoded
-                      </StyledLink>{' '}
-                      when used in a URL.
-                    </Typography>
+                    <>
+                      <Typography variant="body1" component="p">
+                        <T flagged>
+                          Variables are{' '}
+                          <StyledLink
+                            color="#ffffff"
+                            href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent"
+                            target="_blank"
+                          >
+                            URL-encoded
+                          </StyledLink>{' '}
+                          when used in a URL.
+                        </T>
+                      </Typography>
+                      {parameter.type === 'image' ? (
+                        <Typography variant="body1" component="p">
+                          <T flagged>
+                            When accessing the noggin with a URL, image
+                            variables must be uploaded to a publicly-accessible
+                            URL.
+                          </T>
+                        </Typography>
+                      ) : null}
+                    </>
                   }
                 >
                   <strong>{encodeURIComponent(parameterValues[id])}</strong>

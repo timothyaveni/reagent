@@ -26,6 +26,8 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
       case 'number':
       case 'boolean':
       case 'select':
+        modelInputs.set(inputKey, input.default);
+        break;
       case 'simple-schema':
         modelInputs.set(inputKey, input.default);
         break;
