@@ -1,7 +1,8 @@
-import { NogginRunStatus } from '@prisma/client';
+import { NogginRunStatus } from '~/db';
+import type { NogginRunStatusType } from '~/db';
 import { t } from '~/i18n/T';
 
-export function renderNogginRunStatus(status: NogginRunStatus) {
+export function renderNogginRunStatus(status: NogginRunStatusType) {
   switch (status) {
     case NogginRunStatus.pending:
       return t('Pending');
