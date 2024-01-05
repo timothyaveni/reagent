@@ -24,16 +24,19 @@ type JWTPayload = {
 
 const wss = new WebSocketServer({ noServer: true });
 
-const host = process.env.Y_WEBSOCKET_HOST;
-const portStr = process.env.Y_WEBSOCKET_PORT;
+// const host = process.env.Y_WEBSOCKET_HOST;
+// const portStr = process.env.Y_WEBSOCKET_PORT;
 
-if (!host || !portStr) {
+/*if (!host || !portStr) {
   throw new Error(
     'Y_WEBSOCKET_HOST and Y_WEBSOCKET_PORT must be set in .env (see .env.example)',
   );
-}
+}*/
 
-const port = parseInt(portStr, 10);
+// const port = parseInt(portStr, 10);
+
+const port = 2347;
+const host = '0.0.0.0';
 
 const jwtPublicKey = fs.readFileSync(
   './jwt/y-websocket-es512-public.pem',
