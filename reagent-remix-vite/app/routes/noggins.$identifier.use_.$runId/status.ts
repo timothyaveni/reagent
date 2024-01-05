@@ -1,8 +1,15 @@
-import { NogginRunStatus } from '~/db';
-import type { NogginRunStatusType } from '~/db';
 import { t } from '~/i18n/T';
 
-export function renderNogginRunStatus(status: NogginRunStatusType) {
+// TODO: figure out why this prisma TS import isn't working in the prod build
+type NogginRunStatus = 'pending' | 'running' | 'succeeded' | 'failed';
+const NogginRunStatus = {
+  pending: 'pending' as const,
+  running: 'running' as const,
+  succeeded: 'succeeded' as const,
+  failed: 'failed' as const,
+};
+
+export function renderNogginRunStatus(status: NogginRunStatus) {
   switch (status) {
     case NogginRunStatus.pending:
       return t('Pending');
