@@ -9,7 +9,7 @@ import {
 } from '@remix-run/react';
 
 import { withEmotionCache } from '@emotion/react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from '@mui/material';
 import { json } from '@remix-run/node';
 import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import { useContext, useEffect, useRef } from 'react';

@@ -1,0 +1,33 @@
+FROM node:21.4.0-bookworm
+
+WORKDIR /app
+
+COPY ./reagent-remix-vite/package.json /app
+COPY ./reagent-remix-vite/package-lock.json /app
+
+RUN npm ci --force # we don't love --force but i think react canary ends up making us need it
+
+RUN mkdir -p /noggin-server/src/reagent-noggin-shared
+COPY ./noggin-server/package.json /noggin-server/
+COPY ./noggin-server/package-lock.json /noggin-server/
+COPY ./noggin-server/tsconfig.json /noggin-server/
+
+RUN cd /noggin-server && npm ci --force
+
+COPY ./reagent-remix-vite /app
+
+COPY ./prisma /app/prisma
+
+COPY ./noggin-server/src/reagent-noggin-shared /noggin-server/src/reagent-noggin-shared
+
+ENV NODE_ENV=production
+
+RUN cd /noggin-server && npm run build
+
+ENV PRISMA_OUTPUT="/app/node_modules/.prisma/client"
+RUN npx prisma generate
+
+RUN npm run build
+
+ENTRYPOINT ["node", "server.mjs"]
+# ENTRYPOINT ["tail", "-F", "/dev/null"]

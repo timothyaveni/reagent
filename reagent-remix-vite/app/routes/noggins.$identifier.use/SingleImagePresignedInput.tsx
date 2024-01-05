@@ -1,7 +1,7 @@
 // this might go in the shared components directory at some point
 
 import { Button, CircularProgress } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { styled } from '@mui/material';
 import { useParams } from '@remix-run/react';
 import { useState } from 'react';
 

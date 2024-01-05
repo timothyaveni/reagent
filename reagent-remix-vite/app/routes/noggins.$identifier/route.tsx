@@ -2,11 +2,8 @@ import { json, type MetaFunction } from '@remix-run/node';
 import { useEffect, useState } from 'react';
 import { loadNogginBySlug } from '~/models/noggin.server';
 
-import jwt from 'jsonwebtoken';
-
 import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
 import { LoaderFunctionArgs } from '@remix-run/server-runtime';
-import { JWT_PRIVATE_KEY } from 'jwt/y-websocket-es512-private.pem.json';
 import { WebsocketProvider } from 'y-websocket';
 import { notFound } from '~/route-utils/status-code';
 import {
@@ -16,6 +13,7 @@ import {
 import { useRootHasPopulatedStore } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import EditorHeader from './EditorHeader';
 import { StoreContext } from './StoreContext';
+import { genAuthTokenForNoggin } from './jwt.server';
 
 export const meta: MetaFunction = () => {
   return [
@@ -34,16 +32,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw notFound();
   }
 
-  const authToken = jwt.sign(
-    {
-      nogginId: noggin.id,
-    },
-    JWT_PRIVATE_KEY,
-    {
-      algorithm: 'ES512',
-      expiresIn: '30m',
-    },
-  );
+  const authToken = genAuthTokenForNoggin(noggin.id);
 
   console.log({ authToken });
 

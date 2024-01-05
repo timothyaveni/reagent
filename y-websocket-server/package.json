@@ -4,7 +4,8 @@
   "description": "This code is adapted (maybe. or maybe I didn't make any changes yet.) from the starter server code in [y-websocket](https://github.com/yjs/y-websocket), by Kevin Jahns.",
   "main": "server.ts",
   "scripts": {
-    "dev": "tsc-watch --preserveWatchOutput --onSuccess \"node dist/server.js\""
+    "dev": "tsc-watch --preserveWatchOutput --onSuccess \"node dist/server.js\"",
+    "build": "tsc"
   },
   "prisma": {
     "schema": "/app/prisma/schema.prisma"
