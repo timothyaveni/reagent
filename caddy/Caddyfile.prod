@@ -1,0 +1,11 @@
+rea.gent {
+  reverse_proxy http://remix:3000
+}
+
+noggin.rea.gent {
+  # reverse_proxy http://noggin-server:2358
+}
+
+ws.rea.gent {
+  reverse_proxy http://yjs-websocket:2347
+}

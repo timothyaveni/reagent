@@ -17,6 +17,7 @@ services:
       - OBJECT_STORAGE_ACCESS_KEY
       - OBJECT_STORAGE_SECRET_KEY
       - OBJECT_STORAGE_EXTERNAL_URL=https://objects.rea.gent
+      - GITHUB_REDIRECT_URL=https://rea.gent/auth/github/callback
       
       - GITHUB_CLIENT_ID
       - GITHUB_CLIENT_SECRET
@@ -37,4 +38,15 @@ services:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres?schema=public
       - SHARED_Y_WEBSOCKET_SERVER_SECRET
     restart: on-failure:5
-
+  caddy:
+    image: caddy:2.7.6-alpine
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy-data-prod:/data
+      - ./caddy-config-prod:/config
+      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile

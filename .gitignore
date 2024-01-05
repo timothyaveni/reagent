@@ -6,3 +6,5 @@ pg-data-prod/
 .env.production
 object-data/
 object-data-prod/
+caddy-data-prod/
+caddy-config-prod/

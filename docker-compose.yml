@@ -26,6 +26,7 @@ services:
       - OBJECT_STORAGE_ACCESS_KEY
       - OBJECT_STORAGE_SECRET_KEY
       - OBJECT_STORAGE_EXTERNAL_URL=http://objects.dev.rea.gent
+      - GITHUB_REDIRECT_URL=http://localhost:3000/auth/github/callback
 
       - GITHUB_CLIENT_ID
       - GITHUB_CLIENT_SECRET
