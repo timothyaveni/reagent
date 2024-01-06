@@ -46,20 +46,18 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     run.nogginRevision.nogginId,
   );
 
-  return json({ noggin, apiKey });
+  return json({ noggin, apiKey, NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL: process.env.NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL });
 };
 
 export default function NogginRun() {
-  const { noggin, apiKey } = useLoaderData<typeof loader>();
+  const { noggin, apiKey, NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL } = useLoaderData<typeof loader>();
   const params = useParams();
 
   const [outputText, setOutputText] = useState('');
   const [outputAssetURL, setOutputAssetURL] = useState('');
 
   useEffect(() => {
-    // ws url:
-    // TODO env
-    const wsUrl = `ws://localhost:2358/ws/${params.runId}?key=${apiKey}`;
+    const wsUrl = `${NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL}/ws/${params.runId}?key=${apiKey}`;
 
     const ws = new WebSocket(wsUrl);
 

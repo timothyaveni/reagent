@@ -1,0 +1,21 @@
+FROM node:21.4.0-bookworm
+
+WORKDIR /app
+
+COPY ./noggin-server/package.json /app
+COPY ./noggin-server/package-lock.json /app
+
+RUN npm ci --force
+
+COPY ./noggin-server /app
+
+COPY ./prisma /app/prisma
+
+ENV NODE_ENV=production
+
+ENV PRISMA_OUTPUT="/app/node_modules/.prisma/client"
+RUN npx prisma generate
+
+RUN npm run build
+
+ENTRYPOINT ["node", "dist/server.js"]

@@ -3,9 +3,17 @@ rea.gent {
 }
 
 noggin.rea.gent {
-  # reverse_proxy http://noggin-server:2358
+  reverse_proxy http://noggin-server:2358
 }
 
 ws.rea.gent {
   reverse_proxy http://yjs-websocket:2347
+}
+
+objects.rea.gent {
+  reverse_proxy http://minio:9000
+}
+
+console.objects.rea.gent {
+  reverse_proxy http://minio:9001
 }
