@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiKey.server';
 import { notFound } from '~/route-utils/status-code';
 
-import { Alert, Breadcrumbs, Typography } from '@mui/material';
+import { Alert, Box, Breadcrumbs, Paper, Typography } from '@mui/material';
 import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
 import MUILink from '~/components/MUILink';
 import './NogginRun.css';
@@ -139,9 +139,46 @@ function RenderOutput({ outputState }: { outputState: OutputState }) {
   if (outputState.outputType === 'unknown') {
     return <></>;
   } else if (outputState.outputType === 'text') {
-    return <>{outputState.outputText}</>;
+    return (
+      <Paper
+        elevation={3}
+        sx={{
+          padding: '1rem',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+          mt: 3,
+        }}
+      >
+        {outputState.outputText}
+      </Paper>
+    );
   } else if (outputState.outputType === 'asset') {
-    return <img src={outputState.outputAssetURL} alt="output asset" />;
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            padding: 1,
+            width: 'fit-content',
+            mt: 3,
+          }}
+        >
+          <img
+            src={outputState.outputAssetURL}
+            alt="output asset"
+            style={{
+              maxWidth: 800,
+              maxHeight: 800,
+            }}
+          />
+        </Paper>
+      </Box>
+    );
   } else if (outputState.outputType === 'error') {
     return <Alert severity="error">{outputState.outputError}</Alert>;
   } else {
