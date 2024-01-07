@@ -197,7 +197,6 @@ export default function NogginRun() {
           metadata: obj.metadata,
         });
       } else if (obj.type === 'final asset URL output') {
-        console.log({ obj });
         setCurrentOutputState({
           outputStage: 'final',
           outputType: 'asset',
