@@ -44,7 +44,7 @@ services:
       - OBJECT_STORAGE_INTERNAL_USE_SSL=false
       - OBJECT_STORAGE_ACCESS_KEY
       - OBJECT_STORAGE_SECRET_KEY
-      - OBJECT_STORAGE_EXTERNAL_URL=http://objects.rea.gent
+      - OBJECT_STORAGE_EXTERNAL_URL=https://objects.rea.gent
     restart: on-failure:5
   postgres:
     image: postgres:16.0
