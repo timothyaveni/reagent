@@ -200,7 +200,7 @@ export default function NogginRun() {
         setCurrentOutputState({
           outputStage: 'final',
           outputType: 'asset',
-          outputAssetURL: obj.url,
+          outputAssetURL: obj.assetUrl,
           metadata: obj.metadata,
         });
       }
