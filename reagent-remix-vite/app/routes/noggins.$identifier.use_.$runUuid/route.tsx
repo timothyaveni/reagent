@@ -189,14 +189,14 @@ export default function NogginRun() {
             return prev;
           }
         });
-      } else if (obj.type === 'final output text') {
+      } else if (obj.type === 'final text output') {
         setCurrentOutputState({
           outputStage: 'final',
           outputType: 'text',
           outputText: obj.text,
           metadata: obj.metadata,
         });
-      } else if (obj.type === 'final output asset URL') {
+      } else if (obj.type === 'final asset URL output') {
         setCurrentOutputState({
           outputStage: 'final',
           outputType: 'asset',
