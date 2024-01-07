@@ -47,8 +47,13 @@ export const action = async ({
 
   // TODO: toss this in prisma as well, linked to a noggin but not to a run yet
 
+  const objectStorageExternalUrlIsHttps =
+    !!process.env.OBJECT_STORAGE_EXTERNAL_URL?.startsWith('https');
+
   return json({
-    presignedUrl: url,
+    presignedUrl: objectStorageExternalUrlIsHttps
+      ? url.toString().replace('http', 'https') // don't ask about the toString
+      : url,
     uploadUrl: `${process.env.OBJECT_STORAGE_EXTERNAL_URL}/${ReagentBucket.NOGGIN_RUN_INPUTS}/${filename}`,
   });
 };
