@@ -86,6 +86,8 @@ services:
       - ./object-data:/data
       - ./minio:/minio-cfg
     environment:
-      MINIO_ROOT_USER: minio_dev_user
-      MINIO_ROOT_PASSWORD: minio_dev_password
+      - MINIO_ROOT_USER=minio_dev_user
+      - MINIO_ROOT_PASSWORD=minio_dev_password
+      - OBJECT_STORAGE_ACCESS_KEY
+      - OBJECT_STORAGE_SECRET_KEY
     restart: unless-stopped
