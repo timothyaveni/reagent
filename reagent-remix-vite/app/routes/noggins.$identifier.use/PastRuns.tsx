@@ -15,7 +15,7 @@ import { useNavigate, useParams } from '@remix-run/react';
 import { SerializeFrom } from '@remix-run/server-runtime';
 import { formatDistance } from 'date-fns';
 import T from '~/i18n/T';
-import { renderNogginRunStatus } from '../noggins.$identifier.use_.$runId/status';
+import { renderNogginRunStatus } from '../noggins.$identifier.use_.$runUuid/status';
 import { NogginUseLoader } from './route';
 
 type PastRunsProps = {
