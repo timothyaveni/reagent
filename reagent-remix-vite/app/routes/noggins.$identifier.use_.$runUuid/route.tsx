@@ -5,10 +5,18 @@ import { useEffect, useState } from 'react';
 import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiKey.server';
 import { notFound } from '~/route-utils/status-code';
 
-import { Alert, Box, Breadcrumbs, Paper, Typography } from '@mui/material';
+import {
+  Alert,
+  Box,
+  Breadcrumbs,
+  CircularProgress,
+  Typography,
+} from '@mui/material';
 import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
+import { IOVisualizationRender } from 'reagent-noggin-shared/io-visualization-types/IOVisualizationRender';
 import MUILink from '~/components/MUILink';
 import './NogginRun.css';
+import { IOVisualization } from './io-visualization/IOVisualization';
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const noggin = await prisma.noggin.findUnique({
@@ -35,6 +43,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
         },
       },
       id: true,
+      ioVisualizationRender: true,
     },
   });
 
@@ -62,6 +71,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   return json({
     noggin,
+    ioVisualizationRender: run.ioVisualizationRender as IOVisualizationRender,
     finalOutput,
     apiKey,
     NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL:
@@ -135,49 +145,35 @@ const getInitialOutputStateForOutput = (
   return _exhaustiveCheck; // dunno why i need this
 };
 
-function RenderOutput({ outputState }: { outputState: OutputState }) {
-  if (outputState.outputType === 'unknown') {
-    return <></>;
-  } else if (outputState.outputType === 'text') {
-    return (
-      <Paper
-        elevation={3}
-        sx={{
-          padding: '1rem',
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-          mt: 3,
-        }}
-      >
-        {outputState.outputText}
-      </Paper>
-    );
+function RenderOutput({
+  outputState,
+  hasIOVisualization,
+}: {
+  outputState: OutputState;
+  hasIOVisualization: boolean;
+}) {
+  if (outputState.outputStage === 'not started') {
+    if (hasIOVisualization) {
+      return <CircularProgress />;
+    } else {
+      return null;
+    }
+  }
+
+  // just render if we don't have an IO visualization ... but not the progress bar above
+
+  if (outputState.outputType === 'text') {
+    return outputState.outputText;
   } else if (outputState.outputType === 'asset') {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
+      <img
+        src={outputState.outputAssetURL}
+        alt="output asset"
+        style={{
+          maxWidth: 800,
+          maxHeight: 800,
         }}
-      >
-        <Paper
-          elevation={3}
-          sx={{
-            padding: 1,
-            width: 'fit-content',
-            mt: 3,
-          }}
-        >
-          <img
-            src={outputState.outputAssetURL}
-            alt="output asset"
-            style={{
-              maxWidth: 800,
-              maxHeight: 800,
-            }}
-          />
-        </Paper>
-      </Box>
+      />
     );
   } else if (outputState.outputType === 'error') {
     return <Alert severity="error">{outputState.outputError}</Alert>;
@@ -188,13 +184,20 @@ function RenderOutput({ outputState }: { outputState: OutputState }) {
 }
 
 export default function NogginRun() {
-  const { noggin, apiKey, finalOutput, NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL } =
-    useLoaderData<typeof loader>();
+  const {
+    noggin,
+    apiKey,
+    finalOutput,
+    ioVisualizationRender,
+    NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL,
+  } = useLoaderData<typeof loader>();
   const params = useParams();
 
   const [currentOutputState, setCurrentOutputState] = useState<OutputState>(
     getInitialOutputStateForOutput(finalOutput),
   );
+  const [currentIOVisualizationRender, setCurrentIOVisualizationRender] =
+    useState<IOVisualizationRender>(ioVisualizationRender);
 
   useEffect(() => {
     if (finalOutput) {
@@ -208,7 +211,9 @@ export default function NogginRun() {
     ws.onmessage = (event) => {
       const obj = JSON.parse(event.data);
       console.log({ obj });
-      if (obj.type === 'incremental text output') {
+      if (obj.type === 'set io visualization') {
+        setCurrentIOVisualizationRender(obj.ioVisualization);
+      } else if (obj.type === 'incremental text output') {
         setCurrentOutputState((prev) => {
           if (prev.outputStage === 'not started') {
             return {
@@ -257,7 +262,14 @@ export default function NogginRun() {
         <Typography color="text.primary">{params.runUuid}</Typography>
       </Breadcrumbs>
       <div className="noggin-run-text-output">
-        <RenderOutput outputState={currentOutputState} />
+        <Box sx={{ mt: 2 }}>
+          <IOVisualization ioVisualizationRender={currentIOVisualizationRender}>
+            <RenderOutput
+              outputState={currentOutputState}
+              hasIOVisualization={currentIOVisualizationRender !== null}
+            />
+          </IOVisualization>
+        </Box>
       </div>
     </>
   );

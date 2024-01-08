@@ -229,6 +229,13 @@ model NogginRun {
   evaluatedParameters Json?
   evaluatedOverrides  Json?
 
+  // after parameters have been evaluated and we know what the request to the model looks like,
+  // we'd like to show the user exactly what was requested (in the 'use' tab on reagent) -- but
+  // we'd like to make this pretty, so the noggin gets to decide how it gets rendered, corresponding
+  // roughly to a render tree on the client. this render leaves a 'void' where the model output
+  // should go.
+  ioVisualizationRender Json?
+
   computedCost            Float?
   nogginOutputAssetObject NogginOutputAssetObject[]
 }

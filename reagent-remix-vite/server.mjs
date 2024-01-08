@@ -4,10 +4,10 @@ import { installGlobals } from '@remix-run/node';
 import express from 'express';
 import session from 'express-session';
 
+import lti from 'ims-lti';
 import passport from 'passport';
 import GitHubStrategy from 'passport-github2';
 import LTIStrategy from 'passport-lti';
-import lti from 'ims-lti';
 
 import { resolveGitHubAuth } from './auth/github.js';
 import {
@@ -103,9 +103,9 @@ app.get(
   '/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/auth/login' }),
   function (req, res) {
-    console.log('req', req);
-    console.log('res', res);
-    console.log('req.user', req.user);
+    // console.log('req', req);
+    // console.log('res', res);
+    // console.log('req.user', req.user);
     res.redirect('/');
   },
 );
@@ -247,19 +247,21 @@ app.all(
         user: req.user,
         session: req.session,
         loginNewUser: async (user) => {
-          return await new Promise((resolve, reject) => req.login(
-            {
-              id: user.id,
-            },
-            (err) => {
-              if (err) {
-                // return next(err);
-                reject(err);
-              }
-              resolve();
-            },
-          ));
-        }
+          return await new Promise((resolve, reject) =>
+            req.login(
+              {
+                id: user.id,
+              },
+              (err) => {
+                if (err) {
+                  // return next(err);
+                  reject(err);
+                }
+                resolve();
+              },
+            ),
+          );
+        },
       };
     },
   }),
