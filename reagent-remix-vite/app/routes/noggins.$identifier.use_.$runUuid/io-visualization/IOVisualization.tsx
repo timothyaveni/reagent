@@ -190,7 +190,7 @@ function IOVisualizationRawElement({
         sx={{
           padding: 1,
           width: 'fit-content',
-          mt: 3,
+          mt: 1,
         }}
       >
         {content.map((element, index) => {
@@ -251,9 +251,13 @@ export function IOVisualizationColumn({
 }: {
   components: IOVisualizationTopLevelComponent[];
 }) {
-  return components.map((component, index) => {
-    return <IOVisualizationComponent key={index} component={component} />;
-  });
+  return (
+    <Stack spacing={2} sx={{ width: 800, margin: '0 auto' }}>
+      {components.map((component, index) => {
+        return <IOVisualizationComponent key={index} component={component} />;
+      })}
+    </Stack>
+  );
 }
 
 export function IOVisualization({
