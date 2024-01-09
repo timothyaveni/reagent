@@ -154,7 +154,7 @@ function RenderOutput({
 }) {
   if (outputState.outputStage === 'not started') {
     if (hasIOVisualization) {
-      return <CircularProgress />;
+      return <CircularProgress size={30} sx={{ p: 2 }} />;
     } else {
       return null;
     }

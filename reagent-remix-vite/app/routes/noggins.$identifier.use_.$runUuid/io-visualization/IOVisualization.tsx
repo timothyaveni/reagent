@@ -52,6 +52,7 @@ export function IOVisualizationHypertextVariable({
         src={variable.variableEvaluatedValue.url}
         style={{
           maxWidth: 300,
+          maxHeight: 300,
         }}
       />
     );
