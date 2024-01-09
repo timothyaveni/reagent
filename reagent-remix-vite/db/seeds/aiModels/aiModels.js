@@ -163,6 +163,31 @@ async function main() {
     },
   });
 
+  const { default: andreasjansson_llama213bChatJsonSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/andreasjansson_llama-2-13b-chat-json-schema.js'
+  );
+
+  const andreasjansson_llama213bChatJson = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'andreasjansson_llama-2-13b-chat-json-schema',
+        revision:
+          '60ec5dda9ff9ee0b6f786c9d1157842e6ab3cc931139ad98fe99e08a35c5d4d4_2024-01-08',
+      },
+    },
+    update: {
+      editorSchema: andreasjansson_llama213bChatJsonSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'andreasjansson_llama-2-13b-chat-json-schema',
+      revision:
+        '60ec5dda9ff9ee0b6f786c9d1157842e6ab3cc931139ad98fe99e08a35c5d4d4_2024-01-08',
+      editorSchema: andreasjansson_llama213bChatJsonSchema,
+    },
+  });
+
   const testProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'test',
