@@ -8,7 +8,15 @@ import { requireUser } from '~/auth/auth.server';
 import { createNoggin } from '~/models/noggin.server';
 import { indexOrganizations } from '~/models/organization.server';
 
-import { Autocomplete, Button, Switch, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
 import { useState } from 'react';
 import T, { t } from '~/i18n/T';
@@ -72,13 +80,13 @@ export default function NewNoggin() {
 
   return (
     <div className="new-noggin">
-      <h1>
+      <Typography variant="h1" mb={4}>
         <T>Create a noggin</T>
-      </h1>
+      </Typography>
 
       <Form method="post">
-        <label>
-          {/* todo we don't do anything with this */}
+        {/* todo we don't do anything with this */}
+        {/* <label>
           <T>org-owned</T>
           <Switch
             checked={nogginOwnershipType === 'org'}
@@ -86,25 +94,48 @@ export default function NewNoggin() {
               setNogginOwnershipType(e.target.checked ? 'org' : 'personal');
             }}
           />
-        </label>
-
-        <TextField name="name" label={t('Name')} />
-
-        <Autocomplete
-          options={aiModels}
-          getOptionLabel={(option) =>
-            `${option.modelProvider.name}/${option.name}`
-          }
-          renderInput={(params) => (
-            <TextField {...params} label={t('AI Model')} />
-          )}
-          onChange={(e, value) => {
-            setSelectedModelId(value?.id ?? null);
+        </label> */}
+        <Box
+          sx={{
+            maxWidth: 600,
+            mx: 'auto',
           }}
-        />
-        <input type="hidden" name="aiModelId" value={selectedModelId ?? ''} />
+        >
+          <Stack spacing={2}>
+            <Paper
+              sx={{
+                p: 4,
+              }}
+            >
+              <Stack spacing={2}>
+                <TextField name="name" label={t('Noggin name')} />
 
-        <Button type="submit">Create</Button>
+                <Autocomplete
+                  options={aiModels}
+                  getOptionLabel={(option) =>
+                    `${option.modelProvider.name}/${option.name}`
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label={t('AI Model')} />
+                  )}
+                  onChange={(e, value) => {
+                    setSelectedModelId(value?.id ?? null);
+                  }}
+                />
+                <input
+                  type="hidden"
+                  name="aiModelId"
+                  value={selectedModelId ?? ''}
+                />
+              </Stack>
+            </Paper>
+            <Box alignSelf="flex-end">
+              <Button type="submit" variant="contained">
+                Create
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
       </Form>
     </div>
   );
