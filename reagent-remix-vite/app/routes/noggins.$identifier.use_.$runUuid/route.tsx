@@ -15,6 +15,7 @@ import {
 import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
 import { IOVisualizationRender } from 'reagent-noggin-shared/io-visualization-types/IOVisualizationRender';
 import MUILink from '~/components/MUILink';
+import PreformattedText from '~/components/PreformattedText';
 import './NogginRun.css';
 import { IOVisualization } from './io-visualization/IOVisualization';
 
@@ -176,7 +177,16 @@ function RenderOutput({
       />
     );
   } else if (outputState.outputType === 'error') {
-    return <Alert severity="error">{outputState.outputError}</Alert>;
+    return (
+      <>
+        <Alert severity="error">{outputState.outputError}</Alert>
+        {outputState.metadata ? (
+          <PreformattedText>
+            {JSON.stringify(outputState.metadata, null, 2)}
+          </PreformattedText>
+        ) : null}
+      </>
+    );
   } else {
     const _exhaustiveCheck: never = outputState;
     return <>Unknown error</>;
@@ -243,6 +253,13 @@ export default function NogginRun() {
           outputStage: 'final',
           outputType: 'asset',
           outputAssetURL: obj.assetUrl,
+          metadata: obj.metadata,
+        });
+      } else if (obj.type === 'error') {
+        setCurrentOutputState({
+          outputStage: 'final',
+          outputType: 'error',
+          outputError: obj.error,
           metadata: obj.metadata,
         });
       }

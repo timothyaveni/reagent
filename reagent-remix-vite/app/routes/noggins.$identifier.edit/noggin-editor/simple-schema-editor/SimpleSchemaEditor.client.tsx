@@ -26,6 +26,7 @@ import { ModelInput_SimpleSchema } from 'reagent-noggin-shared/types/editorSchem
 import T, { t } from '~/i18n/T';
 import { useInputValueState } from '../editor-utils';
 
+import PreformattedText from '~/components/PreformattedText';
 import './SimpleSchemaEditor.css';
 
 type SimpleSchemaEditorProps = {
@@ -110,7 +111,7 @@ export function SimpleSchemaEditor({
           });
         }}
       />
-      <div className="schema-preview">{JSON.stringify(value)}</div>
+      <PreformattedText>{JSON.stringify(value)}</PreformattedText>
     </Box>
   );
 }
