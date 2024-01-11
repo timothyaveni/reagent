@@ -77,7 +77,7 @@ function OrganizationsListBody({
       <Stack spacing={2}>
         {organizations.map((organization) => {
           return (
-            <Card variant="outlined">
+            <Card variant="outlined" key={organization.id}>
               <CardActionArea
                 onClick={() => navigate(`/organizations/${organization.id}`)}
               >
