@@ -1,15 +1,17 @@
+import { BlurOn } from '@mui/icons-material';
 import {
   Box,
   Button,
   Card,
   CardActionArea,
   CardContent,
+  Paper,
   Stack,
   Typography,
 } from '@mui/material';
 import { json } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
-import { LoaderFunctionArgs } from '@remix-run/server-runtime';
+import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
 import T, { pluralize } from '~/i18n/T';
 import { indexOrganizations } from '~/models/organization.server';
 
@@ -18,6 +20,80 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 
   return json({ organizations });
 };
+
+type OrganizationsListLoader = typeof loader;
+type OrganizationsListLoaderData = SerializeFrom<OrganizationsListLoader>;
+
+function OrganizationsListBody({
+  organizations,
+}: {
+  organizations: OrganizationsListLoaderData['organizations'];
+}) {
+  const navigate = useNavigate();
+
+  if (organizations.length === 0) {
+    return (
+      <Box>
+        <Paper
+          elevation={2}
+          // don't take up the full width:
+          sx={{
+            width: 'fit-content',
+            mx: 'auto',
+            p: 3,
+          }}
+        >
+          <Stack spacing={2} alignItems={'center'}>
+            <BlurOn htmlColor="#666" fontSize="large" />
+            <Typography variant="body1" color="textSecondary">
+              <T>
+                Looks like you're not a member of any organizations right now.
+              </T>
+            </Typography>
+          </Stack>
+        </Paper>
+      </Box>
+    );
+  }
+
+  return (
+    <>
+      <Box mb={6}>
+        <Typography variant="body1">
+          <T>These are the organizations you're a member of.</T>
+        </Typography>
+      </Box>
+      <Stack spacing={2}>
+        {organizations.map((organization) => {
+          return (
+            <Card variant="outlined">
+              <CardActionArea
+                onClick={() => navigate(`/organizations/${organization.id}`)}
+              >
+                <CardContent>
+                  <Typography variant="h2">{organization.name}</Typography>
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    component="p"
+                    className="noggin-description"
+                  >
+                    {pluralize(
+                      organization._count.members,
+                      'member',
+                      'members',
+                      true,
+                    )}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          );
+        })}
+      </Stack>
+    </>
+  );
+}
 
 export default function OrganizationsList() {
   const { organizations } = useLoaderData<typeof loader>();
@@ -49,44 +125,7 @@ export default function OrganizationsList() {
         </Button>
       </Stack>
 
-      <Box mb={6}>
-        <Typography variant="body1">
-          {organizations.length > 0 ? (
-            <T>These are the organizations you're a member of.</T>
-          ) : (
-            <T>You're not a member of any organizations.</T>
-          )}
-        </Typography>
-      </Box>
-
-      <Stack spacing={2}>
-        {organizations.map((organization) => {
-          return (
-            <Card variant="outlined">
-              <CardActionArea
-                onClick={() => navigate(`/organizations/${organization.id}`)}
-              >
-                <CardContent>
-                  <Typography variant="h2">{organization.name}</Typography>
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    component="p"
-                    className="noggin-description"
-                  >
-                    {pluralize(
-                      organization._count.members,
-                      'member',
-                      'members',
-                      true,
-                    )}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          );
-        })}
-      </Stack>
+      <OrganizationsListBody organizations={organizations} />
     </div>
   );
 }
