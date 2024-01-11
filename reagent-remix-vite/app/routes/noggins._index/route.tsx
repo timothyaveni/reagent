@@ -11,8 +11,13 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { LoaderFunctionArgs } from '@remix-run/server-runtime';
+import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
+import {
+  NogginRevisionOutputSchema,
+  NogginRevisionVariables,
+} from 'reagent-noggin-shared/types/NogginRevision';
 import T from '~/i18n/T';
+import NogginCardIOSchema from './NogginCardIOSchema';
 import './NogginList.css';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
@@ -24,7 +29,11 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 };
 
 // TODO type
-function NogginCard({ noggin }: { noggin: any }) {
+function NogginCard({
+  noggin,
+}: {
+  noggin: SerializeFrom<typeof loader>['noggins'][0];
+}) {
   const navigate = useNavigate();
 
   return (
@@ -34,18 +43,37 @@ function NogginCard({ noggin }: { noggin: any }) {
           onClick={() => navigate(`/noggins/${noggin.slug}/edit`)}
         >
           <CardContent>
-            <Typography variant="h2">{noggin.title}</Typography>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              component="p"
-              className="noggin-description"
+            <Stack
+              direction={'row'}
+              spacing={2}
+              alignItems={'center'}
+              justifyContent={'space-between'}
             >
-              <T flagged>
-                {noggin.aiModel.modelProvider.name}/
-                <strong>{noggin.aiModel.name}</strong>
-              </T>
-            </Typography>
+              <Stack>
+                <Typography variant="h2">{noggin.title}</Typography>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  component="p"
+                  className="noggin-description"
+                >
+                  <T flagged>
+                    {noggin.aiModel.modelProvider.name}/
+                    <strong>{noggin.aiModel.name}</strong>
+                  </T>
+                </Typography>
+              </Stack>
+              <NogginCardIOSchema
+                variables={
+                  noggin.nogginRevisions[0]
+                    .nogginVariables as NogginRevisionVariables
+                }
+                outputSchema={
+                  noggin.nogginRevisions[0]
+                    .outputSchema as NogginRevisionOutputSchema
+                }
+              />
+            </Stack>
           </CardContent>
         </CardActionArea>
       </Card>

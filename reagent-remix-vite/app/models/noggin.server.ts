@@ -157,7 +157,7 @@ export const loadNogginBySlug = async (
 };
 
 export const loadNogginsIndex = async (context: AppLoadContext) => {
-  const user = await requireUser(context);
+  const user = requireUser(context);
 
   // TODO: load for teams as well
   // TODO: limit
@@ -177,6 +177,8 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
         select: {
           id: true,
           updatedAt: true,
+          nogginVariables: true,
+          outputSchema: true,
         },
       },
       aiModel: {
@@ -193,6 +195,7 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
   });
 
   // todo do this with sql (don't think prisma supports bleh)
+  // todo while we're refactoring that, let's also include a noggin run count through nogginrevisions
   noggins.sort((a, b) => {
     if (!a.nogginRevisions[0]) {
       return 1;

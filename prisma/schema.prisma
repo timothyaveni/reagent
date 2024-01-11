@@ -183,8 +183,12 @@ model NogginRevision {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  content   Bytes
-  editors   User[]
+
+  content         Bytes
+  nogginVariables Json? // this is redundant with the content, but we want to be able to grab it from the db for a few pages
+  outputSchema    Json? // also redundant
+
+  editors User[] // todo
 
   runs NogginRun[]
 }

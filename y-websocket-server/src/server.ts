@@ -132,6 +132,66 @@ const deserializeYDoc = (serialized: Buffer, ydoc: Y.Doc) => {
   return ydoc;
 };
 
+const getNogginVariablesFromYdoc = (ydoc: Y.Doc): /*NogginVariables*/ any => {
+  const variableNamesByDocument = ydoc
+    .get('documentParameterIdsByDocument', Y.Map)
+    .toJSON();
+
+  const allVariables = ydoc.get('documentParameters', Y.Map).toJSON();
+
+  const usedVariables = {};
+
+  for (const documentId of Object.keys(variableNamesByDocument)) {
+    const variableIds = variableNamesByDocument[documentId];
+    for (const variableId of variableIds) {
+      usedVariables[variableId] = allVariables[variableId];
+    }
+  }
+
+  console.log('getNogginVariablesFromYdoc', usedVariables);
+
+  return usedVariables;
+};
+
+// TODO: need to use the shared types here
+const getOutputFormatFromYdoc = async (
+  nogginId: number,
+  ydoc: Y.Doc,
+): /*NogginRevisionOutputSchema*/ Promise<any> => {
+  const { chosenOutputFormatKey } = ydoc.get('nogginOptions', Y.Map).toJSON();
+  const editorSchema: /*EditorSchema*/ any = (
+    await prisma.noggin.findUnique({
+      where: {
+        id: nogginId,
+      },
+      select: {
+        aiModel: {
+          select: {
+            editorSchema: true,
+          },
+        },
+      },
+    })
+  ).aiModel.editorSchema;
+
+  // TODO make sure this doesn't throw lol
+  const outputFormat = editorSchema.outputFormats.find(
+    (o) => o.key === chosenOutputFormatKey,
+  );
+  const outputFormatType = outputFormat.type;
+
+  return {
+    outputFormatType,
+    components: Object.fromEntries(
+      outputFormat.editorComponents.map((componentKey: string) => {
+        // hm it feels like i shouldn't have to jsonify this entire object... i thought the sub-objects were maps? ig not...
+        const component = ydoc.get('modelInputs', Y.Map).toJSON()[componentKey];
+        return [componentKey, component];
+      }),
+    ),
+  };
+};
+
 // todo memory leaks...
 const docLoaded = {};
 const updateDocFunction = {};
@@ -142,20 +202,6 @@ setPersistence({
     try {
       docLoaded[docName] = false;
       console.log('bindState', docName);
-      console.log(
-        'blargh',
-        await prisma.nogginRevision.findFirst({
-          where: {
-            nogginId: parseInt(docName, 10),
-          },
-          orderBy: {
-            id: 'desc', // this feels a little risky relative to doing it by updatedAt but we're only supposed to update the most recent one
-          },
-          select: {
-            content: true,
-          },
-        }),
-      );
       const { content } = await prisma.nogginRevision.findFirst({
         where: {
           nogginId: parseInt(docName, 10),
@@ -178,11 +224,20 @@ setPersistence({
         console.log('update');
         const serialized = serializeYDoc(ydoc);
         console.log({ serialized });
+        const vars = getNogginVariablesFromYdoc(ydoc);
+        const nogginId = parseInt(docName, 10);
+        const outputSchema = await getOutputFormatFromYdoc(nogginId, ydoc);
         // todo: create new revision only conditionally -- >5minutes or lots of change or if the row has been used by a noggin run -- otherwise just update the highest-ID row (this will require db txns...)
         await prisma.nogginRevision.create({
           data: {
-            nogginId: parseInt(docName, 10),
+            noggin: {
+              connect: {
+                id: nogginId,
+              },
+            },
             content: serialized,
+            nogginVariables: vars,
+            outputSchema: outputSchema,
           },
         });
       };
@@ -203,11 +258,21 @@ setPersistence({
       console.log('writeState', docName);
 
       // here we probably always want to make a new revision, but idk, maybe not
+      // TODO: dry it out
       const serialized = serializeYDoc(ydoc);
+      const vars = getNogginVariablesFromYdoc(ydoc);
+      const nogginId = parseInt(docName, 10);
+      const outputSchema = await getOutputFormatFromYdoc(nogginId, ydoc);
       await prisma.nogginRevision.create({
         data: {
-          nogginId: parseInt(docName, 10),
+          noggin: {
+            connect: {
+              id: nogginId,
+            },
+          },
           content: serialized,
+          nogginVariables: vars,
+          outputSchema: outputSchema,
         },
       });
     } catch (e) {
