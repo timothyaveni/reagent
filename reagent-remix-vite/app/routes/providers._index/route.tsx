@@ -14,6 +14,17 @@ import T from '~/i18n/T';
 import OpenAISVG from './provider-logos/openai-white-lockup.svg';
 import ReplicateSVG from './provider-logos/replicate.svg';
 
+import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+export const meta: MetaFunction = () => {
+  return [
+    { title: `Providers :: reagent` },
+    {
+      name: 'description',
+      content: `All providers on reagent`,
+    },
+  ];
+};
+
 export default function Providers() {
   const navigate = useNavigate();
 

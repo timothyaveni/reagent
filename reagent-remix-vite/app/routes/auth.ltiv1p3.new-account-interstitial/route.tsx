@@ -11,6 +11,17 @@ import { getLTIConnectionNameWithOrgNameAndId_OMNISCIENT } from '~/models/ltiCon
 import { addUserToOrganization_OMNIPOTENT } from '~/models/organization.server';
 import { OrganizationRole } from '~/shared/organization';
 
+import { MetaFunction } from '@remix-run/react';
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Create account :: reagent' },
+    {
+      name: 'description',
+      content: 'Create an account from your course website',
+    },
+  ];
+};
+
 export async function loader({ context }: LoaderFunctionArgs) {
   const user = null; // todo
   const { lastLTILaunch } = context.session;

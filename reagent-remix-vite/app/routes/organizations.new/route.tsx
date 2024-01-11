@@ -1,4 +1,4 @@
-import { Button, Input, TextField } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -10,6 +10,17 @@ import { requireUser } from '~/auth/auth.server';
 import { t } from '~/i18n/T';
 import { createOrganization } from '~/models/organization.server';
 import { MAX_NAME_LENGTH } from '~/shared/organization';
+
+import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: `Create a new organization :: reagent` },
+    {
+      name: 'description',
+      content: 'Create a new organization',
+    },
+  ];
+};
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const user = requireUser(context);

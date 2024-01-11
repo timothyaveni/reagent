@@ -10,8 +10,12 @@ import './Index.css';
 
 export const meta: MetaFunction = () => {
   return [
-    { title: 'New Remix App' },
-    { name: 'description', content: 'Welcome to Remix!' },
+    { title: 'reagent' },
+    {
+      name: 'description',
+      content:
+        'reagent is designed to get you quickly up to speed making prototypes with AI.',
+    },
   ];
 };
 

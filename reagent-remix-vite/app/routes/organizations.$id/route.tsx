@@ -16,6 +16,17 @@ import {
 import MUILink from '~/components/MUILink';
 import { createNewLTIConnection } from '~/models/ltiConnection.server';
 
+import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: `${data?.name} :: Organizations :: reagent` },
+    {
+      name: 'description',
+      content: `Overfor of the ${data?.name} organization on reagent`,
+    },
+  ];
+};
+
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const { id } = params;
 

@@ -1,6 +1,17 @@
 import { Box, Button, Typography } from '@mui/material';
+import { MetaFunction } from '@remix-run/react';
 import T from '~/i18n/T';
 import DevLogin from './DevLogin';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Log in :: reagent' },
+    {
+      name: 'description',
+      content: 'Log into reagent',
+    },
+  ];
+};
 
 export default function Login() {
   return (

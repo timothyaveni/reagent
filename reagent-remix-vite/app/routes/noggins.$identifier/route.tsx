@@ -1,25 +1,30 @@
-import { json, type MetaFunction } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { useEffect, useState } from 'react';
 import { loadNogginBySlug } from '~/models/noggin.server';
 
 import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
-import { LoaderFunctionArgs } from '@remix-run/server-runtime';
+import {
+  LoaderFunctionArgs,
+  ServerRuntimeMetaFunction as MetaFunction,
+} from '@remix-run/server-runtime';
 import { WebsocketProvider } from 'y-websocket';
 import { notFound } from '~/route-utils/status-code';
 import {
-  initializeStoreForNoggin,
   NogginEditorStore,
+  initializeStoreForNoggin,
 } from '~/routes/noggins.$identifier.edit/noggin-editor/store.client';
 import { useRootHasPopulatedStore } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import EditorHeader from './EditorHeader';
 import { StoreContext } from './StoreContext';
 import { genAuthTokenForNoggin } from './jwt.server';
 
-export const meta: MetaFunction = () => {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    // TODO prob just remove this block
-    { title: 'New Remix App' },
-    { name: 'description', content: 'Welcome to Remix!' },
+    { title: `${data?.noggin.title} :: reagent` },
+    {
+      name: 'description',
+      content: `${data?.noggin.title} on reagent`,
+    },
   ];
 };
 

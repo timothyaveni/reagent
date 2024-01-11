@@ -14,6 +14,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { MetaFunction } from '@remix-run/react';
 import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
 import {
   NogginRevisionOutputSchema,
@@ -21,6 +22,16 @@ import {
 } from 'reagent-noggin-shared/types/NogginRevision';
 import T from '~/i18n/T';
 import NogginCardIOSchema from './NogginCardIOSchema';
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: 'Noggins :: reagent' },
+    {
+      name: 'description',
+      content: 'All your noggins on reagent',
+    },
+  ];
+};
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const user = requireUser(context);

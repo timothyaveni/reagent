@@ -18,6 +18,17 @@ import { json } from '@remix-run/node';
 import MUILink from '~/components/MUILink';
 import './Provider.css';
 
+import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: `${data?.provider.friendlyName} :: Providers :: reagent` },
+    {
+      name: 'description',
+      content: `Overview of provider ${data?.provider.friendlyName} on reagent`,
+    },
+  ];
+};
+
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   requireUser(context);
 

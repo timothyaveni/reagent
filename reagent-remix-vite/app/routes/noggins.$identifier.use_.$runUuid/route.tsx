@@ -12,12 +12,26 @@ import {
   CircularProgress,
   Typography,
 } from '@mui/material';
-import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
+import {
+  LoaderFunctionArgs,
+  ServerRuntimeMetaFunction as MetaFunction,
+  SerializeFrom,
+} from '@remix-run/server-runtime';
 import { IOVisualizationRender } from 'reagent-noggin-shared/io-visualization-types/IOVisualizationRender';
 import MUILink from '~/components/MUILink';
 import PreformattedText from '~/components/PreformattedText';
 import './NogginRun.css';
 import { IOVisualization } from './io-visualization/IOVisualization';
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: `Run of ${data?.noggin.title} :: reagent` },
+    {
+      name: 'description',
+      content: `Run of ${data?.noggin.title}`,
+    },
+  ];
+};
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const noggin = await prisma.noggin.findUnique({

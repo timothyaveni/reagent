@@ -9,10 +9,21 @@ import { createNoggin } from '~/models/noggin.server';
 import { indexOrganizations } from '~/models/organization.server';
 
 import { Autocomplete, Button, Switch, TextField } from '@mui/material';
+import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
 import { useState } from 'react';
 import T, { t } from '~/i18n/T';
 import { indexAIModels } from '~/models/aiModel.server';
 import './NewNoggin.css';
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: `New noggin :: reagent` },
+    {
+      name: 'description',
+      content: `Create a new noggin`,
+    },
+  ];
+};
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
