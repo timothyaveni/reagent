@@ -25,7 +25,7 @@ import './NewNoggin.css';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: `New noggin :: reagent` },
+    { title: `Create a noggin :: reagent` },
     {
       name: 'description',
       content: `Create a new noggin`,
