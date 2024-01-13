@@ -47,7 +47,8 @@ export function IntegerEditor({
         value={value}
         onChange={(event) => {
           const newValue = parseInt(event.target.value, 10);
-          const capped = Math.min(max, Math.max(min, newValue));
+          const notNaN = isNaN(newValue) ? min : newValue;
+          const capped = Math.min(max, Math.max(min, notNaN));
           setValue(capped);
         }}
       />

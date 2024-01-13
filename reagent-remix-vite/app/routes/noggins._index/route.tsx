@@ -109,7 +109,7 @@ function NogginIndexDescription() {
       <Typography component="p" variant="body1" mb={2}>
         <T>
           You can think of a noggin as being a single-purpose
-          &ldquo;brain&rdquo; or function, configured to handle one task
+          &ldquo;brain&rdquo; or function that you design to handle one task
           particularly well. For example, you might use a noggin to
           pre-configure instructions to a language model or to get a
           text-to-image model to create drawings in a particular style.
