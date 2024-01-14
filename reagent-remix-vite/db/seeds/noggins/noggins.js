@@ -62,15 +62,7 @@ async function createNogginWithRevision({
 }
 
 async function main() {
-  await createNogginWithRevision({
-    yDocObject: (await import('./icon-generator.ydoc.js')).default,
-    title: 'Icon Generator',
-    slug: 'icy-gorilla-0123',
-    modelProviderName: 'replicate',
-    modelName: 'sdxl',
-    modelRevision:
-      '39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b_2023-12-23',
-  });
+  // https://github.com/andreasonny83/unique-names-generator/tree/main/src/dictionaries
 
   await createNogginWithRevision({
     yDocObject: (await import('./hex-color-converter.ydoc.js')).default,
@@ -124,6 +116,27 @@ async function main() {
     modelProviderName: 'openai',
     modelName: 'gpt-4-vision-preview',
     modelRevision: '2023-12-23',
+  });
+
+  await createNogginWithRevision({
+    yDocObject: (await import('./nutrition-label-reader.ydoc.js')).default,
+    title: 'Nutrition fact label reader',
+    slug: 'narrow-fox-0123',
+    modelProviderName: 'openai',
+    modelName: 'gpt-4-vision-preview',
+    modelRevision: '2023-12-23',
+  });
+
+  await createNogginWithRevision({
+    yDocObject: (
+      await import('./attractive-man-drawing-generator.ydoc.js')
+    ).default,
+    title: 'Attractive man drawing generator',
+    slug: 'adorable-mammal-0123',
+    modelProviderName: 'replicate',
+    modelName: 'sdxl',
+    modelRevision:
+      '39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b_2023-12-23',
   });
 }
 
