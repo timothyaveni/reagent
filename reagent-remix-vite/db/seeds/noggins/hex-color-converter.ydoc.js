@@ -38,7 +38,7 @@ const doc = {
       type: 'string',
     },
     temperature: 0,
-    'maximum-completion-length': 0,
+    'maximum-completion-length': 20,
   },
   documentParameters: {
     'edd495f3-506d-4f28-bc31-0bb10fc7960d': {
