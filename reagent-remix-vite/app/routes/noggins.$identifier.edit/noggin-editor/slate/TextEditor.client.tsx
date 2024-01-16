@@ -514,7 +514,7 @@ const TextEditor = ({
                       open: true,
                       position: {
                         x: selectionPoint.left,
-                        y: selectionPoint.top + PADDING,
+                        y: selectionPoint.top + window.scrollY + PADDING,
                       },
                       // variableSoFar: '',
                       selectedExistingVariableId: null,
