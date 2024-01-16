@@ -400,7 +400,7 @@ const TextEditor = ({
                 } else if (
                   event.key === 'Enter' ||
                   event.key === 'Tab' ||
-                  event.key === 'Space'
+                  event.key === ' '
                 ) {
                   event.preventDefault();
                   const variableSoFar = lastTypedVariableName;
