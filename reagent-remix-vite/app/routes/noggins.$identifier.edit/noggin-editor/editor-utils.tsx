@@ -109,27 +109,41 @@ export const getVariableElements = (editor: ReactEditor) => {
 
 export const addNewVariable = (
   store: NogginEditorStore,
-  editor: ReactEditor,
-) => {
+  // editor: ReactEditor,
+  variableName: string,
+): string => {
   // todo: do this with the store's parameters, not the editor's
   const existingVariableIds = uniq(
     Object.values(store.documentParameterIdsByDocument).flat(),
   );
-  let newIndex = existingVariableIds.length + 1;
-  // so, this is a little awkward, because it's using the map to check for collisions, but probably that's a good thing so we don't get collisions with hidden un-GC'd params -- even though that's probably not a big deal -- anyway, we'll fix this with TODO(param-sync)
-  while (
+  if (
     Object.values(store.documentParameters).some(
-      // @ts-ignore
-      (p) => p?.name === `var${newIndex}`,
+      // @ts-expect-error
+      (c) => c?.name === variableName,
     )
   ) {
-    newIndex++;
+    // shouldn't really happen, but can for now especially because of un-GC'd vars.
+    return Object.entries(store.documentParameters).find(
+      // @ts-expect-error
+      ([id, variable]) => variable?.name === variableName,
+    )![0];
   }
+
+  // let newIndex = existingVariableIds.length + 1;
+  // // so, this is a little awkward, because it's using the map to check for collisions, but probably that's a good thing so we don't get collisions with hidden un-GC'd params -- even though that's probably not a big deal -- anyway, we'll fix this with TODO(param-sync)
+  // while (
+  //   Object.values(store.documentParameters).some(
+  //     // @ts-ignore
+  //     (p) => p?.name === `var${newIndex}`,
+  //   )
+  // ) {
+  //   newIndex++;
+  // }
 
   const id = uuid();
 
   store.documentParameters[id] = new Y.Map([
-    ['name', `var${newIndex}`],
+    ['name', variableName],
     ['type', 'text'],
     ['maxLength', 500],
     ['defaultValue', ''],
@@ -138,7 +152,10 @@ export const addNewVariable = (
   // name: `param${newIndex}`,
   // maxLength: 500,
   // };
+  return id;
+};
 
+export const insertVariableAtCursor = (editor: ReactEditor, id: string) => {
   Transforms.insertNodes(editor, {
     type: 'parameter',
     parameterId: id,

@@ -33,6 +33,7 @@ export const Variable = ({
       {/* {element.parameterOptions.name} */}
       {/* todo workshop this a bit lol */}
       {variable.type === 'image' ? <ImageIcon fontSize="small" /> : null}
+      <span style={{ opacity: 0.6, paddingRight: 2 }}>$</span>
       {variable.name}
       {children}
     </span>

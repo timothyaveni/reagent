@@ -46,7 +46,7 @@ export function VariableControlsInner({
         >
           <T>
             Your prompts don't contain any variables! You can add one by typing
-            "@" into the pane to the left.
+            &ldquo;$&rdquo; into the pane to the left.
           </T>
         </Typography>
       </Card>
