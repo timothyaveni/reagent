@@ -1,5 +1,5 @@
-/* todo hm, maybe we cycle through colors per parameter. same list every time though? */
-.parameter {
+/* todo hm, maybe we cycle through colors per variable. same list every time though? */
+.variable {
   background-color: var(--reagent-purple);
   border: 1px solid white;
   color: white;
@@ -87,6 +87,3 @@
   }
 }
 
-.parameter-control {
-
-}

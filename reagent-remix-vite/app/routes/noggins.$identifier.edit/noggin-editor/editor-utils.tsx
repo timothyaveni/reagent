@@ -1,12 +1,12 @@
 import { Node, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { uniq } from 'underscore';
-import { ParameterNode } from './editor-types';
+import { VariableNode } from './editor-types';
 
 import { Y, getYjsValue, observeDeep } from '@syncedstore/core';
 import { useSyncedStore } from '@syncedstore/react';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { DocumentParameter } from 'reagent-noggin-shared/types/DocType';
+import { DocumentVariable } from 'reagent-noggin-shared/types/DocType';
 import { v4 as uuid } from 'uuid';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 import { NogginEditorStore } from './store.client';
@@ -67,55 +67,55 @@ export const useHasPopulatedStore = () => {
   return hasPopulatedStore;
 };
 
-export type EditorParametersList = {
+export type EditorVariablesList = {
   id: string;
-  parameter: DocumentParameter;
+  variable: DocumentVariable;
 }[];
-export const useEditorParameters = (): EditorParametersList => {
-  // for parameters synced to documentParameters in the store
+export const useEditorVariables = (): EditorVariablesList => {
+  // for variables synced to documentParameters in the store
   const store = useEditorStore();
-  const parameterMap = useSyncedStore(store.documentParameters); // this includes orphaned parameters
-  const parameterIdsByDocument = useSyncedStore(
+  const variableMap = useSyncedStore(store.documentParameters); // this includes orphaned variables
+  const variableIdsByDocument = useSyncedStore(
     store.documentParameterIdsByDocument, // actually i think we have to use this so it invalidates, like we saw before
   );
 
   const seenIds = new Set<string>();
-  const parameters: EditorParametersList = [];
-  for (const documentId of Object.keys(parameterIdsByDocument)) {
-    const parameterIds = parameterIdsByDocument[documentId] || [];
-    for (const parameterId of parameterIds) {
-      if (!seenIds.has(parameterId)) {
-        parameters.push({
-          id: parameterId,
-          parameter: parameterMap[parameterId] as unknown as DocumentParameter,
+  const variables: EditorVariablesList = [];
+  for (const documentId of Object.keys(variableIdsByDocument)) {
+    const variableIds = variableIdsByDocument[documentId] || [];
+    for (const variableId of variableIds) {
+      if (!seenIds.has(variableId)) {
+        variables.push({
+          id: variableId,
+          variable: variableMap[variableId] as unknown as DocumentVariable,
         });
-        seenIds.add(parameterId);
+        seenIds.add(variableId);
       }
     }
   }
 
-  return parameters;
+  return variables;
 };
 
-export const getParameterElements = (editor: ReactEditor) => {
+export const getVariableElements = (editor: ReactEditor) => {
   return [...Node.nodes(editor)]
     .filter(([node, path]: [any, number[]]) => {
       return node.type === 'parameter';
     })
     .map(([node, path]: [any, number[]]) => {
-      return node as ParameterNode;
+      return node as VariableNode;
     });
 };
 
-export const addNewParameter = (
+export const addNewVariable = (
   store: NogginEditorStore,
   editor: ReactEditor,
 ) => {
   // todo: do this with the store's parameters, not the editor's
-  const existingParameterIds = uniq(
+  const existingVariableIds = uniq(
     Object.values(store.documentParameterIdsByDocument).flat(),
   );
-  let newIndex = existingParameterIds.length + 1;
+  let newIndex = existingVariableIds.length + 1;
   // so, this is a little awkward, because it's using the map to check for collisions, but probably that's a good thing so we don't get collisions with hidden un-GC'd params -- even though that's probably not a big deal -- anyway, we'll fix this with TODO(param-sync)
   while (
     Object.values(store.documentParameters).some(
@@ -148,7 +148,7 @@ export const addNewParameter = (
     //   name: `param${newIndex}`,
     //   maxLength: 500,
     // },
-  } as ParameterNode);
+  } as VariableNode);
 
   Transforms.move(editor);
 };

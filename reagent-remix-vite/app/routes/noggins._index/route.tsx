@@ -44,7 +44,6 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 type NogginIndexLoader = typeof loader;
 type NogginIndexLoaderData = SerializeFrom<NogginIndexLoader>;
 
-// TODO type
 function NogginCard({
   noggin,
 }: {

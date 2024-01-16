@@ -1,8 +1,8 @@
 import { Node, Transforms } from 'slate';
-import { ChatTurnNode } from './editor-types';
 import { ReactEditor } from 'slate-react';
+import { ChatTurnNode } from './editor-types';
 
-const withParameterElements = (editor: ReactEditor): ReactEditor => {
+const withVariableElements = (editor: ReactEditor): ReactEditor => {
   const { isInline, isVoid, normalizeNode } = editor;
 
   editor.isInline = (element: any) => {
@@ -245,7 +245,7 @@ const withSharedBehavior = (editor: ReactEditor): ReactEditor => {
   let e = editor;
 
   e = withSharedNormalization(e);
-  e = withParameterElements(e);
+  e = withVariableElements(e);
 
   return e;
 };

@@ -20,7 +20,7 @@ import { useState } from 'react';
 import MUILink from '~/components/MUILink';
 import T from '~/i18n/T';
 import {
-  EditorParametersList,
+  EditorVariablesList,
   useHasPopulatedStore,
 } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 
@@ -30,26 +30,24 @@ type CodeSamplesProps = {
   noggin: any; // TODO
   apiKey: string;
   nogginServerUrl: string;
-  parameters: EditorParametersList;
-  parameterValues: Record<string, any>; // todo ig this is string or image
+  variables: EditorVariablesList;
+  variableValues: Record<string, any>; // todo ig this is string or image
 };
 
 function UrlSample({
   noggin,
   apiKey,
   nogginServerUrl,
-  parameters,
-  parameterValues,
+  variables,
+  variableValues,
 }: CodeSamplesProps) {
   const url = `${nogginServerUrl}/${noggin.slug}?key=${apiKey}${
-    parameters.length === 0
+    variables.length === 0
       ? ''
-      : `&${parameters
-          .map(({ id, parameter }) => {
+      : `&${variables
+          .map(({ id, variable }) => {
             // TODO images
-            return `${parameter.name}=${encodeURIComponent(
-              parameterValues[id],
-            )}`;
+            return `${variable.name}=${encodeURIComponent(variableValues[id])}`;
           })
           .join('&')}`
   }`;
@@ -99,7 +97,7 @@ function UrlSample({
         <Box sx={{ pl: 2 }}>
           <code>?key={apiKey}</code>
         </Box>
-        {parameters.map(({ id, parameter }) => {
+        {variables.map(({ id, variable: parameter }) => {
           return (
             <Box sx={{ pl: 2 }}>
               <code>
@@ -132,7 +130,7 @@ function UrlSample({
                     </>
                   }
                 >
-                  <strong>{encodeURIComponent(parameterValues[id])}</strong>
+                  <strong>{encodeURIComponent(variableValues[id])}</strong>
                 </Tooltip>
               </code>
             </Box>
@@ -196,10 +194,10 @@ const response = await fetch(
       Authorization: 'Bearer ${props.apiKey}',
     },
     body: JSON.stringify({
-      ${props.parameters
-        .map(({ id, parameter }) => {
-          return `${parameter.name}: ${JSON.stringify(
-            props.parameterValues[id],
+      ${props.variables
+        .map(({ id, variable }) => {
+          return `${variable.name}: ${JSON.stringify(
+            props.variableValues[id],
           )},`;
         })
         .join('\n      ')}
@@ -222,10 +220,10 @@ response = requests.post(
     'Content-Type': 'application/json',
   },
   json={
-    ${props.parameters
-      .map(({ id, parameter }) => {
-        return `'${parameter.name}': ${JSON.stringify(
-          props.parameterValues[id],
+    ${props.variables
+      .map(({ id, variable }) => {
+        return `'${variable.name}': ${JSON.stringify(
+          props.variableValues[id],
         )},`;
       })
       .join('\n    ')}
@@ -245,10 +243,10 @@ function KotlinSample(props: CodeSamplesProps) {
     "Content-Type" to "application/json",
   ),
   json = mapOf(
-    ${props.parameters
-      .map(({ id, parameter }) => {
-        return `"${parameter.name}" to ${JSON.stringify(
-          props.parameterValues[id],
+    ${props.variables
+      .map(({ id, variable }) => {
+        return `"${variable.name}" to ${JSON.stringify(
+          props.variableValues[id],
         )},`;
       })
       .join('\n    ')}

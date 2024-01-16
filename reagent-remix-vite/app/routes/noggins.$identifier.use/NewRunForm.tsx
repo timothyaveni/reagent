@@ -12,8 +12,8 @@ import { Form } from '@remix-run/react';
 import { useState } from 'react';
 import T from '~/i18n/T';
 import {
-  EditorParametersList,
-  useEditorParameters,
+  EditorVariablesList,
+  useEditorVariables,
   useHasPopulatedStore,
 } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import CodeSamples from './CodeSamples';
@@ -21,15 +21,15 @@ import './NewRunForm.css';
 import { SingleImagePresignedInput } from './SingleImagePresignedInput';
 
 const NewRunVariablesForm = ({
-  parameters,
-  parameterValues,
-  setParameterValue,
+  variables,
+  variableValues,
+  setVariableValue,
 }: {
-  parameters: EditorParametersList;
-  parameterValues: Record<string, any>;
-  setParameterValue: (id: string, value: any) => any;
+  variables: EditorVariablesList;
+  variableValues: Record<string, any>;
+  setVariableValue: (id: string, value: any) => any;
 }) => {
-  if (parameters.length === 0) {
+  if (variables.length === 0) {
     return (
       <Typography variant="body1">
         {/* todo: change this if we allow overrides */}
@@ -45,18 +45,18 @@ const NewRunVariablesForm = ({
   return (
     <Stack spacing={2}>
       <Typography variant="body1">Fill in variables for this run:</Typography>
-      {parameters.map(({ id, parameter }) => {
-        if (parameter.type === 'image') {
+      {variables.map(({ id, variable: variable }) => {
+        if (variable.type === 'image') {
           return (
             <Stack key={id} direction={'row'} spacing={2} alignItems={'center'}>
               {/* todo allow image URL toggle like the noggin server does */}
-              <Typography variant="body1">{parameter.name}</Typography>
+              <Typography variant="body1">{variable.name}</Typography>
               <SingleImagePresignedInput
                 onFinishUpload={(url: string) => {
-                  setParameterValue(id, url);
+                  setVariableValue(id, url);
                 }}
-                currentUrl={parameterValues[id]}
-                name={`_reagent_param_${parameter.name}`}
+                currentUrl={variableValues[id]}
+                name={`_reagent_param_${variable.name}`}
               />
             </Stack>
           );
@@ -66,11 +66,11 @@ const NewRunVariablesForm = ({
           <div key={id}>
             <TextField
               fullWidth
-              name={`_reagent_param_${parameter.name}`}
-              label={parameter.name}
-              value={parameterValues[id] ?? ''}
+              name={`_reagent_param_${variable.name}`}
+              label={variable.name}
+              value={variableValues[id] ?? ''}
               onChange={(e) => {
-                setParameterValue(id, e.target.value);
+                setVariableValue(id, e.target.value);
               }}
             />
           </div>
@@ -110,11 +110,11 @@ const NewRunOverrides = () => {
 };
 
 function NewRunForm({ noggin, apiKey, nogginServerUrl }: NewRunFormProps) {
-  const parameters = useEditorParameters();
-  const [parameterValues, setParameterValues] = useState<Record<string, any>>(
+  const variables = useEditorVariables();
+  const [variableValues, setVariableValues] = useState<Record<string, any>>(
     Object.fromEntries(
       // @ts-expect-error look we're just doing a thing here
-      parameters.map(({ id, parameter: { defaultValue } }) => [
+      variables.map(({ id, variable: { defaultValue } }) => [
         id,
         defaultValue || '',
       ]),
@@ -135,10 +135,10 @@ function NewRunForm({ noggin, apiKey, nogginServerUrl }: NewRunFormProps) {
             <Form method="post">
               <Box sx={{ mb: 2 }}>
                 <NewRunVariablesForm
-                  parameters={parameters}
-                  parameterValues={parameterValues}
-                  setParameterValue={(id, value) => {
-                    setParameterValues((old) => ({
+                  variables={variables}
+                  variableValues={variableValues}
+                  setVariableValue={(id, value) => {
+                    setVariableValues((old) => ({
                       ...old,
                       [id]: value,
                     }));
@@ -164,8 +164,8 @@ function NewRunForm({ noggin, apiKey, nogginServerUrl }: NewRunFormProps) {
               noggin={noggin}
               apiKey={apiKey}
               nogginServerUrl={nogginServerUrl}
-              parameters={parameters}
-              parameterValues={parameterValues}
+              variables={variables}
+              variableValues={variableValues}
             />
           </Paper>
         </Grid>

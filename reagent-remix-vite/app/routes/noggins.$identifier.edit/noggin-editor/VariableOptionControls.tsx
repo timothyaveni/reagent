@@ -1,7 +1,6 @@
 import { Skeleton, Typography } from '@mui/material';
 import T from '~/i18n/T';
-import './ParameterControls.css';
-import { ParameterControlsInner } from './ParameterControlsInner.client';
+import { VariableControlsInner } from './VariableControlsInner.client';
 import { useHasPopulatedStore } from './editor-utils';
 
 type Props = {
@@ -11,7 +10,7 @@ type Props = {
   documentIds: string[];
 };
 
-export const AllParameterOptionControls = (props: Props) => {
+export const AllVariableOptionControls = (props: Props) => {
   return (
     <div>
       <Typography variant="h2" gutterBottom>
@@ -41,5 +40,5 @@ function ControlsWrapper({ documentIds }: { documentIds: string[] }) {
     return <Skeleton variant="rounded" height={200} />;
   }
 
-  return <ParameterControlsInner documentIds={documentIds} />;
+  return <VariableControlsInner documentIds={documentIds} />;
 }

@@ -10,15 +10,15 @@ import {
 } from '@mui/material';
 import { useSyncedStore } from '@syncedstore/react';
 import {
-  DocumentImageParameter,
-  DocumentParameter,
-  DocumentTextParameter,
+  DocumentImageVariable,
+  DocumentTextVariable,
+  DocumentVariable,
 } from 'reagent-noggin-shared/types/DocType';
 import { uniq } from 'underscore';
 import T from '~/i18n/T';
 import { useEditorStore } from './editor-utils';
 
-export function ParameterControlsInner({
+export function VariableControlsInner({
   documentIds,
 }: {
   documentIds: string[];
@@ -33,9 +33,9 @@ export function ParameterControlsInner({
     );
   }
 
-  const parameterElementIds = uniq(documentIdList.flat());
+  const variableElementIds = uniq(documentIdList.flat());
 
-  if (parameterElementIds.length === 0) {
+  if (variableElementIds.length === 0) {
     return (
       <Card sx={{ p: 4, mt: 2 }} elevation={2}>
         <Typography
@@ -54,49 +54,45 @@ export function ParameterControlsInner({
   }
 
   return (
-    <div className="parameter-controls-wrapper">
-      {parameterElementIds.map((id) => (
-        <ParameterOptionControls key={id} id={id} />
+    <div className="variable-controls-wrapper">
+      {variableElementIds.map((id) => (
+        <VariableOptionControls key={id} id={id} />
       ))}
     </div>
   );
 }
-function ParameterOptionControls({ id }: { id: string }) {
+function VariableOptionControls({ id }: { id: string }) {
   const store = useEditorStore();
-  const parameterOptions = useSyncedStore(store.documentParameters);
-  console.log({ parameterOptions: JSON.stringify(parameterOptions) });
-  const thisParameter = parameterOptions[id];
-  if (!thisParameter) {
-    console.log(
-      'no parameter options yet',
-      id,
-      JSON.stringify(parameterOptions),
-    );
+  const variableOptions = useSyncedStore(store.documentParameters);
+  console.log({ variableOptions: JSON.stringify(variableOptions) });
+  const thisVariable = variableOptions[id];
+  if (!thisVariable) {
+    console.log('no variable options yet', id, JSON.stringify(variableOptions));
     return null; // next tick, i think
   }
 
   // @ts-ignore
-  switch (thisParameter.type) {
+  switch (thisVariable.type) {
     case 'image':
       return (
-        <ImageParameterOptionControls
+        <ImageVariableOptionControls
           id={id}
-          parameter={thisParameter as unknown as DocumentImageParameter}
+          variable={thisVariable as unknown as DocumentImageVariable}
         />
       );
     case 'text':
     default: // TODO probably get rid of this -- i just didn't want to migrate my test db
       return (
-        <TextParameterOptionControls
+        <TextVariableOptionControls
           id={id}
-          parameter={thisParameter as unknown as DocumentTextParameter}
+          variable={thisVariable as unknown as DocumentTextVariable}
         />
       );
   }
 
-  throw new Error('unknown parameter type');
+  throw new Error('unknown variable type');
 }
-function NameField({ parameter }: { parameter: DocumentParameter }) {
+function NameField({ variable }: { variable: DocumentVariable }) {
   // TODO: prevent dupes, etc.
   // TODO: also prevent reserved params like 'key'... hmm we don't love this but the idea is simple api even if it's worse practice
   return (
@@ -106,34 +102,34 @@ function NameField({ parameter }: { parameter: DocumentParameter }) {
         fullWidth
         variant="standard"
         // @ts-ignore
-        value={parameter.name}
+        value={variable.name}
         onChange={(event) => {
           // @ts-ignore
-          parameter.name = event.target.value;
+          variable.name = event.target.value;
         }}
       />
     </FormControl>
   );
 }
 function TypeField({
-  parameterId,
-  parameter,
+  variableId,
+  variable,
 }: {
-  parameterId: string;
-  parameter: DocumentParameter;
+  variableId: string;
+  variable: DocumentVariable;
 }) {
   // this will retain old parameter info in the param object, but that's okay. for now, anyway. makes it easier to switch back and forth, if you want to for some reason
   return (
     <FormControl variant="standard" fullWidth sx={{ flex: 1 }}>
-      <InputLabel id={`parameter-type-field-${parameterId}`}>
+      <InputLabel id={`variable-type-field-${variableId}`}>
         <T>Type</T>
       </InputLabel>
       <Select
         label={<T>Type</T>}
-        value={parameter.type}
+        value={variable.type}
         onChange={(event) => {
           // @ts-ignore
-          parameter.type = event.target.value;
+          variable.type = event.target.value;
         }}
         fullWidth
       >
@@ -147,12 +143,12 @@ function TypeField({
     </FormControl>
   );
 }
-function TextParameterOptionControls({
+function TextVariableOptionControls({
   id,
-  parameter,
+  variable,
 }: {
   id: string;
-  parameter: DocumentTextParameter;
+  variable: DocumentTextVariable;
 }) {
   // TODO: do not render type parameter if the editor does not have this feature enabled
   return (
@@ -165,8 +161,8 @@ function TextParameterOptionControls({
         }}
         alignItems={'end'}
       >
-        <NameField parameter={parameter} />
-        <TypeField parameterId={id} parameter={parameter} />
+        <NameField variable={variable} />
+        <TypeField variableId={id} variable={variable} />
       </Stack>
 
       <TextField
@@ -175,10 +171,10 @@ function TextParameterOptionControls({
           mb: 2,
         }}
         // @ts-ignore
-        value={parameter.maxLength}
+        value={variable.maxLength}
         onChange={(event) => {
           // @ts-ignore
-          parameter.maxLength = parseInt(event.target.value);
+          variable.maxLength = parseInt(event.target.value);
         }}
         type="number"
         label="Max length"
@@ -192,22 +188,22 @@ function TextParameterOptionControls({
           }
         }
         // @ts-ignore
-        value={parameter.defaultValue}
+        value={variable.defaultValue}
         onChange={(event) => {
           // @ts-ignore
-          parameter.defaultValue = event.target.value;
+          variable.defaultValue = event.target.value;
         }}
         label="Default value"
       />
     </Card>
   );
 }
-function ImageParameterOptionControls({
+function ImageVariableOptionControls({
   id,
-  parameter,
+  variable,
 }: {
   id: string;
-  parameter: DocumentImageParameter;
+  variable: DocumentImageVariable;
 }) {
   return (
     <Card elevation={2} key={id} sx={{ my: 2, p: 2 }}>
@@ -219,20 +215,20 @@ function ImageParameterOptionControls({
         }}
         alignItems={'end'}
       >
-        <NameField parameter={parameter} />
-        <TypeField parameterId={id} parameter={parameter} />
+        <NameField variable={variable} />
+        <TypeField variableId={id} variable={variable} />
       </Stack>
 
       <FormControl variant="standard" fullWidth>
-        <InputLabel id={`parameter-image-quality-field-${id}`}>
+        <InputLabel id={`variable-image-quality-field-${id}`}>
           <T>Image quality</T>
         </InputLabel>
         <Select
           label={<T>Image quality</T>}
-          value={parameter.openAI_detail}
+          value={variable.openAI_detail}
           onChange={(event) => {
             // @ts-ignore
-            parameter.openAI_detail = event.target.value;
+            variable.openAI_detail = event.target.value;
           }}
         >
           <MenuItem value="auto">

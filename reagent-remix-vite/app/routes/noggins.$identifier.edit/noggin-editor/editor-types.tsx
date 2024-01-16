@@ -1,15 +1,15 @@
 import { BaseElement } from 'slate';
 
-type ParameterOptions = {
+type VariableOptions = {
   name: string;
   maxLength: number;
   defaultValue: string;
 };
 
-export interface ParameterNode extends BaseElement {
+export interface VariableNode extends BaseElement {
   type: 'parameter';
   parameterId: string;
-  parameterOptions: ParameterOptions;
+  parameterOptions: VariableOptions;
 }
 
 export interface ChatTurnNode extends BaseElement {

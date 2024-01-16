@@ -4,9 +4,9 @@ import { useEditorStore } from '../editor-utils';
 
 // image icon
 import ImageIcon from '@mui/icons-material/Image';
-import { DocumentParameter } from 'reagent-noggin-shared/types/DocType';
+import { DocumentVariable } from 'reagent-noggin-shared/types/DocType';
 
-export const Parameter = ({
+export const Variable = ({
   attributes,
   children,
   element,
@@ -19,7 +19,7 @@ export const Parameter = ({
   const selected = useSelected();
 
   // @ts-ignore
-  const parameter: DocumentParameter = useSyncedStore(store.documentParameters)[
+  const variable: DocumentVariable = useSyncedStore(store.documentParameters)[
     element.parameterId
   ];
 
@@ -27,13 +27,13 @@ export const Parameter = ({
   return (
     <span
       {...attributes}
-      className={'parameter' + (selected ? ' selected' : '')}
+      className={'variable' + (selected ? ' selected' : '')}
       contentEditable={false}
     >
       {/* {element.parameterOptions.name} */}
       {/* todo workshop this a bit lol */}
-      {parameter.type === 'image' ? <ImageIcon fontSize="small" /> : null}
-      {parameter.name}
+      {variable.type === 'image' ? <ImageIcon fontSize="small" /> : null}
+      {variable.name}
       {children}
     </span>
   );

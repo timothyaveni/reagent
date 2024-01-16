@@ -3,9 +3,8 @@ import React from 'react';
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import T from '~/i18n/T';
-import './Editor.css';
 import InputsColumn from './InputsColumn';
-import { AllParameterOptionControls } from './ParameterOptionControls';
+import { AllVariableOptionControls } from './VariableOptionControls';
 import { ModelOutputEditor } from './output-editor/ModelOutputEditor';
 
 export interface EditorProps {
@@ -50,7 +49,7 @@ const Editor: React.FC<EditorProps> = (props) => {
       </Stack>
 
       <Stack spacing={6} sx={{ flex: 1 }}>
-        <AllParameterOptionControls
+        <AllVariableOptionControls
           documentIds={editorSchema.modelInputComponents}
         />
         <Box>
