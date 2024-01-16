@@ -52,6 +52,9 @@ type VariableEditorOpenState = {
 
 type VariableEditorState = VariableEditorClosedState | VariableEditorOpenState;
 
+// allows empty variable, which is not actually valid, but should not close the variable editor dialog
+const VALID_VARIABLE_NAME_REGEX = /^[a-zA-Z0-9_-]*$/;
+
 const getExactMatchForVariableEditorState = (
   variables: EditorVariablesList,
   variableSoFar: string,
@@ -309,7 +312,16 @@ const TextEditor = ({
         return null;
       }
 
-      return before.slice(startIndex + 1);
+      const variableName = before.slice(startIndex + 1);
+
+      console.log({ variableName });
+      console.log('test', VALID_VARIABLE_NAME_REGEX.test(variableName));
+
+      if (!VALID_VARIABLE_NAME_REGEX.test(variableName)) {
+        return null;
+      }
+
+      return variableName;
     } else {
       return null;
     }
@@ -364,6 +376,10 @@ const TextEditor = ({
     [editor, setVariableEditorState],
   );
 
+  const addSpace = () => {
+    Transforms.insertText(editor, ' ');
+  };
+
   return (
     <Box
       mt={1}
@@ -383,8 +399,14 @@ const TextEditor = ({
           // setLastCursorPositionForVariableAdd(selection?.focus ?? null);
 
           // we don't seem to get a rerender if we don't do this. hopefully doesn't make things slow since setState(null) on null won't rerender?
-          setLastTypedVariableName(getCurrentTypedVariableName());
-          // TODO: cancel editor when going to a random spot, when clicking, when the relevant $ disappears
+          const currentTypedVariableName = getCurrentTypedVariableName();
+          setLastTypedVariableName(currentTypedVariableName);
+
+          if (currentTypedVariableName === null && variableEditorState.open) {
+            setVariableEditorState({
+              open: false,
+            });
+          }
         }}
       >
         <Cursors>
@@ -417,12 +439,18 @@ const TextEditor = ({
                       // TODO not so dry
                       const variableId = addNewVariable(store, variableSoFar);
                       addVariableInEditor(variableId);
+                      if (event.key === ' ') {
+                        addSpace();
+                      }
                     } else {
                       // todo add a space or something? idk
                     }
                   } else {
                     // existing variable
                     addVariableInEditor(trueSelection);
+                    if (event.key === ' ') {
+                      addSpace();
+                    }
                   }
                 } else if (
                   event.key === 'ArrowDown' ||
