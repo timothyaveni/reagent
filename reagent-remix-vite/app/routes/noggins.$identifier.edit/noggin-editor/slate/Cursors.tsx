@@ -1,14 +1,27 @@
 import {
+  CursorOverlayData,
   // CursorOverlayData,
   useRemoteCursorOverlayPositions,
 } from '@slate-yjs/react';
 import { useRef } from 'react';
 
+import { CaretPosition } from 'node_modules/@slate-yjs/react/dist/utils/getOverlayPosition';
 import './Cursors.css';
 
-export function Cursors({ children }) {
+type CursorsProps = {
+  children: React.ReactNode;
+};
+
+export type CursorData = {
+  name: string;
+  color: string;
+};
+
+export function Cursors({ children }: CursorsProps) {
   const containerRef = useRef(null);
-  const [cursors] = useRemoteCursorOverlayPositions({ containerRef });
+  const [cursors] = useRemoteCursorOverlayPositions<CursorData>({
+    containerRef,
+  });
 
   return (
     <div className="cursors" ref={containerRef}>
@@ -20,7 +33,11 @@ export function Cursors({ children }) {
   );
 }
 
-function Selection({ data, selectionRects, caretPosition }) {
+function Selection({
+  data,
+  selectionRects,
+  caretPosition,
+}: CursorOverlayData<CursorData>) {
   if (!data) {
     return null;
   }
@@ -43,7 +60,13 @@ function Selection({ data, selectionRects, caretPosition }) {
   );
 }
 
-function Caret({ caretPosition, data }) {
+function Caret({
+  caretPosition,
+  data,
+}: {
+  caretPosition: CaretPosition;
+  data: CursorData;
+}) {
   const caretStyle = {
     ...caretPosition,
     background: data?.color,
