@@ -10,7 +10,6 @@ import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 import { Box, List, ListItemButton, Paper, Typography } from '@mui/material';
 import T from '~/i18n/T';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
-import { Cursors } from '../Cursors';
 import {
   addNewVariable,
   EditorVariablesList,
@@ -22,6 +21,7 @@ import {
 } from '../editor-utils';
 import { withChatElements, withPlainTextElements } from '../editorPlugins';
 import { ChatTurn } from './ChatTurn';
+import { Cursors } from './Cursors';
 import { InlineImage } from './InlineImage';
 import './TextEditor.css';
 import { TextFragment } from './TextFragment';
