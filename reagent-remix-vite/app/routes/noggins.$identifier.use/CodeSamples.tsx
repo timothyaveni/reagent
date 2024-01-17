@@ -129,8 +129,10 @@ function UrlSample({
                     </>
                   }
                 >
-                  &{parameter.name}=
-                  <strong>{encodeURIComponent(variableValues[id])}</strong>
+                  <span>
+                    &{parameter.name}=
+                    <strong>{encodeURIComponent(variableValues[id])}</strong>
+                  </span>
                 </Tooltip>
               </code>
             </Box>
