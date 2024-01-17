@@ -1,5 +1,7 @@
 /* todo hm, maybe we cycle through colors per variable. same list every time though? */
 .variable {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10pt;
   background-color: var(--reagent-purple);
   border: 1px solid white;
   color: white;
@@ -8,6 +10,7 @@
   border-radius: 4px;
   display: inline-flex;
   align-self: center;
+  align-items: center;
   /* box-sizing: border-box; */
   user-select: none; /* idk it doesn't work when you're actually in the slate editor */
 
@@ -86,4 +89,3 @@
     }
   }
 }
-
