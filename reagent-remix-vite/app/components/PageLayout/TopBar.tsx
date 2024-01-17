@@ -52,7 +52,9 @@ export default function TopBar() {
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         {/* <div className="site-title"> */}
-        <ReagentWordmark />
+        <Box sx={{ pl: 2 }}>
+          <ReagentWordmark />
+        </Box>
         {/* </div> */}
         <nav>
           <Box
