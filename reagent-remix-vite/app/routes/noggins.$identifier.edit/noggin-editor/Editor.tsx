@@ -97,12 +97,12 @@ const Editor: React.FC<EditorProps> = (props) => {
   if (!isNarrow) {
     return (
       <Stack direction="row" spacing={3} alignItems="top">
-        <Stack spacing={6} sx={{ flex: 2 }}>
+        <Stack spacing={6} flex={2}>
           <ModelInputsBox {...props} />
           <ModelOutputsBox {...props} />
         </Stack>
 
-        <Stack spacing={6} sx={{ flex: 1 }}>
+        <Stack spacing={6} flex={1}>
           <AllVariableOptionControls
             documentIds={editorSchema.modelInputComponents}
           />
