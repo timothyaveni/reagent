@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile-reagent-remix-vite.prod
     restart: on-failure:5
     environment:
+      - REAGENT_EXTERNAL_URL=https://rea.gent
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres?schema=public
       - Y_WEBSOCKET_SERVER_EXTERNAL_URL=wss://ws.rea.gent
       - NOGGIN_SERVER_EXTERNAL_URL=https://noggin.rea.gent
@@ -19,7 +20,7 @@ services:
       - OBJECT_STORAGE_SECRET_KEY
       - OBJECT_STORAGE_EXTERNAL_URL=https://objects.rea.gent
       - GITHUB_REDIRECT_URL=https://rea.gent/auth/github/callback
-      
+
       - GITHUB_CLIENT_ID
       - GITHUB_CLIENT_SECRET
       - SESSION_SECRET
@@ -71,9 +72,9 @@ services:
     cap_add:
       - NET_ADMIN
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
     volumes:
       - ./caddy-data-prod:/data
       - ./caddy-config-prod:/config

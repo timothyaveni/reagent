@@ -19,10 +19,10 @@ import { createNewLTIConnection } from '~/models/ltiConnection.server';
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
-    { title: `${data?.name} :: Organizations :: reagent` },
+    { title: `${data?.organization?.name} :: Organizations :: reagent` },
     {
       name: 'description',
-      content: `Overfor of the ${data?.name} organization on reagent`,
+      content: `Overfor of the ${data?.organization?.name} organization on reagent`,
     },
   ];
 };
@@ -42,7 +42,10 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw notFound();
   }
 
-  return json(organizationData);
+  return json({
+    organization: organizationData,
+    ltiBaseUrl: process.env.REAGENT_EXTERNAL_URL || '', // TODO warn?
+  });
 };
 
 export const action = async ({
@@ -74,8 +77,10 @@ export const action = async ({
 
 function OrganizationView({
   organizationData,
+  ltiBaseUrl,
 }: {
   organizationData: OrganizationLoadResponse;
+  ltiBaseUrl: string;
 }) {
   if (organizationData.userOrganizationRole === OrganizationRole.MEMBER) {
     return null;
@@ -86,14 +91,17 @@ function OrganizationView({
   } else {
     return (
       <>
-        <LTIConnectionConfig ltiConnection={organizationData.ltiConnection} />
+        <LTIConnectionConfig
+          ltiConnection={organizationData.ltiConnection}
+          ltiBaseUrl={ltiBaseUrl}
+        />
       </>
     );
   }
 }
 
 export default function Organization() {
-  const organizationData = useLoaderData<typeof loader>();
+  const { organization, ltiBaseUrl } = useLoaderData<typeof loader>();
 
   return (
     <Box mt={4}>
@@ -101,11 +109,14 @@ export default function Organization() {
         <MUILink to="/organizations" underline="hover">
           Organizations
         </MUILink>
-        <Typography color="text.primary">{organizationData.name}</Typography>
+        <Typography color="text.primary">{organization.name}</Typography>
       </Breadcrumbs>
-      <h1>{organizationData.name}</h1>
+      <h1>{organization.name}</h1>
 
-      <OrganizationView organizationData={organizationData} />
+      <OrganizationView
+        organizationData={organization}
+        ltiBaseUrl={ltiBaseUrl}
+      />
     </Box>
   );
 }

@@ -101,7 +101,6 @@ function UrlSample({
           return (
             <Box sx={{ pl: 2 }}>
               <code>
-                &{parameter.name}=
                 <Tooltip
                   title={
                     <>
@@ -130,6 +129,7 @@ function UrlSample({
                     </>
                   }
                 >
+                  &{parameter.name}=
                   <strong>{encodeURIComponent(variableValues[id])}</strong>
                 </Tooltip>
               </code>
@@ -233,6 +233,7 @@ response = requests.post(
   );
 }
 
+// TODO: this is copilot, i haven't tested it
 function KotlinSample(props: CodeSamplesProps) {
   return (
     <CodeSample language="kotlin" {...props}>

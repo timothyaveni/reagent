@@ -16,6 +16,8 @@ services:
       - ./noggin-server/src/reagent-noggin-shared:/noggin-server/src/reagent-noggin-shared
       - ./noggin-server/package.json:/noggin-server/package.json
     environment:
+      # external URL is for external services (e.g. LTI consumers) to hit this instance, so even in dev may need a reverse proxy
+      - REAGENT_EXTERNAL_URL=http://dev.rea.gent
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
       - Y_WEBSOCKET_SERVER_EXTERNAL_URL=ws://localhost:2347
       - NOGGIN_SERVER_EXTERNAL_URL=http://localhost:2358
