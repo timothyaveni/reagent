@@ -37,6 +37,7 @@ export const Variable = ({
       ) : null}
       <span style={{ opacity: 1, paddingRight: 0 }}>$</span>
       {variable.name}
+
       {children}
     </span>
   );

@@ -13,9 +13,11 @@
   align-items: center;
   /* box-sizing: border-box; */
   user-select: none; /* idk it doesn't work when you're actually in the slate editor */
+  vertical-align: middle;
 
   &.selected {
     /* background-color: #135388; */
+    box-shadow: 0 0 8px -2px var(--reagent-purple);
     border: 1px solid #0c2336;
   }
 }
