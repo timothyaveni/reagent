@@ -129,9 +129,9 @@ async function main() {
 
   await createNogginWithRevision({
     yDocObject: (
-      await import('./attractive-man-drawing-generator.ydoc.js')
+      await import('./red-haired-man-drawing-generator.ydoc.js')
     ).default,
-    title: 'Attractive man drawing generator',
+    title: 'Red-haired man drawing generator',
     slug: 'adorable-mammal-0123',
     modelProviderName: 'replicate',
     modelName: 'sdxl',
