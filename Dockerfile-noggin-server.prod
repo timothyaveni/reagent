@@ -1,5 +1,7 @@
 FROM node:21.4.0-bookworm
 
+RUN apt-get -y update && apt-get -y install graphicsmagick
+
 WORKDIR /app
 
 COPY ./noggin-server/package.json /app
