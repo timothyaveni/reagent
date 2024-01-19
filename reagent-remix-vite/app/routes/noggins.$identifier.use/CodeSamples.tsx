@@ -198,9 +198,12 @@ const response = await fetch(
     body: JSON.stringify({
       ${props.variables
         .map(({ id, variable }) => {
-          return `${variable.name}: ${JSON.stringify(
-            props.variableValues[id],
-          )},`;
+          let s = '';
+          if (variable.type === 'image') {
+            s += '// You can use an external URL or a data URL here.\n      ';
+          }
+          s += `${variable.name}: ${JSON.stringify(props.variableValues[id])},`;
+          return s;
         })
         .join('\n      ')}
     }),
@@ -224,9 +227,12 @@ response = requests.post(
   json={
     ${props.variables
       .map(({ id, variable }) => {
-        return `'${variable.name}': ${JSON.stringify(
-          props.variableValues[id],
-        )},`;
+        let s = '';
+        if (variable.type === 'image') {
+          s += '# You can use an external URL or a data URL here.\n    ';
+        }
+        s += `'${variable.name}': ${JSON.stringify(props.variableValues[id])},`;
+        return s;
       })
       .join('\n    ')}
   }
@@ -248,9 +254,15 @@ function KotlinSample(props: CodeSamplesProps) {
   json = mapOf(
     ${props.variables
       .map(({ id, variable }) => {
-        return `"${variable.name}" to ${JSON.stringify(
+        let s = '';
+        if (variable.type === 'image') {
+          s += '// You can use an external URL or a data URL here.\n    ';
+        }
+
+        s += `"${variable.name}" to ${JSON.stringify(
           props.variableValues[id],
         )},`;
+        return s;
       })
       .join('\n    ')}
   )
