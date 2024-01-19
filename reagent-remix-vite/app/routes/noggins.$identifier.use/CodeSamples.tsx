@@ -11,8 +11,12 @@ import {
   Typography,
 } from '@mui/material';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import js from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
-import tomorrow from 'react-syntax-highlighter/dist/cjs/styles/hljs/tomorrow';
+import {
+  javascript,
+  kotlin,
+  python,
+} from 'react-syntax-highlighter/dist/cjs/languages/hljs';
+import { tomorrow } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
@@ -24,7 +28,9 @@ import {
   useHasPopulatedStore,
 } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 
-js;
+SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('python', python);
+SyntaxHighlighter.registerLanguage('kotlin', kotlin);
 
 type CodeSamplesProps = {
   noggin: any; // TODO
@@ -144,7 +150,7 @@ function UrlSample({
 }
 
 function CodeSample(
-  props: CodeSamplesProps & { language: string; children: React.ReactNode },
+  props: CodeSamplesProps & { language: string; children: string },
 ) {
   return (
     <Box
