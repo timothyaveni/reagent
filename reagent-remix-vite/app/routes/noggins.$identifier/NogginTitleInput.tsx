@@ -20,6 +20,11 @@ export default function NogginTitleInput({
         setIsEditingTitle(true);
       }}
       onBlur={() => {
+        if (shownTitle === noggin.title) {
+          setIsEditingTitle(false);
+          return;
+        }
+
         saveTitle(
           {
             newTitle: shownTitle,
@@ -31,6 +36,12 @@ export default function NogginTitleInput({
           },
         );
         setIsEditingTitle(false);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          event.currentTarget.blur();
+        }
       }}
       sx={{
         fontSize: '2rem',
