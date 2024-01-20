@@ -156,6 +156,42 @@ export const loadNogginBySlug = async (
   return noggin;
 };
 
+export const updateNogginTitle = async (
+  context: AppLoadContext,
+  { nogginSlug, title }: { nogginSlug: string; title: string },
+) => {
+  const user = requireUser(context);
+
+  const noggin = await prisma.noggin.findUnique({
+    where: {
+      slug: nogginSlug,
+    },
+    select: {
+      userOwnerId: true,
+    },
+  });
+
+  if (!noggin) {
+    throw notFound();
+  }
+
+  // temp. should require some 'manage' permission probably, like adding credits, not an edit permission. idk
+  if (noggin.userOwnerId !== user.id) {
+    throw notFound();
+  }
+
+  await prisma.noggin.update({
+    where: {
+      slug: nogginSlug,
+    },
+    data: {
+      title,
+    },
+  });
+
+  return true;
+};
+
 export const loadNogginsIndex = async (context: AppLoadContext) => {
   const user = requireUser(context);
 
