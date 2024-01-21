@@ -19,6 +19,7 @@ export default function NogginTitleInput({
       onFocus={() => {
         setIsEditingTitle(true);
       }}
+      // TODO -- don't even render an editor if we don't have permission to
       onBlur={() => {
         if (shownTitle === noggin.title) {
           setIsEditingTitle(false);

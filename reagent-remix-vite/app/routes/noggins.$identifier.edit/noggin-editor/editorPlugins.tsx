@@ -221,13 +221,23 @@ const withChatSoftBreak = (editor: ReactEditor): ReactEditor => {
   };
 
   editor.insertSoftBreak = () => {
-    // todo: add a chat turn, different from the one we'e currently in (the last one before the selection)
-
     let speaker = 'user';
     const { selection } = editor;
 
     if (selection) {
-      // todo
+      // get last parent chat node before selection
+      const selectionTopLevelNode = selection.focus.path[0];
+      for (let i = selectionTopLevelNode - 1; i >= 0; i--) {
+        const node = editor.children[i];
+        if (
+          // @ts-ignore
+          node.type === 'chat-turn'
+        ) {
+          // @ts-ignore
+          speaker = node.speaker === 'user' ? 'assistant' : 'user';
+          break;
+        }
+      }
     }
 
     Transforms.insertNodes(editor, {
