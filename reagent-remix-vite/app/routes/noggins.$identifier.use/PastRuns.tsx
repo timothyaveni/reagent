@@ -14,6 +14,7 @@ import {
 import { useNavigate, useParams } from '@remix-run/react';
 import { SerializeFrom } from '@remix-run/server-runtime';
 import { formatDistance } from 'date-fns';
+import { unit } from 'reagent-noggin-shared/cost-calculation/units';
 import T from '~/i18n/T';
 import { renderNogginRunStatus } from '../noggins.$identifier.use_.$runUuid/status';
 import { NogginUseLoader } from './route';
@@ -45,6 +46,40 @@ function NoRuns() {
       </Stack>
     </Paper>
   );
+}
+
+function renderCost(cost: PastRunsProps['runs'][0]['cost']) {
+  if (cost === null) {
+    return null;
+  }
+
+  if (cost.computedCostQuastra !== null) {
+    const creditCount = unit(cost.computedCostQuastra, 'quastra')
+      .to('credits')
+      .toNumber();
+    // round for rendering
+    const roundedCreditCount = Math.round(creditCount * 1000000) / 1000000;
+    return (
+      <T flagged>
+        {roundedCreditCount} <T>credits</T>
+      </T>
+    );
+  }
+
+  if (cost.estimatedCostQuastra !== null) {
+    const creditCount = unit(cost.estimatedCostQuastra, 'quastra')
+      .to('credits')
+      .toNumber();
+    // round for rendering
+    const roundedCreditCount = Math.round(creditCount * 1000000) / 1000000;
+    return (
+      <T flagged>
+        {roundedCreditCount} <T>credits</T> (estimated)
+      </T>
+    );
+  }
+
+  return null;
 }
 
 function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
@@ -91,14 +126,7 @@ function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
                 {/* TODO variables */}
                 <TableCell></TableCell>
                 <TableCell>{renderNogginRunStatus(run.status)}</TableCell>
-                <TableCell>
-                  {/* todo */}
-                  {run.status === 'running' ? (
-                    <T>{run.estimatedCost} (estimated)</T>
-                  ) : (
-                    <T>{run.computedCost}</T>
-                  )}
-                </TableCell>
+                <TableCell>{renderCost(run.cost)}</TableCell>
                 <TableCell>
                   <Button
                     variant="outlined"

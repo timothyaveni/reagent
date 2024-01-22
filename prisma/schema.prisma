@@ -227,8 +227,6 @@ model NogginRun {
 
   status NogginRunStatus
 
-  estimatedCost Float?
-
   // TODO: these might be something we'd want to normalize
   evaluatedParameters Json?
   evaluatedOverrides  Json?
@@ -240,8 +238,24 @@ model NogginRun {
   // should go.
   ioVisualizationRender Json?
 
-  computedCost            Float?
   nogginOutputAssetObject NogginOutputAssetObject[]
+  cost                    NogginRunCost?
+}
+
+model NogginRunCost {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  nogginRun   NogginRun @relation(fields: [nogginRunId], references: [id])
+  nogginRunId Int       @unique
+
+  // cost is in quastra === 0.0001 credits === 0.0001 cents, US.
+  estimatedCostQuastra BigInt?
+  estimationMetadata   Json?
+  computedCostQuastra  BigInt?
+  computationMetadata  Json?
 }
 
 enum NogginRunLogLevel {
