@@ -164,25 +164,27 @@ export default function PastRuns({
   return (
     <Box sx={{ mt: 4 }}>
       <Typography variant="h2">Past runs</Typography>
-      {runs.length === 0 ? <NoRuns /> : <RunTable runs={runs} />}
-      <Box display="flex" justifyContent="center" mt={2} mb={4}>
-        {/* todo don't love how this forces a rerender even for the top stuff. maybe we should do it in the URL idk */}
-        <Pagination
-          page={page}
-          count={Math.ceil(runCount / runPageSize)}
-          renderItem={(item) => (
-            <PaginationItem
-              component={Link}
-              to={`/noggins/${nogginIdentifier}/use/${
-                item.page === 1 ? '' : `?page=${item.page}`
-              }`}
-              preventScrollReset
-              replace
-              {...item}
-            />
-          )}
-        />
-      </Box>
+      {runCount === 0 ? <NoRuns /> : <RunTable runs={runs} />}
+      {runCount > runPageSize ? (
+        <Box display="flex" justifyContent="center" mt={2} mb={4}>
+          {/* todo don't love how this forces a rerender even for the top stuff. maybe we should do it in the URL idk */}
+          <Pagination
+            page={page}
+            count={Math.ceil(runCount / runPageSize)}
+            renderItem={(item) => (
+              <PaginationItem
+                component={Link}
+                to={`/noggins/${nogginIdentifier}/use/${
+                  item.page === 1 ? '' : `?page=${item.page}`
+                }`}
+                preventScrollReset
+                replace
+                {...item}
+              />
+            )}
+          />
+        </Box>
+      ) : null}
     </Box>
   );
 }
