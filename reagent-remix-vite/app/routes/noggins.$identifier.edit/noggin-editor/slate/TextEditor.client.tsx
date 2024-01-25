@@ -8,6 +8,7 @@ import { useSyncedStore } from '@syncedstore/react';
 import { withCursors, withYjs, YjsEditor } from '@slate-yjs/core';
 
 import { Box, List, ListItemButton, Paper, Typography } from '@mui/material';
+import { useLoaderData } from '@remix-run/react';
 import T from '~/i18n/T';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 import {
@@ -174,6 +175,13 @@ const TextEditor = ({
   allowImages = 'none', // TODO
   editorHeight,
 }: TextEditorProps) => {
+  // todo type
+  const { userInfo } = useLoaderData() as {
+    userInfo?: null | {
+      displayName: string;
+    };
+  };
+
   const store = useEditorStore();
   const hasPopulatedStore = useHasPopulatedStore();
 
@@ -220,8 +228,8 @@ const TextEditor = ({
       websocketProvider.awareness,
       {
         data: {
-          name: cursorName || 'Anonymous',
-          color: cursorColor || '#000000',
+          name: userInfo?.displayName || 'User',
+          color: '#000000', // TODO? maybe do this on the receiving client
         },
       },
     );

@@ -14,17 +14,21 @@ import { json } from '@remix-run/node';
 import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import { useContext, useEffect, useRef } from 'react';
 import { PageLayout } from './components/PageLayout/PageLayout';
+import { getUserInfo } from './models/user.server';
 import ClientStyleContext from './styles/client.context';
 import './styles/global.css';
 import ServerStyleContext from './styles/server.context';
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   if (context.user) {
-    return json({ loggedIn: true });
+    const userInfo = await getUserInfo(context);
+    return json({ loggedIn: true, userInfo });
   } else {
-    return json({ loggedIn: false });
+    return json({ loggedIn: false, userInfo: null });
   }
 };
+
+export type RootLoader = typeof loader;
 
 const theme = createTheme({
   palette: {

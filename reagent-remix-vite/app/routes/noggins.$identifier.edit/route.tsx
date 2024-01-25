@@ -6,6 +6,7 @@ import {
   getNogginEditorSchema_OMNISCIENT,
   loadNogginBySlug,
 } from '~/models/noggin.server';
+import { getUserInfo } from '~/models/user.server';
 import { notFound } from '~/route-utils/status-code';
 import Editor from './noggin-editor/Editor';
 
@@ -21,7 +22,9 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   const editorSchema = await getNogginEditorSchema_OMNISCIENT(noggin.id);
 
-  return json({ noggin, editorSchema });
+  const userInfo = await getUserInfo(context);
+
+  return json({ noggin, editorSchema, userInfo });
 };
 
 export default function NogginEditor() {

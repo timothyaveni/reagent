@@ -20,6 +20,8 @@ model User {
   githubAuth  GitHubAuth?  @relation("UserGitHubAuth")
   ltiv1p3Auth LTIv1p3Auth? @relation("LTIv1p3Auth")
 
+  userInfo UserInfo?
+
   merges1 UserMerge[] @relation("user1")
   merges2 UserMerge[] @relation("user2")
 
@@ -32,6 +34,17 @@ model User {
   organizations                    OrganizationMembership[]
   noggins                          Noggin[]
   modelProviderPersonalCredentials ModelProviderPersonalCredentials[]
+}
+
+model UserInfo {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+
+  displayName String?
 }
 
 model GitHubAuth {

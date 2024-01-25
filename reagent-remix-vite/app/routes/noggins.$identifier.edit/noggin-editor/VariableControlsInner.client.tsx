@@ -64,7 +64,7 @@ export function VariableControlsInner({
 function VariableOptionControls({ id }: { id: string }) {
   const store = useEditorStore();
   const variableOptions = useSyncedStore(store.documentParameters);
-  console.log({ variableOptions: JSON.stringify(variableOptions) });
+  // console.log({ variableOptions: JSON.stringify(variableOptions) });
   const thisVariable = variableOptions[id];
   if (!thisVariable) {
     console.log('no variable options yet', id, JSON.stringify(variableOptions));
