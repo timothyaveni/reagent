@@ -1,11 +1,14 @@
 import { prisma } from 'db/db';
 
+const NOGGIN_RUN_PAGE_SIZE = 15;
+
 // todo when we have noggin authorization validation
 export async function getNogginRuns_OMNISCIENT(
   // context: AppLoadContext,
   nogginId: number,
+  offsetPage: number = 1,
 ) {
-  return await prisma.nogginRun
+  const runs = await prisma.nogginRun
     .findMany({
       where: {
         nogginRevision: {
@@ -29,6 +32,8 @@ export async function getNogginRuns_OMNISCIENT(
       orderBy: {
         createdAt: 'desc',
       },
+      skip: (offsetPage - 1) * NOGGIN_RUN_PAGE_SIZE,
+      take: NOGGIN_RUN_PAGE_SIZE,
     })
     .then((runs) => {
       // convert bigints on cost to number if present
@@ -52,4 +57,18 @@ export async function getNogginRuns_OMNISCIENT(
         };
       });
     });
+
+  const runCount = await prisma.nogginRun.count({
+    where: {
+      nogginRevision: {
+        nogginId,
+      },
+    },
+  });
+
+  return {
+    runs,
+    runCount,
+    NOGGIN_RUN_PAGE_SIZE,
+  };
 }

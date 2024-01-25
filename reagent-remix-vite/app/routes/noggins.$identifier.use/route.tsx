@@ -14,10 +14,17 @@ import { notFound } from '~/route-utils/status-code';
 import NewRunForm from './NewRunForm';
 import PastRuns from './PastRuns';
 
-export const loader = async ({ params, context }: LoaderFunctionArgs) => {
+export const loader = async ({
+  request,
+  params,
+  context,
+}: LoaderFunctionArgs) => {
   const user = requireUser(context);
 
   const { identifier } = params;
+  // pagination query params
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page')?.toString() || '1', 10) || 1;
 
   const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
 
@@ -30,14 +37,18 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     noggin.id,
   );
 
-  // TODO paginate
-  const runs = await getNogginRuns_OMNISCIENT(noggin.id);
+  const { runs, runCount, NOGGIN_RUN_PAGE_SIZE } =
+    await getNogginRuns_OMNISCIENT(noggin.id, page);
 
   return json({
     NOGGIN_SERVER_EXTERNAL_URL: process.env.NOGGIN_SERVER_EXTERNAL_URL || '',
     noggin,
     uiApiKey,
     runs,
+
+    page,
+    runCount,
+    NOGGIN_RUN_PAGE_SIZE,
   });
 };
 
@@ -91,8 +102,15 @@ export const action = async ({
 };
 
 export default function UseNoggin() {
-  const { NOGGIN_SERVER_EXTERNAL_URL, noggin, uiApiKey, runs } =
-    useLoaderData<typeof loader>();
+  const {
+    NOGGIN_SERVER_EXTERNAL_URL,
+    noggin,
+    uiApiKey,
+    runs,
+    page,
+    runCount,
+    NOGGIN_RUN_PAGE_SIZE,
+  } = useLoaderData<typeof loader>();
 
   return (
     <div>
@@ -102,7 +120,13 @@ export default function UseNoggin() {
         nogginServerUrl={NOGGIN_SERVER_EXTERNAL_URL}
       />
       {/* todo don't render that key */}
-      <PastRuns runs={runs} />
+      <PastRuns
+        nogginIdentifier={noggin.slug}
+        page={page}
+        runs={runs}
+        runCount={runCount}
+        runPageSize={NOGGIN_RUN_PAGE_SIZE}
+      />
     </div>
   );
 }
