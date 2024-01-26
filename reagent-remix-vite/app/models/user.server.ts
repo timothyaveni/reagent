@@ -9,7 +9,7 @@ export const getUserInfo = async (
   const user = requireUser(context);
 
   const userInfo = await prisma.userInfo.findFirst({
-    where: { id: user.id },
+    where: { userId: user.id },
   });
 
   if (!userInfo) {
@@ -26,7 +26,7 @@ export const setDisplayName = async (
   const user = requireUser(context);
 
   const userInfo = await prisma.userInfo.upsert({
-    where: { id: user.id },
+    where: { userId: user.id },
     create: {
       userId: user.id,
       displayName,
