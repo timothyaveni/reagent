@@ -1,9 +1,10 @@
 import { json } from '@remix-run/node';
 import { useEffect, useState } from 'react';
-import { loadNogginBySlug } from '~/models/noggin.server';
+import { loadNogginBySlug, updateNogginTitle } from '~/models/noggin.server';
 
 import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
 import {
+  ActionFunctionArgs,
   LoaderFunctionArgs,
   ServerRuntimeMetaFunction as MetaFunction,
 } from '@remix-run/server-runtime';
@@ -47,6 +48,26 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     noggin,
     authToken,
   });
+};
+
+export const action = async ({
+  context,
+  params,
+  request,
+}: ActionFunctionArgs) => {
+  const { identifier } = params;
+
+  const body = await request.formData();
+  const newTitle = body.get('newTitle')?.toString() || null;
+
+  if (newTitle !== null) {
+    await updateNogginTitle(context, {
+      nogginSlug: identifier || '',
+      title: newTitle,
+    });
+
+    return json({ ok: true });
+  }
 };
 
 export type NogginRouteLoaderType = typeof loader;
