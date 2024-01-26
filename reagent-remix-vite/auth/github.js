@@ -32,6 +32,23 @@ export const resolveGitHubAuth = async (profile) => {
     },
   });
 
+  const name = profile.displayName || profile.username;
+
+  if (name) {
+    await prisma.userInfo.upsert({
+      where: {
+        userId: newUser.id,
+      },
+      update: {
+        displayName: name,
+      },
+      create: {
+        userId: newUser.id,
+        displayName: name,
+      },
+    });
+  }
+
   return {
     id: newUser.id,
   };
