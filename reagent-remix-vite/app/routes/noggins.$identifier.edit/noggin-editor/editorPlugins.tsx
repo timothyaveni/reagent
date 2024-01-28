@@ -39,6 +39,18 @@ const withSharedNormalization = (editor: ReactEditor): ReactEditor => {
           // @ts-ignore
           editor.children[i + 1].type === 'paragraph'
         ) {
+          // insert a newline. makes sense NOT to do this (for the case where you're, say, backspacing a chat turn),
+          // but it also makes sense to do this. and by inserting a newline, we fix pasting plaintext with newlines
+          // into the editor.
+          // @ts-ignore
+          const childTextLength = child.children.reduce(
+            // i think there'll only be one child but this shouldn't hurt
+            (acc: number, child: any) => acc + child.text.length,
+            0,
+          );
+          Transforms.insertText(editor, '\n', {
+            at: { path: [i, 0], offset: childTextLength },
+          });
           Transforms.mergeNodes(editor, { at: [i + 1] });
           break; // normalization will run until convergence
         }

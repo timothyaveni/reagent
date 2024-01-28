@@ -213,7 +213,9 @@ const TextEditor = ({
 
     let e = withCursors(
       withYjs(
-        withReagentAugmentations(withReact(withHistory(createEditor()))),
+        withReagentAugmentations(
+          withReact(withHistory(createEditor()), 'x-reagent-noggin-text'),
+        ),
         modelInputs[documentKey]!,
       ),
       websocketProvider.awareness,
