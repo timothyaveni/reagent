@@ -302,6 +302,7 @@ model NogginRunLogEntry {
   run   NogginRun @relation(fields: [runId], references: [id])
   runId Int
 
+  timestamp   BigInt? // doesn't really have to be nullable but i don't want to clear my dev db or write a migration rn
   level       NogginRunLogLevel
   stage       NogginRunLogEntryStage
   message     Json

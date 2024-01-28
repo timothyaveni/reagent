@@ -9,7 +9,10 @@ import {
   Alert,
   Box,
   Breadcrumbs,
+  Button,
+  Chip,
   CircularProgress,
+  Stack,
   Typography,
 } from '@mui/material';
 import {
@@ -18,9 +21,12 @@ import {
   SerializeFrom,
 } from '@remix-run/server-runtime';
 import { IOVisualizationRender } from 'reagent-noggin-shared/io-visualization-types/IOVisualizationRender';
+import { LogEntry } from 'reagent-noggin-shared/log';
 import MUILink from '~/components/MUILink';
 import PreformattedText from '~/components/PreformattedText';
+import T from '~/i18n/T';
 import './NogginRun.css';
+import { ExecutionLog } from './execution-log/ExecutionLog.client';
 import { IOVisualization } from './io-visualization/IOVisualization';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -67,6 +73,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   }
 
   // todo: there shouldn't be more than one, but we won't check that for now
+  // also todo: put this in the model
   const finalOutput = await prisma.nogginRunOutputEntry.findFirst({
     where: {
       runId: run.id,
@@ -79,6 +86,18 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     },
   });
 
+  // todo: this goes in the model as well
+  const logEntries = await prisma.nogginRunLogEntry.findMany({
+    where: {
+      runId: run.id,
+    },
+    select: {
+      level: true,
+      stage: true,
+      message: true,
+    },
+  });
+
   const apiKey = await createOrGetPrimaryUINogginAPIKey_OMNIPOTENT(
     context,
     run.nogginRevision.nogginId,
@@ -87,6 +106,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   return json({
     noggin,
     ioVisualizationRender: run.ioVisualizationRender as IOVisualizationRender,
+    logEntries,
     finalOutput,
     apiKey,
     NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL:
@@ -211,6 +231,7 @@ export default function NogginRun() {
   const {
     noggin,
     apiKey,
+    logEntries,
     finalOutput,
     ioVisualizationRender,
     NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL,
@@ -222,6 +243,17 @@ export default function NogginRun() {
   );
   const [currentIOVisualizationRender, setCurrentIOVisualizationRender] =
     useState<IOVisualizationRender>(ioVisualizationRender);
+  const [currentWebsocketLogEntries, setCurrentWebsocketLogEntries] = useState<
+    typeof logEntries
+  >([]);
+
+  const [showingLog, setShowingLog] = useState(false);
+
+  useEffect(() => {
+    // maybe won't keep this default. log is a client component because error boundaries are trash
+    // so even if we want it to default on we have to do it after mounting
+    setShowingLog(true);
+  }, []);
 
   useEffect(() => {
     if (finalOutput) {
@@ -276,6 +308,9 @@ export default function NogginRun() {
           outputError: obj.error,
           metadata: obj.metadata,
         });
+      } else if (obj.type === 'log') {
+        // todo, don't love that it's quadratic
+        setCurrentWebsocketLogEntries((prev) => [...prev, obj.logEvent]);
       }
     };
 
@@ -283,6 +318,12 @@ export default function NogginRun() {
       ws.close();
     };
   }, [params.runUuid, apiKey, finalOutput]);
+
+  // if the websocket connects at _all_, it will start by dumping an entire incremental state
+  // up to this point. so we should _swap out_ the log calls from the page load.
+  const renderedLogEntries: LogEntry[] = currentWebsocketLogEntries.length
+    ? (currentWebsocketLogEntries as LogEntry[])
+    : (logEntries as LogEntry[]);
 
   return (
     <>
@@ -292,16 +333,34 @@ export default function NogginRun() {
         </MUILink>
         <Typography color="text.primary">{params.runUuid}</Typography>
       </Breadcrumbs>
-      <div className="noggin-run-text-output">
-        <Box sx={{ mt: 2 }}>
-          <IOVisualization ioVisualizationRender={currentIOVisualizationRender}>
-            <RenderOutput
-              outputState={currentOutputState}
-              hasIOVisualization={currentIOVisualizationRender !== null}
-            />
-          </IOVisualization>
-        </Box>
-      </div>
+      <Box sx={{ mt: 2, whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+        <IOVisualization ioVisualizationRender={currentIOVisualizationRender}>
+          <RenderOutput
+            outputState={currentOutputState}
+            hasIOVisualization={currentIOVisualizationRender !== null}
+          />
+        </IOVisualization>
+      </Box>
+      <Box sx={{ mt: 2 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignContent="center"
+        >
+          <Stack direction="row" spacing={3}>
+            <Typography variant="h2">Logs</Typography>
+            <Chip label={renderedLogEntries.length} />
+          </Stack>
+          <Button onClick={() => setShowingLog((prev) => !prev)}>
+            {showingLog ? <T>Hide Logs</T> : <T>Show Logs</T>}
+          </Button>
+        </Stack>
+        {showingLog ? (
+          <Box sx={{ mt: 2 }}>
+            <ExecutionLog logEntries={renderedLogEntries} />
+          </Box>
+        ) : null}
+      </Box>
     </>
   );
 }

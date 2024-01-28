@@ -16,7 +16,7 @@ import {
 import { Link, useNavigate, useParams } from '@remix-run/react';
 import { SerializeFrom } from '@remix-run/server-runtime';
 import { formatDistance } from 'date-fns';
-import { unit } from 'reagent-noggin-shared/cost-calculation/units';
+import { CostText } from '~/components/CostText';
 import T from '~/i18n/T';
 import { renderNogginRunStatus } from '../noggins.$identifier.use_.$runUuid/status';
 import { NogginUseLoader } from './route';
@@ -61,28 +61,15 @@ function renderCost(cost: PastRunsProps['runs'][0]['cost']) {
   }
 
   if (cost.computedCostQuastra !== null) {
-    const creditCount = unit(cost.computedCostQuastra, 'quastra')
-      .to('credits')
-      .toNumber();
-    // round for rendering
-    const roundedCreditCount = Math.round(creditCount * 1000000) / 1000000;
-    return (
-      <T flagged>
-        {roundedCreditCount} <T>credits</T>
-      </T>
-    );
+    return <CostText quastra={cost.computedCostQuastra} />;
   }
 
   if (cost.estimatedCostQuastra !== null) {
-    const creditCount = unit(cost.estimatedCostQuastra, 'quastra')
-      .to('credits')
-      .toNumber();
-    // round for rendering
-    const roundedCreditCount = Math.round(creditCount * 1000000) / 1000000;
     return (
-      <T flagged>
-        {roundedCreditCount} <T>credits</T> (estimated)
-      </T>
+      <>
+        <CostText quastra={cost.estimatedCostQuastra} />{' '}
+        <T flagged>(estimated)</T>
+      </>
     );
   }
 

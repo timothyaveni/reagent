@@ -42,6 +42,7 @@
     "passport-lti": "^0.0.7",
     "react": "^18.3.0-canary-0cdfef19b-20231211",
     "react-dom": "^18.3.0-canary-0cdfef19b-20231211",
+    "react-error-boundary": "^4.0.12",
     "react-markdown": "^9.0.1",
     "react-syntax-highlighter": "^15.5.0",
     "slate": "^0.101.1",

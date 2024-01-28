@@ -202,6 +202,7 @@ const response = await fetch(
       Authorization: 'Bearer ${props.apiKey}',
     },
     body: JSON.stringify({
+      // fill variables here.
       ${props.variables
         .map(({ id, variable }) => {
           let s = '';
@@ -231,6 +232,7 @@ response = requests.post(
     'Content-Type': 'application/json',
   },
   json={
+    # fill variables here.
     ${props.variables
       .map(({ id, variable }) => {
         let s = '';
@@ -258,6 +260,7 @@ function KotlinSample(props: CodeSamplesProps) {
     "Content-Type" to "application/json",
   ),
   json = mapOf(
+    // fill variables here.
     ${props.variables
       .map(({ id, variable }) => {
         let s = '';
