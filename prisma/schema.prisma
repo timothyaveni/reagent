@@ -271,6 +271,8 @@ model NogginRunCost {
   computationMetadata  Json?
 }
 
+// if changing log level or stage, keep the code in sync. something is wrong with the type emission
+
 enum NogginRunLogLevel {
   debug
   info
