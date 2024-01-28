@@ -23,6 +23,7 @@ import {
 import { withChatElements, withPlainTextElements } from '../editorPlugins';
 import { ChatTurn } from './ChatTurn';
 import { Cursors } from './Cursors';
+import { EditorToolbar } from './EditorToolbar';
 import { InlineImage } from './InlineImage';
 import './TextEditor.css';
 import { TextFragment } from './TextFragment';
@@ -47,7 +48,6 @@ type VariableEditorOpenState = {
     x: number;
     y: number;
   };
-  // variableSoFar: string;
   selectedExistingVariableId: string | null;
 };
 
@@ -203,15 +203,6 @@ const TextEditor = ({
 
   const [variableEditorState, setVariableEditorState] =
     useState<VariableEditorState>({ open: false });
-  // useState<VariableEditorState>({
-  //   open: true,
-  //   position: {
-  //     x: 200,
-  //     y: 500,
-  //   },
-  //   variableSoFar: 'var2',
-  //   selectedExistingVariableId: null,
-  // });
 
   const cursorName = localStorage.getItem('cursor-name'); // TODO don't do it like this
   const cursorColor = localStorage.getItem('cursor-color');
@@ -388,6 +379,34 @@ const TextEditor = ({
     Transforms.insertText(editor, ' ');
   };
 
+  // TODO we close it in a lot of cases now but not when unfocusing, might be good
+  // but might also need to be careful not to lose state in case normal use causes an unfocus
+  const openVariableEditor = () => {
+    // TODO: honestly skeptical that there's a better way to wait for the character to be inserted
+    // but we need this so selection will update, which puts the popup in the right spot
+    // UGH TODO looks like 0ms doesn't even do it???
+    setTimeout(() => {
+      const { selection } = editor;
+      if (!selection) {
+        return; // i don't think this can happen?
+      }
+      const selectionPoint = ReactEditor.toDOMRange(
+        editor,
+        selection,
+      ).getBoundingClientRect();
+
+      const PADDING = 32;
+      setVariableEditorState({
+        open: true,
+        position: {
+          x: selectionPoint.left,
+          y: selectionPoint.top + window.scrollY + PADDING,
+        },
+        selectedExistingVariableId: null,
+      });
+    }, 10);
+  };
+
   return (
     <Box
       mt={1}
@@ -403,8 +422,6 @@ const TextEditor = ({
         onChange={(value) => {
           console.log('onchange', value);
           syncVariables();
-          // const { selection } = editor;
-          // setLastCursorPositionForVariableAdd(selection?.focus ?? null);
 
           // we don't seem to get a rerender if we don't do this. hopefully doesn't make things slow since setState(null) on null won't rerender?
           const currentTypedVariableName = getCurrentTypedVariableName();
@@ -451,7 +468,8 @@ const TextEditor = ({
                         addSpace();
                       }
                     } else {
-                      // todo add a space or something? idk
+                      // this will close the popup. bit of a strange interaction if we hit Enter (TODO?) but is fine for now
+                      addSpace();
                     }
                   } else {
                     // existing variable
@@ -500,39 +518,17 @@ const TextEditor = ({
                 }
               } else {
                 if (event.key === '$') {
-                  // event.preventDefault();
-                  // todo add a menu thing
-                  // addNewVariable(store, editor);
-
-                  // TODO: honestly skeptical that there's a better way to wait for the character to be inserted
-                  // but we need this so selection will update
-                  // UGH TODO looks like 0ms doesn't even do it???
-                  setTimeout(() => {
-                    const { selection } = editor;
-                    if (!selection) {
-                      return; // i don't think this can happen?
-                    }
-                    const selectionPoint = ReactEditor.toDOMRange(
-                      editor,
-                      selection,
-                    ).getBoundingClientRect();
-
-                    const PADDING = 32;
-                    setVariableEditorState({
-                      open: true,
-                      position: {
-                        x: selectionPoint.left,
-                        y: selectionPoint.top + window.scrollY + PADDING,
-                      },
-                      // variableSoFar: '',
-                      selectedExistingVariableId: null,
-                    });
-                  }, 10);
+                  openVariableEditor();
                 }
               }
             }}
           />
         </Cursors>
+        <EditorToolbar
+          textType={textType}
+          editor={editor}
+          openVariableEditor={openVariableEditor}
+        />
       </Slate>
       <VariableEditor
         variableEditorState={variableEditorState}
@@ -541,9 +537,11 @@ const TextEditor = ({
         addNewVariable={(variableName: string) => {
           const variableId = addNewVariable(store, variableName);
           addVariableInEditor(variableId);
+          ReactEditor.focus(editor);
         }}
         addExistingVariable={(variableId: string) => {
           addVariableInEditor(variableId);
+          ReactEditor.focus(editor);
         }}
       />
     </Box>

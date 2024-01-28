@@ -36,6 +36,7 @@
   border: 1px solid #ccc;
   padding: 20px;
   border-radius: 3px;
+  transition: padding-bottom 0.15s ease-in-out;
 
   /* active */
   &:focus {
@@ -48,6 +49,30 @@
 
   & p:last-child {
     margin-bottom: 0;
+  }
+}
+
+.slate-toolbar {
+  position: absolute;
+  transition: opacity 0.15s ease-in-out;
+  transform: translateY(-100%);
+}
+
+.slate-wrapper:not(:focus-within) {
+  & .slate-toolbar {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.slate-wrapper:focus-within {
+  & .slate-toolbar {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  & [role='textbox'] {
+    padding-bottom: 54px;
   }
 }
 
