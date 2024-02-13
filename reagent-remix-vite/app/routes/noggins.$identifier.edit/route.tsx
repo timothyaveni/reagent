@@ -20,9 +20,10 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw notFound();
   }
 
-  const editorSchema = await getNogginEditorSchema_OMNISCIENT(noggin.id);
-
-  const userInfo = await getUserInfo(context);
+  const [editorSchema, userInfo] = await Promise.all([
+    getNogginEditorSchema_OMNISCIENT(noggin.id),
+    getUserInfo(context),
+  ]);
 
   return json({ noggin, editorSchema, userInfo });
 };

@@ -9,7 +9,7 @@ import axios from 'axios';
 import { requireUser } from '~/auth/auth.server';
 import { loadNogginBySlug } from '~/models/noggin.server';
 import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiKey.server';
-import { getNogginRuns_OMNISCIENT } from '~/models/nogginRuns.server';
+import { getNogginRuns } from '~/models/nogginRuns.server';
 import { notFound } from '~/route-utils/status-code';
 import NewRunForm from './NewRunForm';
 import PastRuns from './PastRuns';
@@ -37,8 +37,11 @@ export const loader = async ({
     noggin.id,
   );
 
-  const { runs, runCount, NOGGIN_RUN_PAGE_SIZE } =
-    await getNogginRuns_OMNISCIENT(noggin.id, page);
+  const { runs, runCount, NOGGIN_RUN_PAGE_SIZE } = await getNogginRuns(
+    context,
+    { nogginId: noggin.id },
+    page,
+  );
 
   return json({
     NOGGIN_SERVER_EXTERNAL_URL: process.env.NOGGIN_SERVER_EXTERNAL_URL || '',

@@ -9,6 +9,7 @@ import {
   ServerRuntimeMetaFunction as MetaFunction,
 } from '@remix-run/server-runtime';
 import { WebsocketProvider } from 'y-websocket';
+import { getNogginTotalIncurredCost } from '~/models/nogginRuns.server';
 import { notFound } from '~/route-utils/status-code';
 import {
   NogginEditorStore,
@@ -40,13 +41,16 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   const authToken = genAuthTokenForNoggin(noggin.id);
 
-  console.log({ authToken });
+  const totalIncurredCost = await getNogginTotalIncurredCost(context, {
+    nogginId: noggin.id,
+  });
 
   return json({
     Y_WEBSOCKET_SERVER_EXTERNAL_URL:
       process.env.Y_WEBSOCKET_SERVER_EXTERNAL_URL || '',
     noggin,
     authToken,
+    totalIncurredCost,
   });
 };
 

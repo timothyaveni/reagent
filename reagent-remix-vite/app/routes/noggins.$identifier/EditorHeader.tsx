@@ -11,11 +11,12 @@ import React from 'react';
 import T from '~/i18n/T';
 import NogginTitleInput from './NogginTitleInput';
 
+import { CostText } from '~/components/CostText';
 import './EditorHeader.css';
 import { NogginRouteLoaderType } from './route';
 
 const EditorHeader: React.FC = () => {
-  const { noggin } = useLoaderData<NogginRouteLoaderType>();
+  const { noggin, totalIncurredCost } = useLoaderData<NogginRouteLoaderType>();
   const navigate = useNavigate();
   const locationMatches = useMatches();
   console.log({ locationMatches });
@@ -46,17 +47,24 @@ const EditorHeader: React.FC = () => {
         <Box flexGrow={1}>
           <Stack>
             <NogginTitleInput noggin={noggin} />
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              component="p"
-              className="noggin-description"
-            >
-              <T flagged>
-                {noggin.aiModel.modelProvider.name}/
-                <strong>{noggin.aiModel.name}</strong>
-              </T>
-            </Typography>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                component="p"
+                className="noggin-description"
+              >
+                <T flagged>
+                  {noggin.aiModel.modelProvider.name}/
+                  <strong>{noggin.aiModel.name}</strong>
+                </T>
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                <T flagged>
+                  <CostText quastra={totalIncurredCost} /> spent
+                </T>
+              </Typography>
+            </Stack>
           </Stack>
         </Box>
 
