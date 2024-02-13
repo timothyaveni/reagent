@@ -32,7 +32,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const { identifier } = params;
 
-  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
+  const noggin = await loadNogginBySlug(context, { slug: identifier });
 
   if (!noggin) {
     throw notFound();

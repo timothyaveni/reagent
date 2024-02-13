@@ -18,7 +18,7 @@ export const action = async ({
     throw new Error('Invalid extension');
   }
 
-  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
+  const noggin = await loadNogginBySlug(context, { slug: identifier });
 
   if (!noggin) {
     throw notFound();

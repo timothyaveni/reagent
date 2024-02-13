@@ -109,8 +109,12 @@ export const generateFreeSlug = async () => {
 
 export const loadNogginBySlug = async (
   context: AppLoadContext,
-  { slug }: { slug: string },
+  { slug }: { slug: string | null | undefined },
 ) => {
+  if (!slug) {
+    throw notFound();
+  }
+
   requireUser(context);
 
   const noggin = await prisma.noggin.findUnique({
@@ -138,12 +142,45 @@ export const loadNogginBySlug = async (
     },
   });
 
+  await authorizeNoggin(context, {
+    nogginId: noggin?.id,
+  });
+
+  return noggin;
+};
+
+export const authorizeNoggin = async (
+  context: AppLoadContext,
+  {
+    nogginId,
+  }: // permissions,
+  {
+    nogginId: number | null | undefined;
+    // permissions:
+  },
+) => {
+  if (!nogginId) {
+    throw notFound();
+  }
+
+  const user = requireUser(context);
+
+  const noggin = await prisma.noggin.findUnique({
+    where: {
+      id: nogginId,
+    },
+    select: {
+      userOwnerId: true,
+      teamOwnerId: true,
+    },
+  });
+
   if (!noggin) {
     throw notFound();
   }
 
   // temp
-  if (noggin.userOwnerId !== context.user?.id) {
+  if (noggin.userOwnerId !== user.id) {
     throw notFound();
   }
 
@@ -153,7 +190,7 @@ export const loadNogginBySlug = async (
   // - noggin is team-owned and this user is in that team
   // - noggin has a parent organization and the user is a manager or owner of that organization
 
-  return noggin;
+  return true;
 };
 
 export const updateNogginTitle = async (

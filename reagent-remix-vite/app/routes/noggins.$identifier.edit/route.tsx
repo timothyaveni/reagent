@@ -14,7 +14,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const user = requireUser(context);
   const { identifier } = params;
 
-  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
+  const noggin = await loadNogginBySlug(context, { slug: identifier });
 
   if (!noggin) {
     throw notFound();

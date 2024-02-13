@@ -26,7 +26,7 @@ export const loader = async ({
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page')?.toString() || '1', 10) || 1;
 
-  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
+  const noggin = await loadNogginBySlug(context, { slug: identifier });
 
   if (!noggin) {
     throw notFound();
@@ -64,7 +64,7 @@ export const action = async ({
   const { identifier } = params;
 
   // TODO we can simplify this a bit once we authenticate the below code properly
-  const noggin = await loadNogginBySlug(context, { slug: identifier || '' });
+  const noggin = await loadNogginBySlug(context, { slug: identifier });
 
   if (!noggin) {
     throw notFound();
