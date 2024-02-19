@@ -1,5 +1,6 @@
 import { AppLoadContext } from '@remix-run/server-runtime';
 import { prisma } from 'db/db';
+import { getNogginTotalIncurredCost_OMNISCIENT } from 'reagent-noggin-shared/cost-calculation/get-noggin-total-incurred-cost';
 import { authorizeNoggin } from './noggin.server';
 
 const NOGGIN_RUN_PAGE_SIZE = 15;
@@ -92,24 +93,5 @@ export const getNogginTotalIncurredCost = async (
     nogginId,
   });
 
-  // let's just do this in sql
-  // of course don't love that this doesn't track with status, but such is life
-  const [{ totalCost }] = (await prisma.$queryRaw`
-    select
-      sum(coalesce("NogginRunCost"."computedCostQuastra", "NogginRunCost"."estimatedCostQuastra", 0)) as "totalCost"
-    from "NogginRun"
-    inner join "NogginRunCost" on "NogginRun"."id" = "NogginRunCost"."nogginRunId"
-    where "NogginRun"."nogginRevisionId" in (
-      select id from "NogginRevision" where "NogginRevision"."nogginId" = ${nogginId}
-    )
-  `) as { totalCost: number }[];
-
-  // console.log('totalCost', totalCost, nogginId);
-
-  // right, can't do this with queryRaw
-  // ${
-  //   includeUnfinished ? '' : 'and status != "pending" and status != "running"'
-  // }
-
-  return totalCost || 0;
+  return await getNogginTotalIncurredCost_OMNISCIENT(prisma, { nogginId });
 };

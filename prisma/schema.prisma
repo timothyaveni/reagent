@@ -187,6 +187,8 @@ model Noggin {
   aiModelId Int
 
   apiKeys NogginAPIKey[]
+
+  totalAllocatedCreditQuastra BigInt?
 }
 
 model NogginRevision {
