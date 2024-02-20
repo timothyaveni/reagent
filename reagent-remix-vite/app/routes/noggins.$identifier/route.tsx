@@ -1,6 +1,10 @@
 import { json } from '@remix-run/node';
 import { useEffect, useState } from 'react';
-import { loadNogginBySlug, updateNogginTitle } from '~/models/noggin.server';
+import {
+  loadNogginBySlug,
+  updateNogginBudget,
+  updateNogginTitle,
+} from '~/models/noggin.server';
 
 import { Outlet, useLoaderData, useRevalidator } from '@remix-run/react';
 import {
@@ -9,7 +13,10 @@ import {
   ServerRuntimeMetaFunction as MetaFunction,
 } from '@remix-run/server-runtime';
 import { WebsocketProvider } from 'y-websocket';
-import { getNogginTotalIncurredCost } from '~/models/nogginRuns.server';
+import {
+  getNogginTotalAllocatedCreditQuastra,
+  getNogginTotalIncurredCostQuastra,
+} from '~/models/nogginRuns.server';
 import { notFound } from '~/route-utils/status-code';
 import {
   NogginEditorStore,
@@ -41,16 +48,25 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
   const authToken = genAuthTokenForNoggin(noggin.id);
 
-  const totalIncurredCost = await getNogginTotalIncurredCost(context, {
-    nogginId: noggin.id,
-  });
+  const totalIncurredCostQuastra = await getNogginTotalIncurredCostQuastra(
+    context,
+    {
+      nogginId: noggin.id,
+    },
+  );
+
+  const totalAllocatedCreditQuastra =
+    await getNogginTotalAllocatedCreditQuastra(context, {
+      nogginId: noggin.id,
+    });
 
   return json({
     Y_WEBSOCKET_SERVER_EXTERNAL_URL:
       process.env.Y_WEBSOCKET_SERVER_EXTERNAL_URL || '',
     noggin,
     authToken,
-    totalIncurredCost,
+    totalIncurredCostQuastra,
+    totalAllocatedCreditQuastra,
   });
 };
 
@@ -61,13 +77,60 @@ export const action = async ({
 }: ActionFunctionArgs) => {
   const { identifier } = params;
 
-  const body = await request.formData();
-  const newTitle = body.get('newTitle')?.toString() || null;
+  const noggin = await loadNogginBySlug(context, { slug: identifier });
 
-  if (newTitle !== null) {
-    await updateNogginTitle(context, {
-      nogginSlug: identifier || '',
-      title: newTitle,
+  if (!noggin) {
+    throw notFound();
+  }
+
+  const body = await request.formData();
+  const action = body.get('action')?.toString() || null;
+
+  if (action === 'saveTitle') {
+    const newTitle = body.get('newTitle')?.toString() || null;
+
+    if (newTitle !== null) {
+      await updateNogginTitle(context, {
+        nogginSlug: identifier || '',
+        title: newTitle,
+      });
+
+      return json({ ok: true });
+    }
+  } else if (action === 'setBudget') {
+    const budgetQuastra = body.get('budgetQuastra')?.toString() || null;
+
+    let savedBudgetQuastra;
+    if (budgetQuastra === null || budgetQuastra === 'null') {
+      savedBudgetQuastra = null;
+    } else {
+      savedBudgetQuastra = parseFloat(budgetQuastra);
+      if (isNaN(savedBudgetQuastra)) {
+        return json({ ok: false, error: 'Invalid budget' }, { status: 400 });
+      }
+
+      const minBudget = await getNogginTotalIncurredCostQuastra(context, {
+        nogginId: noggin.id,
+      });
+
+      if (savedBudgetQuastra < minBudget) {
+        return json(
+          {
+            ok: false,
+            error: 'Budget must be at least the total incurred cost',
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    if (savedBudgetQuastra !== null) {
+      savedBudgetQuastra = BigInt(Math.round(savedBudgetQuastra));
+    }
+
+    await updateNogginBudget(context, {
+      nogginId: noggin.id,
+      budgetQuastra: savedBudgetQuastra,
     });
 
     return json({ ok: true });

@@ -1,6 +1,8 @@
+import { Edit as EditIcon } from '@mui/icons-material';
 import {
   Box,
   Divider,
+  IconButton,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
@@ -12,11 +14,16 @@ import T from '~/i18n/T';
 import NogginTitleInput from './NogginTitleInput';
 
 import { CostText } from '~/components/CostText';
+import BudgetModal from './BudgetModal';
 import './EditorHeader.css';
 import { NogginRouteLoaderType } from './route';
 
 const EditorHeader: React.FC = () => {
-  const { noggin, totalIncurredCost } = useLoaderData<NogginRouteLoaderType>();
+  const { noggin, totalIncurredCostQuastra, totalAllocatedCreditQuastra } =
+    useLoaderData<NogginRouteLoaderType>();
+
+  const [isShowingBudgetModal, setIsShowingBudgetModal] = React.useState(false);
+
   const navigate = useNavigate();
   const locationMatches = useMatches();
   console.log({ locationMatches });
@@ -61,8 +68,42 @@ const EditorHeader: React.FC = () => {
               </Typography>
               <Typography variant="body2" color="textSecondary" component="p">
                 <T flagged>
-                  <CostText quastra={totalIncurredCost} /> spent
+                  <CostText quastra={totalIncurredCostQuastra} /> spent
                 </T>
+              </Typography>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                component="p"
+                display="flex"
+                alignItems="center"
+                gap={1}
+              >
+                {totalAllocatedCreditQuastra === null ? (
+                  <T>unlimited budget</T>
+                ) : (
+                  <T flagged>
+                    <CostText quastra={totalAllocatedCreditQuastra} /> budgeted
+                  </T>
+                )}
+
+                <Box
+                  onClick={() => {
+                    setIsShowingBudgetModal(true);
+                  }}
+                >
+                  <IconButton>
+                    <EditIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                </Box>
+
+                <BudgetModal
+                  open={isShowingBudgetModal}
+                  setOpen={(open: boolean) => {
+                    setIsShowingBudgetModal(open);
+                  }}
+                  currentBudgetQuastra={totalAllocatedCreditQuastra}
+                />
               </Typography>
             </Stack>
           </Stack>

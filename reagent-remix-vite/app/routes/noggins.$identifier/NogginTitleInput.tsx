@@ -28,6 +28,7 @@ export default function NogginTitleInput({
 
         saveTitle(
           {
+            action: 'saveTitle',
             newTitle: shownTitle,
           },
           {

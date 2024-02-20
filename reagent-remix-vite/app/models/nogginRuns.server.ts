@@ -79,7 +79,7 @@ export async function getNogginRuns(
   };
 }
 
-export const getNogginTotalIncurredCost = async (
+export const getNogginTotalIncurredCostQuastra = async (
   context: AppLoadContext,
   {
     nogginId,
@@ -94,4 +94,32 @@ export const getNogginTotalIncurredCost = async (
   });
 
   return await getNogginTotalIncurredCost_OMNISCIENT(prisma, { nogginId });
+};
+
+export const getNogginTotalAllocatedCreditQuastra = async (
+  context: AppLoadContext,
+  {
+    nogginId,
+  }: {
+    nogginId: number;
+  },
+): Promise<number | null> => {
+  await authorizeNoggin(context, {
+    nogginId,
+  });
+
+  const { totalAllocatedCreditQuastra } = (await prisma.noggin.findFirst({
+    where: {
+      id: nogginId,
+    },
+    select: {
+      totalAllocatedCreditQuastra: true,
+    },
+  })) || { totalAllocatedCreditQuastra: null };
+
+  if (totalAllocatedCreditQuastra === null) {
+    return null;
+  }
+
+  return Number(totalAllocatedCreditQuastra);
 };

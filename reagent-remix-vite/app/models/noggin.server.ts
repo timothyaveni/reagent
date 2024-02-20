@@ -204,18 +204,14 @@ export const updateNogginTitle = async (
       slug: nogginSlug,
     },
     select: {
+      id: true,
       userOwnerId: true,
     },
   });
 
-  if (!noggin) {
-    throw notFound();
-  }
-
-  // temp. should require some 'manage' permission probably, like adding credits, not an edit permission. idk
-  if (noggin.userOwnerId !== user.id) {
-    throw notFound();
-  }
+  await authorizeNoggin(context, {
+    nogginId: noggin?.id,
+  });
 
   await prisma.noggin.update({
     where: {
@@ -227,6 +223,30 @@ export const updateNogginTitle = async (
   });
 
   return true;
+};
+
+export const updateNogginBudget = async (
+  context: AppLoadContext,
+  {
+    nogginId,
+    budgetQuastra,
+  }: {
+    nogginId: number;
+    budgetQuastra: bigint | null;
+  },
+) => {
+  await authorizeNoggin(context, {
+    nogginId,
+  });
+
+  await prisma.noggin.update({
+    where: {
+      id: nogginId,
+    },
+    data: {
+      totalAllocatedCreditQuastra: budgetQuastra,
+    },
+  });
 };
 
 export const loadNogginsIndex = async (context: AppLoadContext) => {

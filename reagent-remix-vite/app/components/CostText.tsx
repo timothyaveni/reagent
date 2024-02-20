@@ -12,3 +12,8 @@ export const CostText = ({ quastra }: { quastra: number }) => {
     </T>
   );
 };
+
+export const roundedCreditCount = (quastra: number) => {
+  const creditCount = unit(quastra, 'quastra').toNumber('credits');
+  return Math.round(creditCount * 1000000) / 1000000;
+};
