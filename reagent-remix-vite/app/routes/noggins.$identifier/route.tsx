@@ -114,13 +114,7 @@ export const action = async ({
       });
 
       if (savedBudgetQuastra < minBudget) {
-        return json(
-          {
-            ok: false,
-            error: 'Budget must be at least the total incurred cost',
-          },
-          { status: 400 },
-        );
+        savedBudgetQuastra = minBudget;
       }
     }
 
