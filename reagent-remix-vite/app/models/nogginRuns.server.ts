@@ -93,7 +93,9 @@ export const getNogginTotalIncurredCostQuastra = async (
     nogginId,
   });
 
-  return await getNogginTotalIncurredCost_OMNISCIENT(prisma, { nogginId });
+  return Number(
+    await getNogginTotalIncurredCost_OMNISCIENT(prisma, { nogginId }),
+  );
 };
 
 export const getNogginTotalAllocatedCreditQuastra = async (

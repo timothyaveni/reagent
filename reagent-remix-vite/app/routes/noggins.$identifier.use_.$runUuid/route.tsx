@@ -25,6 +25,7 @@ import { LogEntry } from 'reagent-noggin-shared/log';
 import MUILink from '~/components/MUILink';
 import PreformattedText from '~/components/PreformattedText';
 import T from '~/i18n/T';
+import { loadNogginBySlug } from '~/models/noggin.server';
 import './NogginRun.css';
 import { ExecutionLog } from './execution-log/ExecutionLog.client';
 import { IOVisualization } from './io-visualization/IOVisualization';
@@ -40,15 +41,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
-  const noggin = await prisma.noggin.findUnique({
-    where: {
-      slug: params.identifier,
-    },
-  });
-
-  if (!noggin) {
-    throw notFound();
-  }
+  const noggin = await loadNogginBySlug(context, { slug: params.identifier });
 
   // TODO important make sure they own this noggin lol
   // i mean, we're going to fix the key function right

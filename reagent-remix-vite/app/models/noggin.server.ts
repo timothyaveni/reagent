@@ -146,6 +146,10 @@ export const loadNogginBySlug = async (
     nogginId: noggin?.id,
   });
 
+  if (!noggin) {
+    throw notFound();
+  }
+
   return noggin;
 };
 
