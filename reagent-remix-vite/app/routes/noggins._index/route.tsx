@@ -77,6 +77,19 @@ function NogginCard({
                     <strong>{noggin.aiModel.name}</strong>
                   </T>
                 </Typography>
+                {noggin.parentOrg && (
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    component="p"
+                    className="noggin-description"
+                  >
+                    <T flagged>
+                      Within the organization{' '}
+                      <strong>{noggin.parentOrg.name}</strong>
+                    </T>
+                  </Typography>
+                )}
               </Stack>
               <NogginCardIOSchema
                 variables={

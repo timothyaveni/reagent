@@ -11,12 +11,15 @@ import {
   uniqueNamesGenerator,
 } from 'unique-names-generator';
 import { notFound } from '~/route-utils/status-code';
+import { OrganizationRole } from '~/shared/organization';
+import { requireAtLeastUserOrganizationRole } from './organization.server';
 
 export const createNoggin = async (
   context: AppLoadContext,
   nogginData: {
     ownerType: 'user' | 'team';
     ownerId: number;
+    containingOrganizationId: number | null;
     aiModelId: number;
     name: string;
   },
@@ -28,6 +31,14 @@ export const createNoggin = async (
   } else if (nogginData.ownerType === 'team') {
     // TODO
     throw new Error('Cannot create noggin for a team');
+  }
+
+  const { containingOrganizationId } = nogginData;
+  if (containingOrganizationId !== null) {
+    await requireAtLeastUserOrganizationRole(context, {
+      organizationId: containingOrganizationId,
+      role: OrganizationRole.MEMBER,
+    });
   }
 
   // there is a race condition of course but the database has a uniqueness constraint. user will live
@@ -71,6 +82,11 @@ export const createNoggin = async (
               },
             },
           }),
+      ...(containingOrganizationId !== null
+        ? {
+            parentOrg: { connect: { id: containingOrganizationId } },
+          }
+        : {}),
     },
   });
 
@@ -286,6 +302,11 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
               name: true,
             },
           },
+        },
+      },
+      parentOrg: {
+        select: {
+          name: true,
         },
       },
     },

@@ -64,6 +64,35 @@ export const requireUserOrganizationRole = async (
   }
 };
 
+export const requireAtLeastUserOrganizationRole = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+    role,
+  }: {
+    organizationId: number;
+    role: OrganizationRole;
+  },
+) => {
+  // idk this is maybe an antipattern because roles might not be a linear hierarchy
+  // but i feel like using the other function is just going to be error-prone
+  const orderedRoles = [
+    OrganizationRole.MEMBER,
+    OrganizationRole.MANAGER,
+    OrganizationRole.OWNER,
+  ];
+
+  const relevantRoles = orderedRoles.slice(
+    orderedRoles.indexOf(role),
+    orderedRoles.length,
+  );
+
+  await requireUserOrganizationRole(context, {
+    organizationId,
+    role: relevantRoles,
+  });
+};
+
 export const createOrganization = async (
   context: AppLoadContext,
   {

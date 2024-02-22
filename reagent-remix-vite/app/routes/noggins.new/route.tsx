@@ -12,7 +12,12 @@ import {
   Autocomplete,
   Box,
   Button,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
   Paper,
+  Radio,
+  RadioGroup,
   Stack,
   TextField,
   Typography,
@@ -60,9 +65,17 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     throw new Error('name is required');
   }
 
+  const orgControl = formData.get('org-control')?.toString() || 'personal';
+  let nogginOrgOwner: number | null = null;
+
+  if (orgControl !== null && orgControl !== 'personal') {
+    nogginOrgOwner = parseInt(orgControl, 10);
+  }
+
   const noggin = await createNoggin(context, {
     ownerType: 'user',
     ownerId: user.id,
+    containingOrganizationId: nogginOrgOwner,
     aiModelId,
     name,
   });
@@ -74,9 +87,7 @@ export default function NewNoggin() {
   const { orgs, aiModels } = useLoaderData<typeof loader>();
 
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
-  const [nogginOwnershipType, setNogginOwnershipType] = useState<
-    'personal' | 'org'
-  >('personal');
+  const [nogginOrgOwner, setNogginOrgOwner] = useState<number | null>(null);
 
   return (
     <div className="new-noggin">
@@ -127,6 +138,68 @@ export default function NewNoggin() {
                   name="aiModelId"
                   value={selectedModelId ?? ''}
                 />
+
+                {orgs.length > 0 && (
+                  <FormControl>
+                    <FormLabel id="org-control-label">
+                      <Typography variant="body1" color="textPrimary">
+                        <T flagged>
+                          Create this noggin within an{' '}
+                          <strong>organization</strong>?
+                        </T>
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        gutterBottom
+                      >
+                        <T>
+                          Creating a noggin within an organization gives full
+                          edit access to organization managers, and also causes
+                          the noggin to be paid for by the organization.
+                        </T>
+                      </Typography>
+                    </FormLabel>
+                    <RadioGroup
+                      name="org-control"
+                      aria-labelledby="org-control-label"
+                      value={
+                        nogginOrgOwner === null
+                          ? 'personal'
+                          : nogginOrgOwner.toString()
+                      }
+                      onChange={(e) => {
+                        if (e.target.value === 'null') {
+                          setNogginOrgOwner(null);
+                        } else {
+                          setNogginOrgOwner(parseInt(e.target.value, 10));
+                        }
+                      }}
+                    >
+                      <FormControlLabel
+                        value="personal"
+                        control={<Radio />}
+                        label={<T>No, make this a personal noggin</T>}
+                      />
+                      {orgs.map((org) => (
+                        <FormControlLabel
+                          key={org.id}
+                          value={org.id.toString()}
+                          control={<Radio />}
+                          label={
+                            <T flagged>
+                              Create a noggin owned by{' '}
+                              <strong>{org.name}</strong>
+                            </T>
+                          }
+                          onChange={(e) => {
+                            setNogginOrgOwner(org.id);
+                          }}
+                        />
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                )}
               </Stack>
             </Paper>
             <Box alignSelf="flex-end">
