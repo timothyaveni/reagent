@@ -152,9 +152,13 @@ export const loadOrganization = async (
   {
     id,
   }: {
-    id: number;
+    id: number | null;
   },
 ): Promise<OrganizationLoadResponse | null> => {
+  if (id === null) {
+    return null;
+  }
+
   const organization = await prisma.organization.findUnique({
     where: {
       id,

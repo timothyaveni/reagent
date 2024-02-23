@@ -111,15 +111,16 @@ model RejectedMerge {
 }
 
 model Organization {
-  id                Int                      @id @default(autoincrement())
-  createdAt         DateTime                 @default(now())
-  updatedAt         DateTime                 @updatedAt
-  deletedAt         DateTime?
-  name              String
-  teams             Team[]
-  members           OrganizationMembership[]
-  noggins           Noggin[]
-  ltiv1p3Connection LTIv1p3Connection?
+  id                          Int                           @id @default(autoincrement())
+  createdAt                   DateTime                      @default(now())
+  updatedAt                   DateTime                      @updatedAt
+  deletedAt                   DateTime?
+  name                        String
+  teams                       Team[]
+  members                     OrganizationMembership[]
+  noggins                     Noggin[]
+  ltiv1p3Connection           LTIv1p3Connection?
+  modelProviderOrgCredentials ModelProviderOrgCredentials[]
 }
 
 enum OrganizationMembershipRole {
@@ -365,6 +366,7 @@ model ModelProvider {
   credentialsSchemaVersion         Int
   needsCredentials                 Boolean
   modelProviderPersonalCredentials ModelProviderPersonalCredentials[]
+  modelProviderOrgCredentials      ModelProviderOrgCredentials[]
 }
 
 model ModelProviderPersonalCredentials {
@@ -383,6 +385,24 @@ model ModelProviderPersonalCredentials {
   credentialsVersion Int
 
   @@unique([modelProviderId, userId, credentialsVersion])
+}
+
+model ModelProviderOrgCredentials {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  modelProvider   ModelProvider @relation(fields: [modelProviderId], references: [id])
+  modelProviderId Int
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+
+  credentials        Json
+  credentialsVersion Int
+
+  @@unique([modelProviderId, organizationId, credentialsVersion])
 }
 
 model AIModel {

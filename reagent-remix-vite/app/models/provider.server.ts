@@ -1,6 +1,8 @@
 import { AppLoadContext } from '@remix-run/server-runtime';
 import { prisma } from 'db/db';
 import { requireUser } from '~/auth/auth.server';
+import { OrganizationRole } from '~/shared/organization';
+import { requireAtLeastUserOrganizationRole } from './organization.server';
 
 export const getProviderPublicData = async (
   provider: string | null | undefined,
@@ -91,6 +93,85 @@ export const upsertProviderCredentialsForUser = async (
     create: {
       modelProviderId: providerId,
       userId: user.id,
+      credentialsVersion: credentialsSchemaVersion,
+      credentials: credentials as any,
+    },
+  });
+};
+
+export const getProviderCredentialsForOrg = async (
+  context: AppLoadContext,
+  {
+    providerId,
+    providerCredentialsSchemaVersion,
+    orgId,
+  }: {
+    providerId: number;
+    providerCredentialsSchemaVersion: number;
+    orgId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId: orgId,
+    role: OrganizationRole.OWNER,
+  });
+
+  return await prisma.modelProviderOrgCredentials.findUnique({
+    where: {
+      modelProviderId_organizationId_credentialsVersion: {
+        modelProviderId: providerId,
+        organizationId: orgId,
+        credentialsVersion: providerCredentialsSchemaVersion,
+      },
+    },
+    select: {
+      credentials: true,
+    },
+  });
+};
+
+export const upsertProviderCredentialsForOrg = async (
+  context: AppLoadContext,
+  {
+    providerName,
+    credentialsSchemaVersion,
+    credentials,
+    orgId,
+  }: {
+    providerName: string;
+    credentialsSchemaVersion: number;
+    credentials: Record<string, unknown>;
+    orgId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId: orgId,
+    role: OrganizationRole.OWNER,
+  });
+
+  const { id: providerId } = await prisma.modelProvider.findUniqueOrThrow({
+    where: {
+      name: providerName,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return await prisma.modelProviderOrgCredentials.upsert({
+    where: {
+      modelProviderId_organizationId_credentialsVersion: {
+        modelProviderId: providerId,
+        organizationId: orgId,
+        credentialsVersion: credentialsSchemaVersion,
+      },
+    },
+    update: {
+      credentials: credentials as any,
+    },
+    create: {
+      modelProviderId: providerId,
+      organizationId: orgId,
       credentialsVersion: credentialsSchemaVersion,
       credentials: credentials as any,
     },

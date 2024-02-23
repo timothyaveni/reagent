@@ -6,11 +6,10 @@ import {
 } from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
 import { ModelProviderCredentialsForm } from '~/components/ModelProviderCredentials/ModelProviderCredentialsForm';
-import { indexOrganizations } from '~/models/organization.server';
 import {
-  getProviderCredentialsForUser,
+  getProviderCredentialsForOrg,
   getProviderPublicData,
-  upsertProviderCredentialsForUser,
+  upsertProviderCredentialsForOrg,
 } from '~/models/provider.server';
 import { notFound } from '~/route-utils/status-code';
 
@@ -18,6 +17,8 @@ import { json } from '@remix-run/node';
 import MUILink from '~/components/MUILink';
 
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+import T from '~/i18n/T';
+import { loadOrganization } from '~/models/organization.server';
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
     { title: `${data?.provider.friendlyName} :: Providers :: reagent` },
@@ -31,25 +32,31 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   requireUser(context);
 
-  const { name } = params;
+  const { name, orgId: orgIdParam } = params;
+  const orgId = orgIdParam ? parseInt(orgIdParam, 10) : null;
 
-  const [provider, orgs] = await Promise.all([
+  const [provider, organization] = await Promise.all([
     getProviderPublicData(name),
-    indexOrganizations(context),
+    loadOrganization(context, { id: orgId }),
   ]);
 
   if (!provider) {
     throw notFound();
   }
 
-  const dbCredentials = await getProviderCredentialsForUser(context, {
+  if (!organization) {
+    throw notFound();
+  }
+
+  const dbCredentials = await getProviderCredentialsForOrg(context, {
+    orgId: organization.id,
     providerId: provider.id,
     providerCredentialsSchemaVersion: provider.credentialsSchemaVersion,
   });
 
   return {
     provider,
-    orgs,
+    organization,
     currentCredentials: dbCredentials?.credentials || {},
   };
 };
@@ -63,16 +70,18 @@ export const action = async ({
     credentials: Record<string, unknown>;
     credentialsVersion: number;
   } = await request.json();
-  // todo: it may be wise to validate the data against the schema here
-  // todo: also, check that the key actually works
-  // todo: also, uh, maybe look into encrypting the credentials
+  // todos: same as personal creds
 
-  // big todo: write-only
+  const { name, orgId: orgIdParam } = params;
+  const orgId = orgIdParam ? parseInt(orgIdParam, 10) : null;
 
-  const { name } = params;
+  if (orgId === null) {
+    throw notFound();
+  }
 
-  await upsertProviderCredentialsForUser(context, {
+  await upsertProviderCredentialsForOrg(context, {
     providerName: name || '',
+    orgId,
     credentials: data.credentials,
     credentialsSchemaVersion: data.credentialsVersion,
   });
@@ -83,16 +92,23 @@ export const action = async ({
 };
 
 export default function Provider() {
-  const { provider, orgs, currentCredentials } = useLoaderData<typeof loader>();
+  const { provider, organization, currentCredentials } =
+    useLoaderData<typeof loader>();
   const actionResponse = useActionData<typeof action>();
   const submit = useSubmit();
 
   return (
     <Box mt={4}>
       <Breadcrumbs>
-        <MUILink to="/providers" underline="hover">
-          Providers
+        <MUILink to="/organizations" underline="hover">
+          Organizations
         </MUILink>
+        <MUILink to={`/organizations/${organization.id}`} underline="hover">
+          {organization.name}
+        </MUILink>
+        {/* <MUILink to={`/organizations/${organization.id}/providers`} underline="hover"> */}
+        <Typography color="text.primary">Providers</Typography>
+        {/* </MUILink> */}
         <Typography color="text.primary">{provider.friendlyName}</Typography>
       </Breadcrumbs>
 
@@ -100,31 +116,12 @@ export default function Provider() {
 
       <h2>Credentials</h2>
       <p>
-        To use models from {provider.friendlyName} in your personal noggins, you
-        need to configure credentials.
+        <T flagged>
+          For members of the <strong>{organization.name}</strong> organization
+          to be able to use models from {provider.friendlyName} in organization
+          noggins, you need to configure credentials.
+        </T>
       </p>
-
-      {orgs.length === 1 ? (
-        <Alert severity="info">
-          I notice you're a member of the <strong>{orgs[0].name}</strong>{' '}
-          organization. Any noggins you make owned by that organization will be
-          billed to <strong>{orgs[0].name}</strong>, so you don't need to
-          configure any credentials here. If you do want to make your own
-          personal noggins and pay for them yourself, that's what this page is
-          for.
-        </Alert>
-      ) : null}
-
-      {orgs.length > 1 ? (
-        <Alert severity="info">
-          I notice you're a member of some organizations (e.g.{' '}
-          <strong>{orgs[0].name}</strong>, <strong>{orgs[1].name}</strong>). Any
-          organization-owned noggins you make will be billed to that
-          organization, so you don't need to configure any credentials here. If
-          you do want to make your own personal noggins and pay for them
-          yourself, that's what this page is for.
-        </Alert>
-      ) : null}
 
       <ModelProviderCredentialsForm
         credentialsSchema={
