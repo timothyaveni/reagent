@@ -143,6 +143,8 @@ model OrganizationMembership {
 
   role OrganizationMembershipRole
 
+  // totalPermittedSpendQuastra BigInt?
+
   @@unique([organizationId, userId])
 }
 

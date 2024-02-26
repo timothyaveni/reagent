@@ -24,9 +24,10 @@ import {
 } from '@mui/material';
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
 import { useState } from 'react';
+import { unit } from 'reagent-noggin-shared/cost-calculation/units';
+import { NogginBudgetEntry } from '~/components/NogginBudgetEntry';
 import T, { t } from '~/i18n/T';
 import { indexAIModels } from '~/models/aiModel.server';
-import './NewNoggin.css';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -39,8 +40,6 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const user = requireUser(context);
-
   const orgs = await indexOrganizations(context);
 
   const aiModels = await indexAIModels(context);
@@ -65,6 +64,13 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     throw new Error('name is required');
   }
 
+  const budgetQuastraString = formData.get('budgetQuastra')?.toString();
+
+  let budgetQuastra: bigint | null = null;
+  if (budgetQuastraString && budgetQuastraString !== 'null') {
+    budgetQuastra = BigInt(Math.round(parseFloat(budgetQuastraString)));
+  }
+
   const orgControl = formData.get('org-control')?.toString() || 'personal';
   let nogginOrgOwner: number | null = null;
 
@@ -78,6 +84,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     containingOrganizationId: nogginOrgOwner,
     aiModelId,
     name,
+    budgetQuastra,
   });
 
   return redirect(`/noggins/${noggin.slug}/edit`);
@@ -88,6 +95,17 @@ export default function NewNoggin() {
 
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
   const [nogginOrgOwner, setNogginOrgOwner] = useState<number | null>(null);
+
+  const [chosenBudgetRadio, setChosenBudgetRadio] = useState<
+    'limited' | 'unlimited'
+  >('limited');
+
+  // const { identifier } = useParams();
+  // const saveBudget = useSubmit();
+
+  const [currentBudgetAmountQuastra, setCurrentBudgetAmountQuastra] = useState(
+    unit(25, 'credits').toNumber('quastra'),
+  );
 
   return (
     <div className="new-noggin">
@@ -142,6 +160,9 @@ export default function NewNoggin() {
                 {orgs.length > 0 && (
                   <FormControl>
                     <FormLabel id="org-control-label">
+                      <Typography variant="h3" color="textPrimary" gutterBottom>
+                        <T>Organization</T>
+                      </Typography>
                       <Typography variant="body1" color="textPrimary">
                         <T flagged>
                           Create this noggin within an{' '}
@@ -200,6 +221,38 @@ export default function NewNoggin() {
                     </RadioGroup>
                   </FormControl>
                 )}
+
+                <Typography variant="h3" color="textPrimary" gutterBottom>
+                  <T>Noggin budget</T>
+                </Typography>
+                <Typography variant="body1" color="textPrimary">
+                  <T>
+                    How many credits can the noggin spend before it stops
+                    running? It's good to keep this low while you're testing, to
+                    make sure an infinite loop in your code doesn't spend a
+                    bunch of money.
+                  </T>
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  <T>100 credits = $1.00 USD.</T>
+                </Typography>
+
+                <NogginBudgetEntry
+                  totalIncurredCostQuastra={0}
+                  currentBudgetAmountQuastra={currentBudgetAmountQuastra}
+                  setCurrentBudgetAmountQuastra={setCurrentBudgetAmountQuastra}
+                  chosenRadio={chosenBudgetRadio}
+                  setChosenRadio={setChosenBudgetRadio}
+                />
+                <input
+                  type="hidden"
+                  name="budgetQuastra"
+                  value={
+                    chosenBudgetRadio === 'unlimited'
+                      ? 'null'
+                      : currentBudgetAmountQuastra
+                  }
+                />
               </Stack>
             </Paper>
             <Box alignSelf="flex-end">

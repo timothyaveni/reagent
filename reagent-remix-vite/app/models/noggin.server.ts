@@ -22,6 +22,7 @@ export const createNoggin = async (
     containingOrganizationId: number | null;
     aiModelId: number;
     name: string;
+    budgetQuastra: bigint | null;
   },
 ) => {
   const user = await requireUser(context);
@@ -87,6 +88,7 @@ export const createNoggin = async (
             parentOrg: { connect: { id: containingOrganizationId } },
           }
         : {}),
+      totalAllocatedCreditQuastra: nogginData.budgetQuastra,
     },
   });
 

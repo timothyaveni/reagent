@@ -1,0 +1,108 @@
+import {
+  Box,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from '@mui/material';
+import { unit } from 'reagent-noggin-shared/cost-calculation/units';
+import { CostText, roundedCreditCount } from '~/components/CostText';
+import T from '~/i18n/T';
+
+type NogginBudgetEntryProps = {
+  totalIncurredCostQuastra: number;
+  currentBudgetAmountQuastra: number;
+  setCurrentBudgetAmountQuastra: (amount: number) => void;
+
+  chosenRadio: 'limited' | 'unlimited';
+  setChosenRadio: (radio: 'limited' | 'unlimited') => void;
+};
+
+/* two options: unlimited, or a floating point number input */
+export function NogginBudgetEntry({
+  totalIncurredCostQuastra,
+  currentBudgetAmountQuastra,
+  setCurrentBudgetAmountQuastra,
+  chosenRadio,
+  setChosenRadio,
+}: NogginBudgetEntryProps) {
+  const currentBudgetAmountCredits = roundedCreditCount(
+    currentBudgetAmountQuastra,
+  );
+  const totalIncurredCostCredits = roundedCreditCount(totalIncurredCostQuastra);
+
+  return (
+    <RadioGroup
+      value={chosenRadio}
+      onChange={(event) => {
+        setChosenRadio(event.target.value as 'limited' | 'unlimited');
+      }}
+    >
+      <FormControlLabel
+        value="unlimited"
+        control={<Radio />}
+        label={<T>Unlimited</T>}
+      />
+      <FormControlLabel
+        value="limited"
+        control={<Radio />}
+        label={
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Box
+              gap={1}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Typography>
+                <T flagged>Limit to</T>
+              </Typography>
+              <TextField
+                type="text"
+                variant="standard"
+                inputProps={{
+                  min: totalIncurredCostCredits,
+                  step: 0.01,
+                  sx: {
+                    width: '12ch',
+                  },
+                }}
+                onFocus={() => {
+                  setChosenRadio('limited');
+                }}
+                value={currentBudgetAmountCredits}
+                onChange={(event) => {
+                  const newParsed = parseFloat(event.target.value);
+
+                  if (isNaN(newParsed)) {
+                    return;
+                  }
+
+                  const withMin = Math.max(newParsed, totalIncurredCostCredits);
+                  setCurrentBudgetAmountQuastra(
+                    unit(withMin, 'credits').toNumber('quastra'),
+                  );
+                }}
+              />
+              <T flagged>credits</T>
+            </Box>
+            {totalIncurredCostCredits > 0 && (
+              <Typography variant="caption">
+                <T flagged>
+                  <CostText
+                    quastra={
+                      currentBudgetAmountQuastra - totalIncurredCostQuastra
+                    }
+                  />{' '}
+                  will remain
+                </T>
+              </Typography>
+            )}
+          </Box>
+        }
+      />
+    </RadioGroup>
+  );
+}
