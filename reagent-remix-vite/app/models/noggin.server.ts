@@ -12,7 +12,11 @@ import {
 } from 'unique-names-generator';
 import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
-import { requireAtLeastUserOrganizationRole } from './organization.server';
+import { getNogginTotalAllocatedCreditQuastra } from './nogginRuns.server';
+import {
+  getPermittedAdditionalBudgetForOrganizationAndUser,
+  requireAtLeastUserOrganizationRole,
+} from './organization.server';
 
 export const createNoggin = async (
   context: AppLoadContext,
@@ -62,6 +66,22 @@ export const createNoggin = async (
   //         }),
   //   },
   // });
+
+  if (containingOrganizationId) {
+    const permittedAdditionalSpend =
+      await getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+        organizationId: containingOrganizationId,
+      });
+
+    if (permittedAdditionalSpend !== null) {
+      if (
+        nogginData.budgetQuastra === null ||
+        nogginData.budgetQuastra > permittedAdditionalSpend
+      ) {
+        throw new Error('Not permitted to allocate that much budget');
+      }
+    }
+  }
 
   const noggin = await prisma.noggin.create({
     data: {
@@ -157,6 +177,7 @@ export const loadNogginBySlug = async (
         },
       },
       userOwnerId: true,
+      parentOrgId: true,
     },
   });
 
@@ -260,6 +281,43 @@ export const updateNogginBudget = async (
   await authorizeNoggin(context, {
     nogginId,
   });
+
+  const nogginWithOrgId = await prisma.noggin.findUnique({
+    where: {
+      id: nogginId,
+    },
+    select: {
+      parentOrgId: true,
+    },
+  });
+
+  if (!nogginWithOrgId) {
+    throw new Error('Noggin not found');
+  }
+
+  const { parentOrgId } = nogginWithOrgId;
+
+  if (parentOrgId) {
+    const permittedAdditionalSpend =
+      await getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+        organizationId: parentOrgId,
+      });
+
+    if (permittedAdditionalSpend !== null) {
+      const permittedAdditionalSpendIncludingThisNoggin =
+        permittedAdditionalSpend +
+        ((await getNogginTotalAllocatedCreditQuastra(context, {
+          nogginId,
+        })) || 0);
+
+      if (
+        budgetQuastra === null ||
+        budgetQuastra > permittedAdditionalSpendIncludingThisNoggin
+      ) {
+        throw new Error('Not permitted to allocate that much budget');
+      }
+    }
+  }
 
   await prisma.noggin.update({
     where: {

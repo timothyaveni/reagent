@@ -20,7 +20,8 @@ type BudgetModalProps = {
 };
 
 export default function BudgetModal(props: BudgetModalProps) {
-  const { totalIncurredCostQuastra } = useLoaderData<NogginRouteLoaderType>();
+  const { totalIncurredCostQuastra, permittedBudgetQuastra } =
+    useLoaderData<NogginRouteLoaderType>();
   // const totalIncurredCostCredits = roundedCreditCount(totalIncurredCostQuastra);
 
   const [chosenRadio, setChosenRadio] = useState<'limited' | 'unlimited'>(
@@ -85,6 +86,7 @@ export default function BudgetModal(props: BudgetModalProps) {
           setCurrentBudgetAmountQuastra={setCurrentBudgetAmountQuastra}
           chosenRadio={chosenRadio}
           setChosenRadio={setChosenRadio}
+          maxPermittedBudgetQuastra={permittedBudgetQuastra}
         />
       </DialogContent>
       <DialogActions>

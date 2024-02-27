@@ -1,4 +1,5 @@
 import { AppLoadContext } from '@remix-run/node';
+import { getTotalOrganizationSpendForUser_OMNISCIENT } from 'reagent-noggin-shared/cost-calculation/get-noggin-total-incurred-cost';
 import { requireUser } from '~/auth/auth.server';
 import prisma from '~/db';
 import { LTIConnectionOwnerVisibleParams } from '~/shared/ltiConnection';
@@ -125,6 +126,7 @@ type OrganizationLoadMemberResponse = {
   id: number;
   name: string;
   userOrganizationRole: 'member';
+  totalPermittedSpendQuastra: number | null;
 };
 
 type OrganizationLoadManagerResponse = {
@@ -132,6 +134,7 @@ type OrganizationLoadManagerResponse = {
   name: string;
   userOrganizationRole: 'manager';
   allMembers: number[];
+  totalPermittedSpendQuastra: number | null;
 };
 
 type OrganizationLoadOwnerResponse = {
@@ -140,6 +143,7 @@ type OrganizationLoadOwnerResponse = {
   userOrganizationRole: 'owner';
   allMembers: number[];
   ltiConnection: LTIConnectionOwnerVisibleParams | null;
+  totalPermittedSpendQuastra: number | null;
 };
 
 export type OrganizationLoadResponse =
@@ -183,6 +187,7 @@ export const loadOrganization = async (
     },
     select: {
       role: true,
+      totalPermittedSpendQuastra: true,
     },
   });
 
@@ -195,6 +200,7 @@ export const loadOrganization = async (
       id,
       name: organization.name,
       userOrganizationRole: OrganizationRole.MEMBER,
+      totalPermittedSpendQuastra: Number(membership.totalPermittedSpendQuastra),
     };
   } else {
     const allMembers = await prisma.organizationMembership.findMany({
@@ -215,6 +221,9 @@ export const loadOrganization = async (
         name: organization.name,
         userOrganizationRole: OrganizationRole.MANAGER,
         allMembers: allMembers.map(({ user }) => user.id),
+        totalPermittedSpendQuastra: Number(
+          membership.totalPermittedSpendQuastra,
+        ),
       };
     } else if (membership.role === OrganizationRole.OWNER) {
       const ltiConnection = await prisma.lTIv1p3Connection.findUnique({
@@ -242,6 +251,9 @@ export const loadOrganization = async (
               lastSeenConsumerName: ltiConnection.lastSeenConsumerName,
             }
           : null,
+        totalPermittedSpendQuastra: Number(
+          membership.totalPermittedSpendQuastra,
+        ),
       };
     } else {
       throw new Error('Invalid organization role');
@@ -265,4 +277,97 @@ export const addUserToOrganization_OMNIPOTENT = async ({
       role,
     },
   });
+};
+
+export const getTotalNogginBudgetsForOrganizationAndUser = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+  }: {
+    organizationId: number;
+  },
+) => {
+  const user = requireUser(context);
+
+  requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.MEMBER,
+  });
+
+  const totalBudget = await prisma.noggin.aggregate({
+    where: {
+      parentOrgId: organizationId,
+      userOwnerId: user.id,
+    },
+    _sum: {
+      totalAllocatedCreditQuastra: true,
+    },
+  });
+
+  // todo: we should also probably include a count of unlimited-budget noggins
+  return Number(totalBudget._sum?.totalAllocatedCreditQuastra || 0);
+};
+
+export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+  }: {
+    organizationId: number;
+  },
+) => {
+  const user = requireUser(context);
+
+  requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.MEMBER,
+  });
+
+  const permittedSpend = await prisma.organizationMembership.findUnique({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId: user.id,
+      },
+    },
+    select: {
+      totalPermittedSpendQuastra: true,
+    },
+  });
+
+  if (permittedSpend === null) {
+    return null;
+  }
+
+  const alreadyBudgeted = await getTotalNogginBudgetsForOrganizationAndUser(
+    context,
+    {
+      organizationId,
+    },
+  );
+
+  return Number(permittedSpend.totalPermittedSpendQuastra) - alreadyBudgeted;
+};
+
+export const getTotalOrganizationSpendForUser = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+  }: {
+    organizationId: number;
+  },
+) => {
+  const user = requireUser(context);
+
+  requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.MEMBER,
+  });
+
+  const totalSpend = await getTotalOrganizationSpendForUser_OMNISCIENT(prisma, {
+    organizationId,
+    userId: user.id,
+  });
+
+  return Number(totalSpend);
 };

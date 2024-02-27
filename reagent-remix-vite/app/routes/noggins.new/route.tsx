@@ -6,7 +6,10 @@ import {
 } from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
 import { createNoggin } from '~/models/noggin.server';
-import { indexOrganizations } from '~/models/organization.server';
+import {
+  getPermittedAdditionalBudgetForOrganizationAndUser,
+  indexOrganizations,
+} from '~/models/organization.server';
 
 import {
   Autocomplete,
@@ -42,9 +45,21 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const orgs = await indexOrganizations(context);
 
+  // joins are for losers
+  const permittedAdditionalSpend = await Promise.all(
+    orgs.map((org) =>
+      getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+        organizationId: org.id,
+      }),
+    ),
+  );
+  const permittedAdditionalSpendByOrgId = Object.fromEntries(
+    orgs.map((org, i) => [org.id, permittedAdditionalSpend[i]]),
+  );
+
   const aiModels = await indexAIModels(context);
 
-  return json({ orgs, aiModels });
+  return json({ orgs, permittedAdditionalSpendByOrgId, aiModels });
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
@@ -91,7 +106,8 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 };
 
 export default function NewNoggin() {
-  const { orgs, aiModels } = useLoaderData<typeof loader>();
+  const { orgs, permittedAdditionalSpendByOrgId, aiModels } =
+    useLoaderData<typeof loader>();
 
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
   const [nogginOrgOwner, setNogginOrgOwner] = useState<number | null>(null);
@@ -106,6 +122,11 @@ export default function NewNoggin() {
   const [currentBudgetAmountQuastra, setCurrentBudgetAmountQuastra] = useState(
     unit(25, 'credits').toNumber('quastra'),
   );
+
+  const permittedAdditionalSpend =
+    nogginOrgOwner === null
+      ? null
+      : permittedAdditionalSpendByOrgId[nogginOrgOwner];
 
   return (
     <div className="new-noggin">
@@ -190,7 +211,7 @@ export default function NewNoggin() {
                           : nogginOrgOwner.toString()
                       }
                       onChange={(e) => {
-                        if (e.target.value === 'null') {
+                        if (e.target.value === 'personal') {
                           setNogginOrgOwner(null);
                         } else {
                           setNogginOrgOwner(parseInt(e.target.value, 10));
@@ -243,6 +264,7 @@ export default function NewNoggin() {
                   setCurrentBudgetAmountQuastra={setCurrentBudgetAmountQuastra}
                   chosenRadio={chosenBudgetRadio}
                   setChosenRadio={setChosenBudgetRadio}
+                  maxPermittedBudgetQuastra={permittedAdditionalSpend}
                 />
                 <input
                   type="hidden"

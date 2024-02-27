@@ -6,6 +6,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import { useEffect } from 'react';
 import { unit } from 'reagent-noggin-shared/cost-calculation/units';
 import { CostText, roundedCreditCount } from '~/components/CostText';
 import T from '~/i18n/T';
@@ -17,6 +18,8 @@ type NogginBudgetEntryProps = {
 
   chosenRadio: 'limited' | 'unlimited';
   setChosenRadio: (radio: 'limited' | 'unlimited') => void;
+
+  maxPermittedBudgetQuastra: number | null;
 };
 
 /* two options: unlimited, or a floating point number input */
@@ -26,11 +29,37 @@ export function NogginBudgetEntry({
   setCurrentBudgetAmountQuastra,
   chosenRadio,
   setChosenRadio,
+  maxPermittedBudgetQuastra,
 }: NogginBudgetEntryProps) {
   const currentBudgetAmountCredits = roundedCreditCount(
     currentBudgetAmountQuastra,
   );
   const totalIncurredCostCredits = roundedCreditCount(totalIncurredCostQuastra);
+
+  const allowUnlimited = maxPermittedBudgetQuastra === null;
+
+  const creditsToClampedQuastra = (credits: number) => {
+    const withMin = Math.max(credits, totalIncurredCostCredits);
+    const withMinQuastra = unit(withMin, 'credits').toNumber('quastra');
+
+    if (maxPermittedBudgetQuastra === null) {
+      return withMinQuastra;
+    }
+
+    return Math.min(withMinQuastra, maxPermittedBudgetQuastra);
+  };
+
+  useEffect(() => {
+    const clamped = creditsToClampedQuastra(currentBudgetAmountCredits);
+    if (clamped !== currentBudgetAmountQuastra) {
+      setCurrentBudgetAmountQuastra(clamped);
+    }
+  }, [
+    currentBudgetAmountQuastra,
+    setCurrentBudgetAmountQuastra,
+    totalIncurredCostQuastra,
+    maxPermittedBudgetQuastra,
+  ]);
 
   return (
     <RadioGroup
@@ -41,12 +70,40 @@ export function NogginBudgetEntry({
     >
       <FormControlLabel
         value="unlimited"
-        control={<Radio />}
-        label={<T>Unlimited</T>}
+        control={
+          <Radio
+            sx={{
+              alignSelf: 'flex-start',
+            }}
+          />
+        }
+        label={
+          <div>
+            <Typography gutterBottom>
+              <T>Unlimited</T>
+            </Typography>
+            {!allowUnlimited && (
+              <Typography variant="caption">
+                <T>
+                  Because this noggin is part of an organization and you have a
+                  total budget limit, you cannot set an unlimited budget for
+                  this noggin.
+                </T>
+              </Typography>
+            )}
+          </div>
+        }
+        disabled={!allowUnlimited}
       />
       <FormControlLabel
         value="limited"
-        control={<Radio />}
+        control={
+          <Radio
+            sx={{
+              alignSelf: 'flex-start',
+            }}
+          />
+        }
         label={
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Box
@@ -80,10 +137,8 @@ export function NogginBudgetEntry({
                     return;
                   }
 
-                  const withMin = Math.max(newParsed, totalIncurredCostCredits);
-                  setCurrentBudgetAmountQuastra(
-                    unit(withMin, 'credits').toNumber('quastra'),
-                  );
+                  const newBudget = creditsToClampedQuastra(newParsed);
+                  setCurrentBudgetAmountQuastra(newBudget);
                 }}
               />
               <T flagged>credits</T>
@@ -97,6 +152,14 @@ export function NogginBudgetEntry({
                     }
                   />{' '}
                   will remain
+                </T>
+              </Typography>
+            )}
+            {maxPermittedBudgetQuastra !== null && (
+              <Typography variant="caption">
+                <T flagged>
+                  Remaining permitted budget from your organization:{' '}
+                  <CostText quastra={maxPermittedBudgetQuastra} />
                 </T>
               </Typography>
             )}

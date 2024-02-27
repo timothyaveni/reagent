@@ -17,6 +17,7 @@ import {
   getNogginTotalAllocatedCreditQuastra,
   getNogginTotalIncurredCostQuastra,
 } from '~/models/nogginRuns.server';
+import { getPermittedAdditionalBudgetForOrganizationAndUser } from '~/models/organization.server';
 import { notFound } from '~/route-utils/status-code';
 import {
   NogginEditorStore,
@@ -60,6 +61,19 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
       nogginId: noggin.id,
     });
 
+  const permittedBudgetQuastraIncludingThisNoggin =
+    noggin.parentOrgId === null
+      ? null
+      : await getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+          organizationId: noggin.parentOrgId,
+        });
+
+  const permittedBudgetQuastra =
+    permittedBudgetQuastraIncludingThisNoggin === null
+      ? null
+      : permittedBudgetQuastraIncludingThisNoggin +
+        (totalAllocatedCreditQuastra || 0); // this || 0 is a lil awkward bc null actually means unlimited
+
   return json({
     Y_WEBSOCKET_SERVER_EXTERNAL_URL:
       process.env.Y_WEBSOCKET_SERVER_EXTERNAL_URL || '',
@@ -67,6 +81,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     authToken,
     totalIncurredCostQuastra,
     totalAllocatedCreditQuastra,
+    permittedBudgetQuastra,
   });
 };
 

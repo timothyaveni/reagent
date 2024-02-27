@@ -2,6 +2,8 @@ import { json, redirect } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import {
   OrganizationLoadResponse,
+  getTotalNogginBudgetsForOrganizationAndUser,
+  getTotalOrganizationSpendForUser,
   loadOrganization,
 } from '~/models/organization.server';
 import { notFound } from '~/route-utils/status-code';
@@ -17,6 +19,7 @@ import MUILink from '~/components/MUILink';
 import { createNewLTIConnection } from '~/models/ltiConnection.server';
 
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+import { CostText } from '~/components/CostText';
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
     { title: `${data?.organization?.name} :: Organizations :: reagent` },
@@ -42,9 +45,20 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw notFound();
   }
 
+  const [spendSoFarQuastra, nogginBudgetTotal] = await Promise.all([
+    getTotalOrganizationSpendForUser(context, {
+      organizationId: organizationData.id,
+    }),
+    getTotalNogginBudgetsForOrganizationAndUser(context, {
+      organizationId: organizationData.id,
+    }),
+  ]);
+
   return json({
     organization: organizationData,
     ltiBaseUrl: process.env.REAGENT_EXTERNAL_URL || '', // TODO warn?
+    spendSoFarQuastra,
+    nogginBudgetTotal,
   });
 };
 
@@ -75,7 +89,7 @@ export const action = async ({
   throw notFound();
 };
 
-function OrganizationView({
+function LTIView({
   organizationData,
   ltiBaseUrl,
 }: {
@@ -100,8 +114,39 @@ function OrganizationView({
   }
 }
 
+function BudgetView({
+  organizationData,
+  nogginBudgetTotal,
+  spendSoFarQuastra,
+}: {
+  organizationData: OrganizationLoadResponse;
+  nogginBudgetTotal: number;
+  spendSoFarQuastra: number;
+}) {
+  return (
+    <>
+      <p>
+        Organization spend so far: <CostText quastra={spendSoFarQuastra} />
+      </p>
+      <p>
+        Total noggin budgets within this organization:{' '}
+        <CostText quastra={nogginBudgetTotal} />
+      </p>
+      <p>
+        Organization total permitted budget:{' '}
+        {organizationData.totalPermittedSpendQuastra ? (
+          <CostText quastra={organizationData.totalPermittedSpendQuastra} />
+        ) : (
+          'unlimited'
+        )}
+      </p>
+    </>
+  );
+}
+
 export default function Organization() {
-  const { organization, ltiBaseUrl } = useLoaderData<typeof loader>();
+  const { organization, ltiBaseUrl, nogginBudgetTotal, spendSoFarQuastra } =
+    useLoaderData<typeof loader>();
 
   return (
     <Box mt={4}>
@@ -113,10 +158,13 @@ export default function Organization() {
       </Breadcrumbs>
       <h1>{organization.name}</h1>
 
-      <OrganizationView
+      <BudgetView
         organizationData={organization}
-        ltiBaseUrl={ltiBaseUrl}
+        nogginBudgetTotal={nogginBudgetTotal}
+        spendSoFarQuastra={spendSoFarQuastra}
       />
+
+      <LTIView organizationData={organization} ltiBaseUrl={ltiBaseUrl} />
     </Box>
   );
 }
