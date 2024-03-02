@@ -16,7 +16,7 @@ export function ImageEditor({ inputKey, input }: ImageEditorProps) {
     useInputValueState<ModelInput_Image_Value>(inputKey);
 
   return (
-    <Box p={2}>
+    <Box px={2} pb={2} pt={1}>
       <SingleImagePresignedInput
         name={`image_input_${inputKey}`}
         currentUrl={value}
