@@ -10,10 +10,11 @@ import {
 } from '@mui/material';
 import { Form } from '@remix-run/react';
 import { useState } from 'react';
+import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import T from '~/i18n/T';
 import {
   EditorVariablesList,
-  useEditorVariables,
+  useEditorVariablesAndOverrides,
   useHasPopulatedStore,
 } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import CodeSamples from './CodeSamples';
@@ -82,6 +83,7 @@ const NewRunVariablesForm = ({
 
 type NewRunFormProps = {
   noggin: any;
+  editorSchema: EditorSchema;
   apiKey: string;
   nogginServerUrl: string;
 };
@@ -109,14 +111,19 @@ const NewRunOverrides = () => {
   return null;
 };
 
-function NewRunForm({ noggin, apiKey, nogginServerUrl }: NewRunFormProps) {
-  const variables = useEditorVariables();
+function NewRunForm({
+  noggin,
+  editorSchema,
+  apiKey,
+  nogginServerUrl,
+}: NewRunFormProps) {
+  const variables = useEditorVariablesAndOverrides(editorSchema);
   const [variableValues, setVariableValues] = useState<Record<string, any>>(
     Object.fromEntries(
       // @ts-expect-error look we're just doing a thing here
       variables.map(({ id, variable: { defaultValue } }) => [
         id,
-        defaultValue || '',
+        defaultValue ?? '',
       ]),
     ),
   );

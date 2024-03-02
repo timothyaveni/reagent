@@ -35,6 +35,7 @@ const doc = {
       ],
     },
   },
+  overridableModelInputKeys: [],
   documentParameters: {
     '513bca02-f4f5-4746-b16e-97a941e2e6c7': {
       name: 'input',

@@ -1,7 +1,7 @@
 import { Skeleton, Typography } from '@mui/material';
 import T from '~/i18n/T';
+import { useHasPopulatedStore } from '../editor-utils';
 import { VariableControlsInner } from './VariableControlsInner.client';
-import { useHasPopulatedStore } from './editor-utils';
 
 type Props = {
   // for now this is a prop, but it won't actually change throughout the lifetime of the app

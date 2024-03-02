@@ -28,6 +28,7 @@ const doc = {
     temperature: 1,
     'maximum-completion-length': 512,
   },
+  overridableModelInputKeys: [],
   documentParameters: {
     'a2c2b3ce-180a-4f64-98eb-0111e8f0302a': {
       name: 'image',

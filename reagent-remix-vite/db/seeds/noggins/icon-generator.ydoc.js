@@ -26,6 +26,7 @@ const doc = {
     height: 1024,
     'inference-steps': 40,
   },
+  overridableModelInputKeys: [],
   documentParameters: {
     'a1749c6d-fe4d-47dc-931f-d75dd6f07723': {
       type: 'text',

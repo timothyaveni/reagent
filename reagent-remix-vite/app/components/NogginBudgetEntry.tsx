@@ -127,6 +127,7 @@ export function NogginBudgetEntry({
                   },
                 }}
                 onFocus={() => {
+                  // TODO: this is in the tabindex, which makes it really hard to tab to the submit button
                   setChosenRadio('limited');
                 }}
                 value={currentBudgetAmountCredits}

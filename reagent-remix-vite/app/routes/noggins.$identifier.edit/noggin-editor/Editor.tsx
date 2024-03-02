@@ -11,8 +11,8 @@ import {
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import T from '~/i18n/T';
 import InputsColumn from './InputsColumn';
-import { AllVariableOptionControls } from './VariableOptionControls';
 import { ModelOutputEditor } from './output-editor/ModelOutputEditor';
+import { AllVariableOptionControls } from './variable-controls/VariableOptionControls';
 
 export interface EditorProps {
   noggin: {

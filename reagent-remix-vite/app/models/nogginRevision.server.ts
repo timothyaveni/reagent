@@ -34,6 +34,8 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
     }
   }
 
+  const _overridableModelInputKeys = yDoc.getArray('overridableModelInputKeys');
+
   const _documentParameters = yDoc.getMap('documentParameters');
 
   const documentParameterIdsByDocument = yDoc.getMap(

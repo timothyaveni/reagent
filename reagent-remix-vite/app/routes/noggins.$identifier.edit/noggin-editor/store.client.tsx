@@ -22,6 +22,7 @@ export const initializeStoreForNoggin = (
   const store = syncedStore<DocType>(
     {
       modelInputs: {},
+      overridableModelInputKeys: [] as string[],
       documentParameters: {},
       // using Object.keys on documentParameters doesn't trigger a rerender on the index component, so we also keep a list of IDs so that the `push` gets noticed by the rerender logic...
       documentParameterIdsByDocument: {},

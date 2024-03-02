@@ -6,7 +6,9 @@ import { VariableNode } from './editor-types';
 import { Y, getYjsValue, observeDeep } from '@syncedstore/core';
 import { useSyncedStore } from '@syncedstore/react';
 import { useContext, useEffect, useRef, useState } from 'react';
+import { createDocumentVariableForOverride } from 'reagent-noggin-shared/createDocumentVariableForOverride';
 import { DocumentVariable } from 'reagent-noggin-shared/types/DocType';
+import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import { v4 as uuid } from 'uuid';
 import { StoreContext } from '~/routes/noggins.$identifier/StoreContext';
 import { NogginEditorStore } from './store.client';
@@ -95,6 +97,37 @@ export const useEditorVariables = (): EditorVariablesList => {
   }
 
   return variables;
+};
+
+const createDocumentVariableForOverrideWrapper = (
+  overrideKey: string,
+  editorSchema: EditorSchema,
+) => {
+  const [defaultValue] = useInputValueState(overrideKey);
+  return createDocumentVariableForOverride(
+    overrideKey,
+    defaultValue,
+    editorSchema,
+  );
+};
+
+export const useEditorVariablesAndOverrides = (
+  editorSchema: EditorSchema,
+): EditorVariablesList => {
+  const store = useEditorStore();
+  const variables = useEditorVariables();
+
+  const overrideKeys = useSyncedStore(store.overridableModelInputKeys);
+
+  const overrides: EditorVariablesList = [];
+
+  for (const overrideKey of overrideKeys) {
+    overrides.push(
+      createDocumentVariableForOverrideWrapper(overrideKey, editorSchema),
+    );
+  }
+
+  return variables.concat(overrides);
 };
 
 export const getVariableElements = (editor: ReactEditor) => {

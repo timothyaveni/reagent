@@ -28,6 +28,7 @@ const doc = {
     },
     'maximum-completion-length': 512,
   },
+  overridableModelInputKeys: [],
   documentParameters: {
     '1f28744a-0772-4915-bd7e-c490ed24b40f': {
       name: 'label',

@@ -34,6 +34,7 @@ const doc = {
     temperature: 1,
     'maximum-completion-length': 512,
   },
+  overridableModelInputKeys: [],
   documentParameters: {
     '18ce8495-a12a-4007-aae9-a93660a13fec': {
       name: 'topic',

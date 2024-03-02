@@ -50,6 +50,7 @@ const doc = {
     temperature: 1,
     'maximum-completion-length': 512,
   },
+  overridableModelInputKeys: [],
   documentParameters: {
     'c0dc222c-1fd4-40b1-8c68-5a60f90dfe11': {
       name: 'todo',

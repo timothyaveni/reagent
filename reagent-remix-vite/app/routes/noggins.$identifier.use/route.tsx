@@ -7,7 +7,10 @@ import {
 } from '@remix-run/server-runtime';
 import axios from 'axios';
 import { requireUser } from '~/auth/auth.server';
-import { loadNogginBySlug } from '~/models/noggin.server';
+import {
+  getNogginEditorSchema_OMNISCIENT,
+  loadNogginBySlug,
+} from '~/models/noggin.server';
 import { createOrGetPrimaryUINogginAPIKey_OMNIPOTENT } from '~/models/nogginApiKey.server';
 import { getNogginRuns } from '~/models/nogginRuns.server';
 import { notFound } from '~/route-utils/status-code';
@@ -32,10 +35,10 @@ export const loader = async ({
     throw notFound();
   }
 
-  const uiApiKey = await createOrGetPrimaryUINogginAPIKey_OMNIPOTENT(
-    context,
-    noggin.id,
-  );
+  const [uiApiKey, editorSchema] = await Promise.all([
+    createOrGetPrimaryUINogginAPIKey_OMNIPOTENT(context, noggin.id),
+    getNogginEditorSchema_OMNISCIENT(noggin.id),
+  ]);
 
   const { runs, runCount, NOGGIN_RUN_PAGE_SIZE } = await getNogginRuns(
     context,
@@ -47,6 +50,7 @@ export const loader = async ({
     NOGGIN_SERVER_EXTERNAL_URL: process.env.NOGGIN_SERVER_EXTERNAL_URL || '',
     noggin,
     uiApiKey,
+    editorSchema,
     runs,
 
     page,
@@ -109,6 +113,7 @@ export default function UseNoggin() {
     NOGGIN_SERVER_EXTERNAL_URL,
     noggin,
     uiApiKey,
+    editorSchema,
     runs,
     page,
     runCount,
@@ -119,6 +124,7 @@ export default function UseNoggin() {
     <div>
       <NewRunForm
         noggin={noggin}
+        editorSchema={editorSchema}
         apiKey={uiApiKey}
         nogginServerUrl={NOGGIN_SERVER_EXTERNAL_URL}
       />
