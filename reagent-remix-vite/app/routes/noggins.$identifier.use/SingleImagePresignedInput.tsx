@@ -1,7 +1,6 @@
 // this might go in the shared components directory at some point
 
-import { Button, CircularProgress } from '@mui/material';
-import { styled } from '@mui/material';
+import { Button, CircularProgress, Stack, styled } from '@mui/material';
 import { useParams } from '@remix-run/react';
 import { useState } from 'react';
 
@@ -31,7 +30,7 @@ export function SingleImagePresignedInput(
   const [loading, setLoading] = useState(false);
 
   return (
-    <>
+    <Stack direction="row" spacing={2} alignItems="center">
       <Button variant="contained" component="label" disabled={loading}>
         Upload image
         <VisuallyHiddenInput
@@ -82,6 +81,6 @@ export function SingleImagePresignedInput(
           style={{ maxHeight: 24 }}
         />
       ) : null}
-    </>
+    </Stack>
   );
 }

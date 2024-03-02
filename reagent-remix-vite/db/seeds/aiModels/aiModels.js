@@ -188,6 +188,29 @@ async function main() {
     },
   });
 
+  const { default: yorickvp_llava13bEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/yorickvp_llava-13b.js'
+  );
+
+  const _yorickvp_llava13b = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'yorickvp_llava-13b',
+        revision: '2024-03-02',
+      },
+    },
+    update: {
+      editorSchema: yorickvp_llava13bEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'yorickvp_llava-13b',
+      revision: '2024-03-02',
+      editorSchema: yorickvp_llava13bEditorSchema,
+    },
+  });
+
   const testProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'test',

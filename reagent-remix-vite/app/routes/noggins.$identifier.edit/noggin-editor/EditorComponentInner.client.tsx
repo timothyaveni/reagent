@@ -1,4 +1,5 @@
 import { EditorComponentProps } from './EditorComponent';
+import { ImageEditor } from './image-editor/ImageEditor';
 import { IntegerEditor } from './primitive-editors/IntegerEditor';
 import { NumberEditor } from './primitive-editors/NumberEditor';
 import { SimpleSchemaEditor } from './simple-schema-editor/SimpleSchemaEditor.client';
@@ -34,6 +35,8 @@ export default function EditorComponentInner({
           editorHeight={input.editorHeight}
         />
       );
+    case 'image':
+      return <ImageEditor inputKey={inputKey} input={input} />;
     case 'integer':
       return <IntegerEditor inputKey={inputKey} input={input} />;
     case 'number':

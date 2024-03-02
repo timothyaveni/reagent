@@ -29,6 +29,8 @@ export default function EditorComponentWrapper({
             height={input.editorHeight === 'primary' ? 400 : 75}
           />
         );
+      case 'image':
+        return <Skeleton variant="rounded" height={100} />;
       case 'integer':
       case 'number':
       case 'boolean':
@@ -37,6 +39,7 @@ export default function EditorComponentWrapper({
       case 'simple-schema':
         return <Skeleton variant="rounded" height={200} />;
       default:
+        const _exhaustiveCheck: never = input;
     }
   }
 

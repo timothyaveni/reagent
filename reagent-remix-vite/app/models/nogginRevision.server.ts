@@ -22,6 +22,9 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
       case 'plain-text-with-parameters':
         modelInputs.set(inputKey, new Y.XmlText(input.default || undefined));
         break;
+      case 'image':
+        modelInputs.set(inputKey, input.default ?? '');
+        break;
       case 'integer':
       case 'number':
       case 'boolean':
@@ -31,6 +34,8 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
       case 'simple-schema':
         modelInputs.set(inputKey, input.default);
         break;
+      default:
+        const _exhaustiveCheck: never = input;
     }
   }
 
@@ -49,11 +54,12 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
       case 'plain-text-with-parameters':
         documentParameterIdsByDocument.set(inputKey, new Y.Array());
         break;
+      case 'image':
       case 'integer':
       case 'number':
       case 'boolean':
       case 'select':
-      case 'simple-schema': // TODO ugh how many spots are there to update if we want parameters to work in a thing
+      case 'simple-schema': // TODO ugh how many spots are there to update if we want variables to work in a thing
         break;
       default:
         // throw ts error if not exhaustive

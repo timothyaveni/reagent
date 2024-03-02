@@ -63,6 +63,10 @@ const NewRunVariablesForm = ({
           );
         }
 
+        // TODO: we should render number and integer fields differently.
+        // for now it's fine because there's coercion from strings everywhere but
+        // it's better to use the right kind of field for this input type, maybe abstracted from elsewhere
+
         return (
           <div key={id}>
             <TextField
