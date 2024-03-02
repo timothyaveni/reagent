@@ -27,13 +27,13 @@ export default function Login() {
       >
         <T>Log in with GitHub</T>
       </Button>
-      <p>
-        {/* todo: i do not want to deal with the end-of-semester emails -- make them give us an email address */}
-        <T>
+      {/* <p> */}
+      {/* todo: i do not want to deal with the end-of-semester emails -- make them give us an email address */}
+      {/* <T>
           If you typically log in through a course site for a class you are
           taking, you'll need to log in through that site again.
-        </T>
-      </p>
+        </T> */}
+      {/* </p> */}
       <DevLogin />
     </Box>
   );
