@@ -2,6 +2,7 @@ import { AppLoadContext } from '@remix-run/node';
 import { getTotalOrganizationSpendForUser_OMNISCIENT } from 'reagent-noggin-shared/cost-calculation/get-noggin-total-incurred-cost';
 import { requireUser } from '~/auth/auth.server';
 import prisma from '~/db';
+import { notFound } from '~/route-utils/status-code';
 import { LTIConnectionOwnerVisibleParams } from '~/shared/ltiConnection';
 import { OrganizationRole } from '~/shared/organization';
 
@@ -57,11 +58,13 @@ export const requireUserOrganizationRole = async (
   });
 
   if (!membership) {
-    throw new Error('User is not a member of this organization');
+    // User is not a member of this organization
+    throw notFound();
   }
 
   if (!roles.includes(membership.role as OrganizationRole)) {
-    throw new Error('User does not have the required role');
+    // User does not have the required role
+    throw notFound();
   }
 };
 
@@ -289,7 +292,7 @@ export const getTotalNogginBudgetsForOrganizationAndUser = async (
 ) => {
   const user = requireUser(context);
 
-  requireAtLeastUserOrganizationRole(context, {
+  await requireAtLeastUserOrganizationRole(context, {
     organizationId,
     role: OrganizationRole.MEMBER,
   });
@@ -318,7 +321,7 @@ export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
 ) => {
   const user = requireUser(context);
 
-  requireAtLeastUserOrganizationRole(context, {
+  await requireAtLeastUserOrganizationRole(context, {
     organizationId,
     role: OrganizationRole.MEMBER,
   });
@@ -339,6 +342,12 @@ export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
     return null;
   }
 
+  const { totalPermittedSpendQuastra } = permittedSpend;
+
+  if (totalPermittedSpendQuastra === null) {
+    return null;
+  }
+
   const alreadyBudgeted = await getTotalNogginBudgetsForOrganizationAndUser(
     context,
     {
@@ -346,7 +355,7 @@ export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
     },
   );
 
-  return Number(permittedSpend.totalPermittedSpendQuastra) - alreadyBudgeted;
+  return Number(totalPermittedSpendQuastra) - alreadyBudgeted;
 };
 
 export const getTotalOrganizationSpendForUser = async (
@@ -359,7 +368,7 @@ export const getTotalOrganizationSpendForUser = async (
 ) => {
   const user = requireUser(context);
 
-  requireAtLeastUserOrganizationRole(context, {
+  await requireAtLeastUserOrganizationRole(context, {
     organizationId,
     role: OrganizationRole.MEMBER,
   });
@@ -370,4 +379,133 @@ export const getTotalOrganizationSpendForUser = async (
   });
 
   return Number(totalSpend);
+};
+
+export const getEnabledAIModelIDsForOrganization = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+  }: {
+    organizationId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.MEMBER,
+  });
+
+  const organization = await prisma.organization.findUnique({
+    where: {
+      id: organizationId,
+    },
+    include: {
+      enabledAIModels: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!organization) {
+    throw new Error('Organization not found');
+  }
+
+  return organization.enabledAIModels.map((model) => model.id);
+};
+
+export const enableAIModelForOrganization = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+    modelId,
+  }: {
+    organizationId: number;
+    modelId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.OWNER,
+  });
+
+  await prisma.organization.update({
+    where: {
+      id: organizationId,
+    },
+    data: {
+      enabledAIModels: {
+        connect: {
+          id: modelId,
+        },
+      },
+    },
+  });
+};
+
+export const disableAIModelForOrganization = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+    modelId,
+  }: {
+    organizationId: number;
+    modelId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.OWNER,
+  });
+
+  await prisma.organization.update({
+    where: {
+      id: organizationId,
+    },
+    data: {
+      enabledAIModels: {
+        disconnect: {
+          id: modelId,
+        },
+      },
+    },
+  });
+};
+
+export const isModelEnabledForOrganization = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+    modelId,
+  }: {
+    organizationId: number;
+    modelId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.MEMBER,
+  });
+
+  const organization = await prisma.organization.findUnique({
+    where: {
+      id: organizationId,
+    },
+    include: {
+      enabledAIModels: {
+        select: {
+          id: true,
+        },
+        where: {
+          id: modelId,
+        },
+      },
+    },
+  });
+
+  if (!organization) {
+    throw notFound();
+  }
+
+  return organization.enabledAIModels.some((model) => model.id === modelId);
 };

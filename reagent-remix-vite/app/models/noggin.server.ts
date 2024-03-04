@@ -15,6 +15,7 @@ import { OrganizationRole } from '~/shared/organization';
 import { getNogginTotalAllocatedCreditQuastra } from './nogginRuns.server';
 import {
   getPermittedAdditionalBudgetForOrganizationAndUser,
+  isModelEnabledForOrganization,
   requireAtLeastUserOrganizationRole,
 } from './organization.server';
 
@@ -80,6 +81,15 @@ export const createNoggin = async (
       ) {
         throw new Error('Not permitted to allocate that much budget');
       }
+    }
+
+    const modelEnabled = await isModelEnabledForOrganization(context, {
+      organizationId: containingOrganizationId,
+      modelId: nogginData.aiModelId,
+    });
+
+    if (!modelEnabled) {
+      throw new Error('Model not enabled for organization');
     }
   }
 

@@ -25,7 +25,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     { title: `${data?.organization?.name} :: Organizations :: reagent` },
     {
       name: 'description',
-      content: `Overfor of the ${data?.organization?.name} organization on reagent`,
+      content: `Overview for the ${data?.organization?.name} organization on reagent`,
     },
   ];
 };

@@ -7,6 +7,7 @@ import {
 import { requireUser } from '~/auth/auth.server';
 import { createNoggin } from '~/models/noggin.server';
 import {
+  getEnabledAIModelIDsForOrganization,
   getPermittedAdditionalBudgetForOrganizationAndUser,
   indexOrganizations,
 } from '~/models/organization.server';
@@ -59,7 +60,26 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 
   const aiModels = await indexAIModels(context);
 
-  return json({ orgs, permittedAdditionalSpendByOrgId, aiModels });
+  // choose your fighter
+  const enabledModelsForOrgs = Object.fromEntries(
+    await Promise.all(
+      orgs.map(async (org) => {
+        return [
+          org.id,
+          await getEnabledAIModelIDsForOrganization(context, {
+            organizationId: org.id,
+          }),
+        ];
+      }),
+    ),
+  );
+
+  return json({
+    orgs,
+    permittedAdditionalSpendByOrgId,
+    aiModels,
+    enabledModelsForOrgs,
+  });
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
@@ -106,11 +126,24 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 };
 
 export default function NewNoggin() {
-  const { orgs, permittedAdditionalSpendByOrgId, aiModels } =
-    useLoaderData<typeof loader>();
+  const {
+    orgs,
+    permittedAdditionalSpendByOrgId,
+    aiModels,
+    enabledModelsForOrgs,
+  } = useLoaderData<typeof loader>();
 
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
   const [nogginOrgOwner, setNogginOrgOwner] = useState<number | null>(null);
+
+  const filteredAIModelOptions = aiModels.filter((model) => {
+    if (nogginOrgOwner === null) {
+      return true;
+    }
+
+    const enabledModelIds = enabledModelsForOrgs[nogginOrgOwner];
+    return enabledModelIds.includes(model.id);
+  });
 
   const [chosenBudgetRadio, setChosenBudgetRadio] = useState<
     'limited' | 'unlimited'
@@ -161,7 +194,7 @@ export default function NewNoggin() {
                 <TextField name="name" label={t('Noggin name')} />
 
                 <Autocomplete
-                  options={aiModels}
+                  options={filteredAIModelOptions}
                   getOptionLabel={(option) =>
                     `${option.modelProvider.name}/${option.name}`
                   }
@@ -171,6 +204,11 @@ export default function NewNoggin() {
                   onChange={(e, value) => {
                     setSelectedModelId(value?.id ?? null);
                   }}
+                  value={
+                    filteredAIModelOptions.find(
+                      (model) => model.id === selectedModelId,
+                    ) ?? null
+                  }
                 />
                 <input
                   type="hidden"
@@ -278,7 +316,13 @@ export default function NewNoggin() {
               </Stack>
             </Paper>
             <Box alignSelf="flex-end">
-              <Button type="submit" variant="contained">
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={
+                  selectedModelId === null // TODO ... make this better ... actual validation. for name, too
+                }
+              >
                 Create
               </Button>
             </Box>

@@ -121,6 +121,7 @@ model Organization {
   noggins                     Noggin[]
   ltiv1p3Connection           LTIv1p3Connection?
   modelProviderOrgCredentials ModelProviderOrgCredentials[]
+  enabledAIModels             AIModel[]
 }
 
 enum OrganizationMembershipRole {
@@ -421,7 +422,8 @@ model AIModel {
 
   editorSchema Json
 
-  Noggin Noggin[]
+  noggin                Noggin[]
+  enablingOrganizations Organization[]
 
   @@unique([modelProviderId, name, revision])
 }
