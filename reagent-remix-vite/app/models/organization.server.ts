@@ -140,7 +140,7 @@ type OrganizationLoadManagerResponse = {
   totalPermittedSpendQuastra: number | null;
 };
 
-type OrganizationLoadOwnerResponse = {
+export type OrganizationLoadOwnerResponse = {
   id: number;
   name: string;
   userOrganizationRole: 'owner';

@@ -108,6 +108,12 @@ export const action = async ({
   }
 };
 
+export const handle = {
+  breadcrumb: () => {
+    return <Typography>Enabled models</Typography>;
+  },
+};
+
 export default function OrganizationEnabledModels() {
   const { allModels, enabledAIModelIds } = useLoaderData<typeof loader>();
   const submit = useSubmit();

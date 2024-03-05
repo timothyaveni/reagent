@@ -150,6 +150,8 @@ const getNogginVariablesFromYdoc = (ydoc: Y.Doc): /*NogginVariables*/ any => {
 
   console.log('getNogginVariablesFromYdoc', usedVariables);
 
+  // TODO: include override variables
+
   return usedVariables;
 };
 
