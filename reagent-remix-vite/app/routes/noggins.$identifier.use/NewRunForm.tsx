@@ -70,6 +70,7 @@ const NewRunVariablesForm = ({
         return (
           <div key={id}>
             <TextField
+              multiline
               fullWidth
               name={`_reagent_param_${variable.name}`}
               label={variable.name}
