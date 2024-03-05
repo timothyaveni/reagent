@@ -163,6 +163,31 @@ async function main() {
     },
   });
 
+  const { default: stableDiffusion } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/stable-diffusion.js'
+  );
+
+  const stableDiffusionModel = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'stable-diffusion',
+        revision:
+          'ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4_2.1-2024-03-05',
+      },
+    },
+    update: {
+      editorSchema: stableDiffusion,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'stable-diffusion',
+      revision:
+        'ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4_2.1-2024-03-05',
+      editorSchema: stableDiffusion,
+    },
+  });
+
   const { default: andreasjansson_llama213bChatJsonSchema } = await import(
     '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/andreasjansson_llama-2-13b-chat-json-schema.js'
   );
