@@ -18,24 +18,30 @@ export const handle = {
 export default function OrganizationsRoot() {
   const matches = useMatches();
 
+  // @ts-expect-error
+  const hideAllBreadcrumbs = last(matches)?.handle?.hideAllBreadcrumbs;
+
   return (
     <>
       <Box mt={4}>
-        <Breadcrumbs>
-          {matches
-            // TODO fix these type issues someday
-            // @ts-expect-error
-            .filter((m) => m.handle?.breadcrumb)
-            .map((m, i) =>
+        {!hideAllBreadcrumbs && (
+          <Breadcrumbs>
+            {matches
+              // TODO fix these type issues someday
               // @ts-expect-error
-              m.handle.breadcrumb({
-                match: m,
+              .filter((m) => m.handle?.breadcrumb)
+              .map((m, i) =>
                 // @ts-expect-error
-                isLeaf: m === last(matches.filter((m) => m.handle?.breadcrumb)),
-              }),
-            )
-            .flat()}
-        </Breadcrumbs>
+                m.handle.breadcrumb({
+                  match: m,
+                  isLeaf:
+                    // @ts-expect-error
+                    m === last(matches.filter((m) => m.handle?.breadcrumb)),
+                }),
+              )
+              .flat()}
+          </Breadcrumbs>
+        )}
 
         <Outlet />
       </Box>

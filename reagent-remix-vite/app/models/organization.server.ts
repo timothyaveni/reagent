@@ -3,7 +3,6 @@ import { getTotalOrganizationSpendForUser_OMNISCIENT } from 'reagent-noggin-shar
 import { requireUser } from '~/auth/auth.server';
 import prisma from '~/db';
 import { notFound } from '~/route-utils/status-code';
-import { LTIConnectionOwnerVisibleParams } from '~/shared/ltiConnection';
 import { OrganizationRole } from '~/shared/organization';
 
 export const indexOrganizations = async (context: AppLoadContext) => {
@@ -125,34 +124,12 @@ export const createOrganization = async (
   return organization;
 };
 
-type OrganizationLoadMemberResponse = {
+export type OrganizationLoadResponse = {
   id: number;
   name: string;
-  userOrganizationRole: 'member';
+  userOrganizationRole: 'member' | 'manager' | 'owner';
   totalPermittedSpendQuastra: number | null;
 };
-
-type OrganizationLoadManagerResponse = {
-  id: number;
-  name: string;
-  userOrganizationRole: 'manager';
-  allMembers: number[];
-  totalPermittedSpendQuastra: number | null;
-};
-
-export type OrganizationLoadOwnerResponse = {
-  id: number;
-  name: string;
-  userOrganizationRole: 'owner';
-  allMembers: number[];
-  ltiConnection: LTIConnectionOwnerVisibleParams | null;
-  totalPermittedSpendQuastra: number | null;
-};
-
-export type OrganizationLoadResponse =
-  | OrganizationLoadMemberResponse
-  | OrganizationLoadManagerResponse
-  | OrganizationLoadOwnerResponse;
 
 export const loadOrganization = async (
   context: AppLoadContext,
@@ -198,70 +175,79 @@ export const loadOrganization = async (
     return null;
   }
 
-  if (membership.role === OrganizationRole.MEMBER) {
-    return {
-      id,
-      name: organization.name,
-      userOrganizationRole: OrganizationRole.MEMBER,
-      totalPermittedSpendQuastra: Number(membership.totalPermittedSpendQuastra),
-    };
-  } else {
-    const allMembers = await prisma.organizationMembership.findMany({
-      where: {
-        organizationId: id,
-      },
-      select: {
-        user: {
-          select: {
-            id: true,
+  return {
+    id,
+    name: organization.name,
+    userOrganizationRole: membership.role,
+    totalPermittedSpendQuastra: Number(membership.totalPermittedSpendQuastra),
+  };
+  // } else {
+  //   throw new Error('Invalid organization role');
+  // }
+  // }
+};
+
+export const loadOrganizationMemberList = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+  }: {
+    organizationId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.MANAGER,
+  });
+
+  const allMembers = await prisma.organizationMembership.findMany({
+    where: {
+      organizationId,
+    },
+    select: {
+      user: {
+        select: {
+          id: true,
+          userInfo: {
+            select: {
+              displayName: true,
+            },
           },
         },
       },
-    });
-    if (membership.role === OrganizationRole.MANAGER) {
-      return {
-        id,
-        name: organization.name,
-        userOrganizationRole: OrganizationRole.MANAGER,
-        allMembers: allMembers.map(({ user }) => user.id),
-        totalPermittedSpendQuastra: Number(
-          membership.totalPermittedSpendQuastra,
-        ),
-      };
-    } else if (membership.role === OrganizationRole.OWNER) {
-      const ltiConnection = await prisma.lTIv1p3Connection.findUnique({
-        where: {
-          organizationId: id,
-        },
-        select: {
-          id: true,
-          consumerKey: true,
-          consumerSecret: true,
-          lastSeenConsumerName: true,
-        },
-      });
+      role: true,
+      totalPermittedSpendQuastra: true,
+    },
+  });
+  return allMembers;
+};
 
-      return {
-        id,
-        name: organization.name,
-        userOrganizationRole: OrganizationRole.OWNER,
-        allMembers: allMembers.map(({ user }) => user.id),
-        ltiConnection: ltiConnection
-          ? {
-              id: ltiConnection.id,
-              consumerKey: ltiConnection.consumerKey,
-              consumerSecret: ltiConnection.consumerSecret,
-              lastSeenConsumerName: ltiConnection.lastSeenConsumerName,
-            }
-          : null,
-        totalPermittedSpendQuastra: Number(
-          membership.totalPermittedSpendQuastra,
-        ),
-      };
-    } else {
-      throw new Error('Invalid organization role');
-    }
-  }
+export const loadOrganizationLTIConnection = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+  }: {
+    organizationId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.OWNER,
+  });
+
+  const ltiConnection = await prisma.lTIv1p3Connection.findUnique({
+    where: {
+      organizationId,
+    },
+    select: {
+      id: true,
+      consumerKey: true,
+      consumerSecret: true,
+      lastSeenConsumerName: true,
+    },
+  });
+
+  return ltiConnection;
 };
 
 export const addUserToOrganization_OMNIPOTENT = async ({

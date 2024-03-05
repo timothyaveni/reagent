@@ -8,8 +8,8 @@ import { BreadcrumbLink } from '~/components/BreadcrumbLink';
 import T from '~/i18n/T';
 import { createNewLTIConnection } from '~/models/ltiConnection.server';
 import {
-  OrganizationLoadOwnerResponse,
   loadOrganization,
+  loadOrganizationLTIConnection,
   requireAtLeastUserOrganizationRole,
 } from '~/models/organization.server';
 import { notFound } from '~/route-utils/status-code';
@@ -36,8 +36,13 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     role: OrganizationRole.OWNER,
   });
 
+  const ltiConnection = await loadOrganizationLTIConnection(context, {
+    organizationId: organizationData.id,
+  });
+
   return json({
-    organization: organizationData as OrganizationLoadOwnerResponse,
+    organization: organizationData,
+    ltiConnection: ltiConnection,
     ltiBaseUrl: process.env.REAGENT_EXTERNAL_URL || '', // TODO warn?
   });
 };
@@ -80,11 +85,12 @@ export const handle = {
 };
 
 export default function OrganizationLTI() {
-  const { organization, ltiBaseUrl } = useLoaderData<typeof loader>();
+  const { organization, ltiConnection, ltiBaseUrl } =
+    useLoaderData<typeof loader>();
 
   return (
     <LTIConnectionConfig
-      ltiConnection={organization.ltiConnection}
+      ltiConnection={ltiConnection}
       ltiBaseUrl={ltiBaseUrl}
     />
   );

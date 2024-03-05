@@ -16,6 +16,7 @@ import T, { pluralize } from '~/i18n/T';
 import { indexOrganizations } from '~/models/organization.server';
 
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
     { title: `Organizations :: reagent` },
@@ -30,6 +31,10 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   const organizations = await indexOrganizations(context);
 
   return json({ organizations });
+};
+
+export const handle = {
+  hideAllBreadcrumbs: true,
 };
 
 type OrganizationsListLoader = typeof loader;
