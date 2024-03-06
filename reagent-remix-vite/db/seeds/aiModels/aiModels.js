@@ -69,6 +69,29 @@ async function main() {
     },
   });
 
+  const { default: gpt35Turbo0125EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-3.5-turbo-0125.js'
+  );
+
+  const gpt35Turbo0125 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'gpt-3.5-turbo-0125',
+        revision: '2024-03-05',
+      },
+    },
+    update: {
+      editorSchema: gpt35Turbo0125EditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'gpt-3.5-turbo-0125',
+      revision: '2024-03-05',
+      editorSchema: gpt35Turbo0125EditorSchema,
+    },
+  });
+
   const { default: gpt4VisionPreviewEditorSchema } = await import(
     '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-4-vision-preview.js'
   );
