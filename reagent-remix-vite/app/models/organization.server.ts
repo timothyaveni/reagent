@@ -205,6 +205,7 @@ export const loadOrganizationMemberList = async (
       organizationId,
     },
     select: {
+      id: true,
       user: {
         select: {
           id: true,
@@ -219,7 +220,16 @@ export const loadOrganizationMemberList = async (
       totalPermittedSpendQuastra: true,
     },
   });
-  return allMembers;
+
+  const withNumberBudgets = allMembers.map((member) => ({
+    ...member,
+    totalPermittedSpendQuastra:
+      member.totalPermittedSpendQuastra === null
+        ? null
+        : Number(member.totalPermittedSpendQuastra),
+  }));
+
+  return withNumberBudgets;
 };
 
 export const loadOrganizationLTIConnection = async (
