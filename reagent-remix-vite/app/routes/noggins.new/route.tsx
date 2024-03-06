@@ -153,7 +153,7 @@ export default function NewNoggin() {
   // const saveBudget = useSubmit();
 
   const [currentBudgetAmountQuastra, setCurrentBudgetAmountQuastra] = useState(
-    unit(25, 'credits').toNumber('quastra'),
+    unit(15, 'credits').toNumber('quastra'),
   );
 
   const permittedAdditionalSpend =
