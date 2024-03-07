@@ -1,6 +1,18 @@
 import { unit } from 'reagent-noggin-shared/cost-calculation/units';
 import T from '~/i18n/T';
 
+export const MaybeUnlimitedCostText = ({
+  quastra,
+}: {
+  quastra: number | bigint | null;
+}) => {
+  if (quastra === null) {
+    return <T>Unlimited</T>;
+  }
+
+  return <CostText quastra={quastra} />;
+};
+
 export const CostText = ({ quastra }: { quastra: number | bigint }) => {
   const quastraAsNumber =
     typeof quastra === 'bigint' ? Number(quastra) : quastra;

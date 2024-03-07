@@ -1,5 +1,6 @@
 import { prisma } from '../db/db.js';
 
+import { attachUnattachedInvitesForGithubUsername } from './invites.js';
 import { createUser } from './user.js';
 
 // type GitHubAuthProfile = {
@@ -7,6 +8,16 @@ import { createUser } from './user.js';
 // };
 
 export const resolveGitHubAuth = async (profile) => {
+  const { id } = await resolveGitHubAuthInner(profile);
+
+  await attachUnattachedInvitesForGithubUsername(id, profile.username);
+
+  return {
+    id,
+  };
+};
+
+export const resolveGitHubAuthInner = async (profile) => {
   const ghAuthRow = await prisma.gitHubAuth.findUnique({
     where: {
       githubId: profile.id,

@@ -34,6 +34,7 @@ model User {
   organizations                    OrganizationMembership[]
   noggins                          Noggin[]
   modelProviderPersonalCredentials ModelProviderPersonalCredentials[]
+  organizationInvite               OrganizationInvite[]
 }
 
 model UserInfo {
@@ -122,6 +123,7 @@ model Organization {
   ltiv1p3Connection           LTIv1p3Connection?
   modelProviderOrgCredentials ModelProviderOrgCredentials[]
   enabledAIModels             AIModel[]
+  organizationInvite          OrganizationInvite[]
 }
 
 enum OrganizationMembershipRole {
@@ -147,6 +149,38 @@ model OrganizationMembership {
   totalPermittedSpendQuastra BigInt?
 
   @@unique([organizationId, userId])
+}
+
+enum OrganizationInviteStatus {
+  pending
+  accepted
+  rejected
+}
+
+model OrganizationInvite {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+
+  // tentative data that might be used to attach the user to the invite
+  githubUsername String?
+
+  // may not have one yet -- the stuff above is for doing this attaching
+  attachedUser   User? @relation(fields: [attachedUserId], references: [id])
+  attachedUserId Int?
+
+  role                 OrganizationMembershipRole
+  initialBudgetQuastra BigInt?
+
+  inviteStatus OrganizationInviteStatus
+
+  @@index([githubUsername])
+  @@index([attachedUserId, inviteStatus])
+  @@index([organizationId, inviteStatus])
 }
 
 model Team {
