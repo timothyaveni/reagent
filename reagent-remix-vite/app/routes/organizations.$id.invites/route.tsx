@@ -125,19 +125,7 @@ export default function OrganizationInviteList() {
       <h2>
         <T>Invite new member</T>
       </h2>
-      <Form
-        method="post"
-        // onSubmit={(e) => {
-        //   e.preventDefault();
-
-        //   const form = e.currentTarget as HTMLFormElement;
-
-        //   submit(form, {
-        //     method: 'POST',
-        //     navigate: false,
-        //   });
-        // }}
-      >
+      <Form method="post">
         <input type="hidden" name="action" value="invite" />
         <Stack spacing={2} direction="row" alignItems="center">
           <TextField name="githubUsername" label={t('GitHub username')} />
