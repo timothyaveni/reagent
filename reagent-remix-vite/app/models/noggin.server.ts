@@ -225,6 +225,7 @@ export const authorizeNoggin = async (
     select: {
       userOwnerId: true,
       teamOwnerId: true,
+      parentOrgId: true,
     },
   });
 
@@ -232,18 +233,26 @@ export const authorizeNoggin = async (
     throw notFound();
   }
 
+  if (noggin.userOwnerId === user.id) {
+    return true;
+  }
+
   // temp
-  if (noggin.userOwnerId !== user.id) {
-    throw notFound();
+  if (noggin.parentOrgId !== null) {
+    await requireAtLeastUserOrganizationRole(context, {
+      organizationId: noggin.parentOrgId,
+      role: OrganizationRole.MANAGER,
+    });
+
+    return true;
   }
 
   // TODO
   // show if:
   // - noggin is user-owned and this is that user (todo: merges)
   // - noggin is team-owned and this user is in that team
-  // - noggin has a parent organization and the user is a manager or owner of that organization
 
-  return true;
+  throw notFound();
 };
 
 export const updateNogginTitle = async (
