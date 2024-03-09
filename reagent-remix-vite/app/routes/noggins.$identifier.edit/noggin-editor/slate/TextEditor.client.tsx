@@ -260,6 +260,16 @@ const TextEditor = ({
       //   element,
       //   JSON.stringify(store.documentParameterIdsByDocument[documentKey]),
       // );
+      if (!parameterOptionDict[element.parameterId]) {
+        // this can happen if we paste in a variable from elsewhere. likely don't need this after TODO(param-sync), or at least it will likely change in implementation
+        console.log({ element });
+        addNewVariable(
+          store,
+          undefined, // no name from the pasted param
+          element.parameterId,
+        );
+      }
+
       if (
         !store.documentParameterIdsByDocument[documentKey]!.includes(
           element.parameterId,

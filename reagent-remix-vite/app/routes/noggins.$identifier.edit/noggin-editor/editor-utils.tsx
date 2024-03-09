@@ -143,7 +143,8 @@ export const getVariableElements = (editor: ReactEditor) => {
 export const addNewVariable = (
   store: NogginEditorStore,
   // editor: ReactEditor,
-  variableName: string,
+  variableName?: string,
+  withUuid?: string,
 ): string => {
   // todo: do this with the store's parameters, not the editor's
   const existingVariableIds = uniq(
@@ -162,21 +163,25 @@ export const addNewVariable = (
     )![0];
   }
 
-  // let newIndex = existingVariableIds.length + 1;
-  // // so, this is a little awkward, because it's using the map to check for collisions, but probably that's a good thing so we don't get collisions with hidden un-GC'd params -- even though that's probably not a big deal -- anyway, we'll fix this with TODO(param-sync)
-  // while (
-  //   Object.values(store.documentParameters).some(
-  //     // @ts-ignore
-  //     (p) => p?.name === `var${newIndex}`,
-  //   )
-  // ) {
-  //   newIndex++;
-  // }
+  let newName = variableName;
+  if (newName === undefined) {
+    let newIndex = existingVariableIds.length + 1;
+    // so, this is a little awkward, because it's using the map to check for collisions, but probably that's a good thing so we don't get collisions with hidden un-GC'd params -- even though that's probably not a big deal -- anyway, we'll fix this with TODO(param-sync)
+    while (
+      Object.values(store.documentParameters).some(
+        // @ts-ignore
+        (p) => p?.name === `var${newIndex}`,
+      )
+    ) {
+      newIndex++;
+    }
+    newName = `var${newIndex}`;
+  }
 
-  const id = uuid();
+  const id = withUuid ?? uuid();
 
   store.documentParameters[id] = new Y.Map([
-    ['name', variableName],
+    ['name', newName],
     ['type', 'text'],
     ['maxLength', 500],
     ['defaultValue', ''],
