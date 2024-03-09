@@ -1,8 +1,10 @@
 import { unstable_viteServerBuildModuleId } from '@remix-run/dev';
 import { createRequestHandler } from '@remix-run/express';
 import { installGlobals } from '@remix-run/node';
+import pgSessionCreator from 'connect-pg-simple';
 import express from 'express';
 import session from 'express-session';
+const pgSession = pgSessionCreator(session);
 
 import lti from 'ims-lti';
 import passport from 'passport';
@@ -76,6 +78,12 @@ passport.deserializeUser(function (user, done) {
 
 app.use(
   session({
+    store: new pgSession({
+      // kinda wanted to use redis but now that we're launched i don't want to add a redis container rn
+      conString: process.env.DATABASE_URL,
+      tableName: 'session',
+      createTableIfMissing: true,
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,

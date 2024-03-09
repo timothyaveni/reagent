@@ -24,6 +24,8 @@ services:
       - GITHUB_CLIENT_ID
       - GITHUB_CLIENT_SECRET
       - SESSION_SECRET
+    depends_on:
+      - postgres
   yjs-websocket:
     build:
       context: .

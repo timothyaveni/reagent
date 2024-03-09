@@ -36,6 +36,8 @@ services:
       - SESSION_SECRET
       - DEV_LOGIN_PASSWORD
 
+    depends_on:
+      - postgres
     restart: on-failure:5
   yjs-websocket:
     build:
