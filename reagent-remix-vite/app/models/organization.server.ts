@@ -307,6 +307,35 @@ export const getTotalNogginBudgetsForOrganizationAndUser = async (
   return Number(totalBudget._sum?.totalAllocatedCreditQuastra || 0);
 };
 
+export const getUserOrganizationRole = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+  }: {
+    organizationId: number;
+  },
+) => {
+  const user = requireUser(context);
+
+  const membership = await prisma.organizationMembership.findUnique({
+    where: {
+      organizationId_userId: {
+        organizationId,
+        userId: user.id,
+      },
+    },
+    select: {
+      role: true,
+    },
+  });
+
+  if (!membership) {
+    return null;
+  }
+
+  return membership.role;
+};
+
 export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
   context: AppLoadContext,
   {
