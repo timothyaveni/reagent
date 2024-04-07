@@ -232,6 +232,45 @@ export const loadOrganizationMemberList = async (
   return withNumberBudgets;
 };
 
+export const loadOrganizationMembership = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+    membershipId,
+  }: {
+    organizationId: number;
+    membershipId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId,
+    role: OrganizationRole.MANAGER,
+  });
+
+  const membership = await prisma.organizationMembership.findUnique({
+    where: {
+      id: membershipId,
+    },
+    select: {
+      id: true,
+      role: true,
+      totalPermittedSpendQuastra: true,
+    },
+  });
+
+  if (!membership) {
+    throw notFound();
+  }
+
+  return {
+    ...membership,
+    totalPermittedSpendQuastra:
+      membership.totalPermittedSpendQuastra === null
+        ? null
+        : Number(membership.totalPermittedSpendQuastra),
+  };
+};
+
 export const loadOrganizationLTIConnection = async (
   context: AppLoadContext,
   {
