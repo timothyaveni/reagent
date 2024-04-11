@@ -8,3 +8,5 @@ object-data/
 object-data-prod/
 caddy-data-prod/
 caddy-config-prod/
+valkey-data/
+valkey-data-prod/

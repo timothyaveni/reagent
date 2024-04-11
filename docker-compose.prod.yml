@@ -26,6 +26,7 @@ services:
       - SESSION_SECRET
     depends_on:
       - postgres
+      - valkey
   yjs-websocket:
     build:
       context: .
@@ -69,6 +70,11 @@ services:
       - OBJECT_STORAGE_ACCESS_KEY
       - OBJECT_STORAGE_SECRET_KEY
     restart: unless-stopped
+  valkey:
+    image: valkey/valkey:7.2-alpine
+    entrypoint: valkey-server --save 60 1 --loglevel warning
+    volumes:
+      - ./valkey-data-prod:/data
   caddy:
     image: caddy:2.7.6-alpine
     cap_add:
