@@ -39,7 +39,7 @@ services:
     depends_on:
       - postgres
       - valkey
-    restart: on-failure:5
+    restart: unless-stopped
   yjs-websocket:
     build:
       context: ./y-websocket-server
@@ -52,7 +52,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
       - SHARED_Y_WEBSOCKET_SERVER_SECRET
-    restart: on-failure:5
+    restart: unless-stopped
   noggin-server:
     build:
       context: ./noggin-server
@@ -72,7 +72,7 @@ services:
       - OBJECT_STORAGE_ACCESS_KEY
       - OBJECT_STORAGE_SECRET_KEY
       - OBJECT_STORAGE_EXTERNAL_URL=http://objects.dev.rea.gent
-    restart: on-failure:5
+    restart: unless-stopped
   postgres:
     image: postgres:16.0
     environment:
