@@ -2,9 +2,9 @@ import { BlurOn } from '@mui/icons-material';
 import { Box, Paper, Stack, Typography } from '@mui/material';
 import { useLoaderData } from '@remix-run/react';
 
-import { ActionFunctionArgs, json, redirect } from '@remix-run/server-runtime';
+import { ActionFunctionArgs, json } from '@remix-run/server-runtime';
 import T from '~/i18n/T';
-import { createTeam, getTeamsForOrgAndUser } from '~/models/team.server';
+import { getTeamsForOrgAndUser } from '~/models/team.server';
 import { notFound } from '~/route-utils/status-code';
 
 export const loader = async ({ params, context }: ActionFunctionArgs) => {
@@ -21,40 +21,6 @@ export const loader = async ({ params, context }: ActionFunctionArgs) => {
   return json({
     teams: userTeamsInOrg,
   });
-};
-
-export const action = async ({
-  request,
-  params,
-  context,
-}: ActionFunctionArgs) => {
-  const { id } = params;
-
-  if (!id) {
-    throw notFound();
-  }
-
-  const idInt = parseInt(id, 10);
-
-  const formData = await request.formData();
-  const action = formData.get('action')?.toString() || null;
-
-  if (action === 'create') {
-    const name = formData.get('name')?.toString();
-
-    if (!name) {
-      throw new Error('Name is required');
-    }
-
-    const team = await createTeam(context, {
-      organizationId: idInt,
-      name,
-    });
-
-    return redirect(`/organizations/${id}/teams/${team.id}`);
-  }
-
-  throw notFound();
 };
 
 export default function OrganizationTeamList() {

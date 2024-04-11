@@ -32,6 +32,9 @@ import { unit } from 'reagent-noggin-shared/cost-calculation/units';
 import { NogginBudgetEntry } from '~/components/NogginBudgetEntry';
 import T, { t } from '~/i18n/T';
 import { indexAIModels } from '~/models/aiModel.server';
+import { getAllTeamsForUser } from '~/models/team.server.js';
+
+import { groupBy } from 'underscore';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -45,6 +48,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const orgs = await indexOrganizations(context);
+  const teams = await getAllTeamsForUser(context);
 
   // joins are for losers
   const permittedAdditionalSpend = await Promise.all(
@@ -76,6 +80,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 
   return json({
     orgs,
+    teams,
     permittedAdditionalSpendByOrgId,
     aiModels,
     enabledModelsForOrgs,
@@ -128,10 +133,13 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 export default function NewNoggin() {
   const {
     orgs,
+    teams,
     permittedAdditionalSpendByOrgId,
     aiModels,
     enabledModelsForOrgs,
   } = useLoaderData<typeof loader>();
+
+  const teamsByOrgId = groupBy(teams, 'organizationId');
 
   const [selectedModelId, setSelectedModelId] = useState<number | null>(null);
   const [nogginOrgOwner, setNogginOrgOwner] = useState<number | null>(null);
@@ -144,6 +152,24 @@ export default function NewNoggin() {
     const enabledModelIds = enabledModelsForOrgs[nogginOrgOwner];
     return enabledModelIds.includes(model.id);
   });
+
+  const [preliminaryTeamId, setPreliminaryTeamId] = useState<number | null>(
+    null,
+  );
+  const orgOwnsTeam = (teamId: number | null) => {
+    if (teamId === null) {
+      return false;
+    }
+
+    return (
+      teams.find((team) => team.id === teamId)?.organizationId ===
+      nogginOrgOwner
+    );
+  };
+  const trueTeamId =
+    preliminaryTeamId && orgOwnsTeam(preliminaryTeamId)
+      ? preliminaryTeamId
+      : null;
 
   const [chosenBudgetRadio, setChosenBudgetRadio] = useState<
     'limited' | 'unlimited'
@@ -280,6 +306,88 @@ export default function NewNoggin() {
                     </RadioGroup>
                   </FormControl>
                 )}
+
+                {nogginOrgOwner !== null &&
+                  teamsByOrgId[nogginOrgOwner]?.length && (
+                    <FormControl>
+                      <FormLabel id="org-control-label">
+                        <Typography
+                          variant="h3"
+                          color="textPrimary"
+                          gutterBottom
+                        >
+                          <T>Team</T>
+                        </Typography>
+                        <Typography variant="body1" color="textPrimary">
+                          <T flagged>
+                            Create this noggin for a <strong>team</strong>{' '}
+                            you're in?
+                          </T>
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="textSecondary"
+                          gutterBottom
+                        >
+                          <T>
+                            Creating a noggin for a team gives full edit access
+                            to fellow team members, and the noggin will be
+                            billed against the team budget, which is separate
+                            from any individual's budget.
+                          </T>
+                        </Typography>
+                      </FormLabel>
+
+                      <RadioGroup
+                        aria-labelledby="team-control-label"
+                        value={
+                          trueTeamId === null
+                            ? 'individual'
+                            : trueTeamId.toString()
+                        }
+                        onChange={(e) => {
+                          setPreliminaryTeamId(
+                            e.target.value === 'individual'
+                              ? null
+                              : parseInt(e.target.value, 10),
+                          );
+                        }}
+                      >
+                        <FormControlLabel
+                          value="individual"
+                          control={<Radio />}
+                          label={
+                            <T flagged>
+                              No, make this an individual noggin within{' '}
+                              <strong>
+                                {
+                                  orgs.find((org) => org.id === nogginOrgOwner)
+                                    ?.name
+                                }
+                              </strong>
+                            </T>
+                          }
+                        />
+                        {teamsByOrgId[nogginOrgOwner].map((team) => (
+                          <FormControlLabel
+                            key={team.id}
+                            value={team.id.toString()}
+                            control={<Radio />}
+                            label={
+                              <T flagged>
+                                Create for my team <strong>{team.name}</strong>
+                              </T>
+                            }
+                          />
+                        ))}
+                      </RadioGroup>
+                      <input
+                        type="hidden"
+                        name="teamId"
+                        value={JSON.stringify(trueTeamId)}
+                      />
+                    </FormControl>
+                  )}
 
                 <Typography variant="h3" color="textPrimary" gutterBottom>
                   <T>Noggin budget</T>

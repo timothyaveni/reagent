@@ -197,6 +197,8 @@ model Team {
 
   // nogginRevisions NogginRevisions[]
   noggins Noggin[]
+
+  totalPermittedSpendQuastra BigInt?
 }
 
 //
