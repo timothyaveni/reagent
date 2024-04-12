@@ -246,7 +246,6 @@ export const authorizeNoggin = async (
     return true;
   }
 
-  // temp
   if (noggin.parentOrgId !== null) {
     if (
       await hasAtLeastUserOrganizationRole(context, {
@@ -267,8 +266,6 @@ export const authorizeNoggin = async (
   // TODO
   // show if:
   // - noggin is user-owned and this is that user (todo: merges)
-
-  // - noggin is team-owned and this user is in that team
 
   throw notFound();
 };
