@@ -84,7 +84,9 @@ export default function OrganizationTeamManagement() {
             mt: 2,
           }}
         >
-          <Typography variant="h4">{team.name}</Typography>
+          <a href={`/organizations/${orgId}/teams/${team.id}`}>
+            <Typography variant="h4">{team.name}</Typography>
+          </a>
         </Paper>
       ))}
     </>

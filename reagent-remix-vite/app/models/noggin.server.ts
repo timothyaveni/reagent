@@ -14,10 +14,11 @@ import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
 import { getNogginTotalAllocatedCreditQuastra } from './nogginRuns.server';
 import {
-  getPermittedAdditionalBudgetForOrganizationAndUser,
+  getPermittedAdditionalBudgetForOrganizationAndOwner,
   isModelEnabledForOrganization,
   requireAtLeastUserOrganizationRole,
 } from './organization.server';
+import { requireUserMayParticipateInTeam } from './team.server';
 
 export const createNoggin = async (
   context: AppLoadContext,
@@ -30,13 +31,12 @@ export const createNoggin = async (
     budgetQuastra: bigint | null;
   },
 ) => {
-  const user = await requireUser(context);
+  const user = requireUser(context);
 
   if (nogginData.ownerType === 'user' && nogginData.ownerId !== user.id) {
     throw new Error('Cannot create noggin for another user');
   } else if (nogginData.ownerType === 'team') {
-    // TODO
-    throw new Error('Cannot create noggin for a team');
+    await requireUserMayParticipateInTeam(context, nogginData.ownerId);
   }
 
   const { containingOrganizationId } = nogginData;
@@ -69,9 +69,13 @@ export const createNoggin = async (
   // });
 
   if (containingOrganizationId) {
+    const teamOwnerId =
+      nogginData.ownerType === 'team' ? nogginData.ownerId : null;
+
     const permittedAdditionalSpend =
-      await getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+      await getPermittedAdditionalBudgetForOrganizationAndOwner(context, {
         organizationId: containingOrganizationId,
+        teamOwnerId,
       });
 
     if (permittedAdditionalSpend !== null) {
@@ -187,6 +191,7 @@ export const loadNogginBySlug = async (
         },
       },
       userOwnerId: true,
+      teamOwnerId: true,
       parentOrgId: true,
     },
   });
@@ -301,25 +306,27 @@ export const updateNogginBudget = async (
     nogginId,
   });
 
-  const nogginWithOrgId = await prisma.noggin.findUnique({
+  const nogginWithOrgAndTeamId = await prisma.noggin.findUnique({
     where: {
       id: nogginId,
     },
     select: {
       parentOrgId: true,
+      teamOwnerId: true,
     },
   });
 
-  if (!nogginWithOrgId) {
+  if (!nogginWithOrgAndTeamId) {
     throw new Error('Noggin not found');
   }
 
-  const { parentOrgId } = nogginWithOrgId;
+  const { parentOrgId } = nogginWithOrgAndTeamId;
 
   if (parentOrgId) {
     const permittedAdditionalSpend =
-      await getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+      await getPermittedAdditionalBudgetForOrganizationAndOwner(context, {
         organizationId: parentOrgId,
+        teamOwnerId: nogginWithOrgAndTeamId.teamOwnerId, // may be null
       });
 
     if (permittedAdditionalSpend !== null) {
@@ -355,7 +362,20 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
   // TODO: limit
   const noggins = await prisma.noggin.findMany({
     where: {
-      userOwnerId: user.id,
+      OR: [
+        {
+          userOwnerId: user.id,
+        },
+        {
+          teamOwner: {
+            members: {
+              some: {
+                id: user.id,
+              },
+            },
+          },
+        },
+      ],
     },
     select: {
       id: true,
@@ -384,6 +404,11 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
         },
       },
       parentOrg: {
+        select: {
+          name: true,
+        },
+      },
+      teamOwner: {
         select: {
           name: true,
         },

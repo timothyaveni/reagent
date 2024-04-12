@@ -3,7 +3,10 @@ import { prisma } from 'db/db';
 import { requireUser } from '~/auth/auth.server';
 import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
-import { requireAtLeastUserOrganizationRole } from './organization.server';
+import {
+  hasAtLeastUserOrganizationRole,
+  requireAtLeastUserOrganizationRole,
+} from './organization.server';
 
 export const getTeamsForOrgAndUser = async (
   context: AppLoadContext,
@@ -25,6 +28,10 @@ export const getTeamsForOrgAndUser = async (
         },
       },
     },
+    select: {
+      id: true,
+      name: true,
+    },
   });
 
   return teams;
@@ -42,6 +49,10 @@ export const getAllOrgTeamsForManagement = async (
   const teams = await prisma.team.findMany({
     where: {
       organizationId,
+    },
+    select: {
+      id: true,
+      name: true,
     },
   });
 
@@ -73,29 +84,106 @@ export const createTeam = async (
   return team;
 };
 
-export const loadTeam = async (context: AppLoadContext, teamId: number) => {
+const isUserOnTeam = async (userId: number, teamId: number) => {
   const team = await prisma.team.findUnique({
     where: {
       id: teamId,
     },
     select: {
-      id: true,
-      name: true,
-      organizationId: true,
       members: {
-        select: {
-          id: true,
-          userInfo: {
-            select: {
-              displayName: true,
-            },
-          },
+        where: {
+          id: userId,
         },
       },
     },
   });
 
   if (!team) {
+    return false;
+  }
+
+  return team.members.length > 0;
+};
+
+const userMayParticipateInTeam = async (
+  context: AppLoadContext,
+  teamId: number,
+): Promise<boolean> => {
+  const user = requireUser(context);
+
+  if (await isUserOnTeam(user.id, teamId)) {
+    return true;
+  }
+
+  const team = await prisma.team.findUnique({
+    where: {
+      id: teamId,
+    },
+    select: {
+      organizationId: true,
+    },
+  });
+
+  if (!team) {
+    throw notFound();
+  }
+
+  return await hasAtLeastUserOrganizationRole(context, {
+    organizationId: team.organizationId,
+    role: OrganizationRole.MANAGER,
+  });
+};
+
+export const requireUserMayParticipateInTeam = async (
+  context: AppLoadContext,
+  teamId: number,
+) => {
+  if (!(await userMayParticipateInTeam(context, teamId))) {
+    throw notFound();
+  }
+};
+
+export const loadTeam = async (context: AppLoadContext, teamId: number) => {
+  const user = requireUser(context);
+
+  const team = await prisma.team
+    .findUnique({
+      where: {
+        id: teamId,
+      },
+      select: {
+        id: true,
+        name: true,
+        organizationId: true,
+        members: {
+          select: {
+            id: true,
+            userInfo: {
+              select: {
+                displayName: true,
+              },
+            },
+          },
+        },
+        totalPermittedSpendQuastra: true,
+      },
+    })
+    .then((team) => {
+      if (!team) {
+        return null;
+      }
+
+      return {
+        ...team,
+        totalPermittedSpendQuastra: Number(team.totalPermittedSpendQuastra),
+      };
+    });
+
+  if (!team) {
+    throw notFound();
+  }
+
+  if (!(await userMayParticipateInTeam(context, teamId))) {
     throw notFound();
   }
 
@@ -119,17 +207,22 @@ export const mayAddMembers = async (
     throw notFound();
   }
 
-  // hm, should we have a non-enforcing version of this?
-  try {
-    await requireAtLeastUserOrganizationRole(context, {
-      organizationId: team.organizationId,
-      role: OrganizationRole.MANAGER,
-    });
-  } catch (e) {
-    return false;
-  }
+  return await hasAtLeastUserOrganizationRole(context, {
+    organizationId: team.organizationId,
+    role: OrganizationRole.MANAGER,
+  });
+};
 
-  return true;
+export const mayManageTeamBudget = async (
+  context: AppLoadContext,
+  teamId: number,
+): Promise<boolean> => {
+  const team = await loadTeam(context, teamId);
+
+  return await hasAtLeastUserOrganizationRole(context, {
+    organizationId: team.organizationId,
+    role: OrganizationRole.MANAGER,
+  });
 };
 
 export const getAddableMembersForTeam = async (
@@ -156,9 +249,10 @@ export const getAddableMembersForTeam = async (
 
   const members = await prisma.user.findMany({
     where: {
+      // bleh, these are actually memberships
       organizations: {
         some: {
-          id: team.organizationId,
+          organizationId: team.organizationId,
         },
       },
       NOT: {
@@ -174,6 +268,11 @@ export const getAddableMembersForTeam = async (
       userInfo: {
         select: {
           displayName: true,
+        },
+      },
+      organizations: {
+        select: {
+          id: true,
         },
       },
     },
@@ -230,6 +329,30 @@ export const addMemberToTeam = async (
           id: userId,
         },
       },
+    },
+  });
+};
+
+export const setTeamTotalBudget = async (
+  context: AppLoadContext,
+  {
+    teamId,
+    budgetQuastra,
+  }: {
+    teamId: number;
+    budgetQuastra: number;
+  },
+) => {
+  if (!(await mayManageTeamBudget(context, teamId))) {
+    throw notFound();
+  }
+
+  await prisma.team.update({
+    where: {
+      id: teamId,
+    },
+    data: {
+      totalPermittedSpendQuastra: budgetQuastra,
     },
   });
 };

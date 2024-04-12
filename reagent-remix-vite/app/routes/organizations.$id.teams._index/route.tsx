@@ -19,12 +19,13 @@ export const loader = async ({ params, context }: ActionFunctionArgs) => {
   const userTeamsInOrg = await getTeamsForOrgAndUser(context, idInt);
 
   return json({
+    orgId: idInt,
     teams: userTeamsInOrg,
   });
 };
 
 export default function OrganizationTeamList() {
-  const { teams } = useLoaderData<typeof loader>();
+  const { orgId, teams } = useLoaderData<typeof loader>();
 
   return (
     <>
@@ -41,7 +42,9 @@ export default function OrganizationTeamList() {
             mt: 2,
           }}
         >
-          <Typography variant="h4">{team.name}</Typography>
+          <a href={`/organizations/${orgId}/teams/${team.id}`}>
+            <Typography variant="h4">{team.name}</Typography>
+          </a>
         </Paper>
       ))}
 

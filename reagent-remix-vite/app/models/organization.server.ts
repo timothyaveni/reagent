@@ -96,6 +96,28 @@ export const requireAtLeastUserOrganizationRole = async (
   });
 };
 
+export const hasAtLeastUserOrganizationRole = async (
+  context: AppLoadContext,
+  {
+    organizationId,
+    role,
+  }: {
+    organizationId: number;
+    role: OrganizationRole;
+  },
+) => {
+  try {
+    await requireAtLeastUserOrganizationRole(context, {
+      organizationId,
+      role,
+    });
+
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
 export const createOrganization = async (
   context: AppLoadContext,
   {
@@ -317,12 +339,14 @@ export const addUserToOrganization_OMNIPOTENT = async ({
   });
 };
 
-export const getTotalNogginBudgetsForOrganizationAndUser = async (
+export const getTotalNogginBudgetsForOrganizationAndOwner = async (
   context: AppLoadContext,
   {
     organizationId,
+    teamOwnerId,
   }: {
     organizationId: number;
+    teamOwnerId: number | null;
   },
 ) => {
   const user = requireUser(context);
@@ -332,10 +356,13 @@ export const getTotalNogginBudgetsForOrganizationAndUser = async (
     role: OrganizationRole.MEMBER,
   });
 
+  const ownerObject =
+    teamOwnerId === null ? { userOwnerId: user.id } : { teamOwnerId };
+
   const totalBudget = await prisma.noggin.aggregate({
     where: {
       parentOrgId: organizationId,
-      userOwnerId: user.id,
+      ...ownerObject,
     },
     _sum: {
       totalAllocatedCreditQuastra: true,
@@ -375,12 +402,14 @@ export const getUserOrganizationRole = async (
   return membership.role;
 };
 
-export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
+export const getPermittedAdditionalBudgetForOrganizationAndOwner = async (
   context: AppLoadContext,
   {
     organizationId,
+    teamOwnerId,
   }: {
     organizationId: number;
+    teamOwnerId: number | null;
   },
 ) => {
   const user = requireUser(context);
@@ -390,17 +419,31 @@ export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
     role: OrganizationRole.MEMBER,
   });
 
-  const permittedSpend = await prisma.organizationMembership.findUnique({
-    where: {
-      organizationId_userId: {
-        organizationId,
-        userId: user.id,
+  let permittedSpend: {
+    totalPermittedSpendQuastra: bigint | null;
+  } | null = null;
+  if (teamOwnerId !== null) {
+    permittedSpend = await prisma.team.findUnique({
+      where: {
+        id: teamOwnerId,
       },
-    },
-    select: {
-      totalPermittedSpendQuastra: true,
-    },
-  });
+      select: {
+        totalPermittedSpendQuastra: true,
+      },
+    });
+  } else {
+    permittedSpend = await prisma.organizationMembership.findUnique({
+      where: {
+        organizationId_userId: {
+          organizationId,
+          userId: user.id,
+        },
+      },
+      select: {
+        totalPermittedSpendQuastra: true,
+      },
+    });
+  }
 
   if (permittedSpend === null) {
     return null;
@@ -412,10 +455,11 @@ export const getPermittedAdditionalBudgetForOrganizationAndUser = async (
     return null;
   }
 
-  const alreadyBudgeted = await getTotalNogginBudgetsForOrganizationAndUser(
+  const alreadyBudgeted = await getTotalNogginBudgetsForOrganizationAndOwner(
     context,
     {
       organizationId,
+      teamOwnerId,
     },
   );
 

@@ -8,7 +8,7 @@ import { requireUser } from '~/auth/auth.server';
 import { createNoggin } from '~/models/noggin.server';
 import {
   getEnabledAIModelIDsForOrganization,
-  getPermittedAdditionalBudgetForOrganizationAndUser,
+  getPermittedAdditionalBudgetForOrganizationAndOwner,
   indexOrganizations,
 } from '~/models/organization.server';
 
@@ -51,15 +51,27 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   const teams = await getAllTeamsForUser(context);
 
   // joins are for losers
-  const permittedAdditionalSpend = await Promise.all(
+  const permittedAdditionalIndividualSpend = await Promise.all(
     orgs.map((org) =>
-      getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+      getPermittedAdditionalBudgetForOrganizationAndOwner(context, {
         organizationId: org.id,
+        teamOwnerId: null,
+      }),
+    ),
+  );
+  const permittedAdditionalTeamSpend = await Promise.all(
+    teams.map((team) =>
+      getPermittedAdditionalBudgetForOrganizationAndOwner(context, {
+        organizationId: team.organizationId,
+        teamOwnerId: team.id,
       }),
     ),
   );
   const permittedAdditionalSpendByOrgId = Object.fromEntries(
-    orgs.map((org, i) => [org.id, permittedAdditionalSpend[i]]),
+    orgs.map((org, i) => [org.id, permittedAdditionalIndividualSpend[i]]),
+  );
+  const permittedAdditionalSpendByTeamId = Object.fromEntries(
+    teams.map((team, i) => [team.id, permittedAdditionalTeamSpend[i]]),
   );
 
   const aiModels = await indexAIModels(context);
@@ -82,6 +94,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     orgs,
     teams,
     permittedAdditionalSpendByOrgId,
+    permittedAdditionalSpendByTeamId,
     aiModels,
     enabledModelsForOrgs,
   });
@@ -118,9 +131,26 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     nogginOrgOwner = parseInt(orgControl, 10);
   }
 
-  const noggin = await createNoggin(context, {
+  let ownerData: {
+    ownerType: 'user' | 'team';
+    ownerId: number;
+  } = {
     ownerType: 'user',
     ownerId: user.id,
+  };
+
+  const teamId = formData.get('teamId')?.toString();
+  if (teamId) {
+    const teamIdInt = parseInt(teamId, 10);
+
+    ownerData = {
+      ownerType: 'team',
+      ownerId: teamIdInt,
+    };
+  }
+
+  const noggin = await createNoggin(context, {
+    ...ownerData,
     containingOrganizationId: nogginOrgOwner,
     aiModelId,
     name,
@@ -135,6 +165,7 @@ export default function NewNoggin() {
     orgs,
     teams,
     permittedAdditionalSpendByOrgId,
+    permittedAdditionalSpendByTeamId,
     aiModels,
     enabledModelsForOrgs,
   } = useLoaderData<typeof loader>();
@@ -185,6 +216,8 @@ export default function NewNoggin() {
   const permittedAdditionalSpend =
     nogginOrgOwner === null
       ? null
+      : trueTeamId !== null
+      ? permittedAdditionalSpendByTeamId[trueTeamId]
       : permittedAdditionalSpendByOrgId[nogginOrgOwner];
 
   return (
@@ -411,6 +444,7 @@ export default function NewNoggin() {
                   chosenRadio={chosenBudgetRadio}
                   setChosenRadio={setChosenBudgetRadio}
                   maxPermittedBudgetQuastra={permittedAdditionalSpend}
+                  isTeam={trueTeamId !== null}
                 />
                 <input
                   type="hidden"

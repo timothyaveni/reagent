@@ -188,7 +188,7 @@ model Team {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-  name      String    @unique
+  name      String
 
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId Int
@@ -199,6 +199,8 @@ model Team {
   noggins Noggin[]
 
   totalPermittedSpendQuastra BigInt?
+
+  @@unique([organizationId, name])
 }
 
 //

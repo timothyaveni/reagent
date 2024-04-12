@@ -20,6 +20,8 @@ type NogginBudgetEntryProps = {
   setChosenRadio: (radio: 'limited' | 'unlimited') => void;
 
   maxPermittedBudgetQuastra: number | null;
+
+  isTeam: boolean;
 };
 
 /* two options: unlimited, or a floating point number input */
@@ -30,6 +32,7 @@ export function NogginBudgetEntry({
   chosenRadio,
   setChosenRadio,
   maxPermittedBudgetQuastra,
+  isTeam, // hate prop drilling for i18n/strings :/
 }: NogginBudgetEntryProps) {
   const currentBudgetAmountCredits = roundedCreditCount(
     currentBudgetAmountQuastra,
@@ -84,11 +87,19 @@ export function NogginBudgetEntry({
             </Typography>
             {!allowUnlimited && (
               <Typography variant="caption">
-                <T>
-                  Because this noggin is part of an organization and you have a
-                  total budget limit, you cannot set an unlimited budget for
-                  this noggin.
-                </T>
+                {isTeam ? (
+                  <T>
+                    Because this noggin is part of an organization and your team
+                    has a total budget limit, you cannot set an unlimited budget
+                    for this noggin.
+                  </T>
+                ) : (
+                  <T>
+                    Because this noggin is part of an organization and you have
+                    a total budget limit, you cannot set an unlimited budget for
+                    this noggin.
+                  </T>
+                )}
               </Typography>
             )}
           </div>
@@ -158,10 +169,17 @@ export function NogginBudgetEntry({
             )}
             {maxPermittedBudgetQuastra !== null && (
               <Typography variant="caption">
-                <T flagged>
-                  Remaining permitted budget from your organization:{' '}
-                  <CostText quastra={maxPermittedBudgetQuastra} />
-                </T>
+                {isTeam ? (
+                  <T flagged>
+                    Remaining permitted budget for this team:{' '}
+                    <CostText quastra={maxPermittedBudgetQuastra} />
+                  </T>
+                ) : (
+                  <T flagged>
+                    Remaining permitted budget from your organization:{' '}
+                    <CostText quastra={maxPermittedBudgetQuastra} />
+                  </T>
+                )}
               </Typography>
             )}
           </Box>

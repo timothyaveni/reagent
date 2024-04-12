@@ -7,6 +7,8 @@ import {
   getAddableMembersForTeam,
   loadTeam,
   mayAddMembers,
+  mayManageTeamBudget,
+  setTeamTotalBudget,
 } from '~/models/team.server';
 import { notFound } from '~/route-utils/status-code';
 
@@ -27,7 +29,16 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     addableMembers = await getAddableMembersForTeam(context, team.id);
   }
 
-  return { team, userMayAddMembers, addableMembers };
+  const currentTeamTotalBudgetQuastra = team.totalPermittedSpendQuastra;
+  const userMayManageBudget = await mayManageTeamBudget(context, team.id);
+
+  return {
+    team,
+    userMayAddMembers,
+    addableMembers,
+    userMayManageBudget,
+    currentTeamTotalBudgetQuastra,
+  };
 };
 
 export const action = async ({
@@ -71,6 +82,25 @@ export const action = async ({
     });
 
     return redirect(`/organizations/${id}/teams/${teamId}`);
+  } else if (action === 'setBudget') {
+    const budget = formData.get('budget')?.toString();
+
+    if (!budget) {
+      throw new Error('Budget is required');
+    }
+
+    const budgetQuastraInt = parseInt(budget, 10);
+
+    if (isNaN(budgetQuastraInt)) {
+      throw new Error('Invalid budget');
+    }
+
+    await setTeamTotalBudget(context, {
+      teamId: teamIdInt,
+      budgetQuastra: budgetQuastraInt,
+    });
+
+    return redirect(`/organizations/${id}/teams/${teamId}`);
   }
 
   throw notFound();
@@ -89,8 +119,13 @@ export const handle = {
 };
 
 export default function TeamView() {
-  const { team, userMayAddMembers, addableMembers } =
-    useLoaderData<typeof loader>();
+  const {
+    team,
+    userMayAddMembers,
+    addableMembers,
+    currentTeamTotalBudgetQuastra,
+    userMayManageBudget,
+  } = useLoaderData<typeof loader>();
   const [memberId, setMemberId] = useState('');
 
   return (
@@ -126,6 +161,25 @@ export default function TeamView() {
             </Button>
           </Form>
         </>
+      )}
+
+      {userMayManageBudget ? (
+        <Form method="post">
+          <input type="hidden" name="action" value="setBudget" />
+          <TextField
+            label="Total Budget"
+            name="budget"
+            type="number"
+            defaultValue={currentTeamTotalBudgetQuastra}
+          />
+          <Button type="submit" variant="contained">
+            Set Total Budget
+          </Button>
+        </Form>
+      ) : (
+        <Typography variant="h3">
+          Total Budget: {currentTeamTotalBudgetQuastra}
+        </Typography>
       )}
     </div>
   );
