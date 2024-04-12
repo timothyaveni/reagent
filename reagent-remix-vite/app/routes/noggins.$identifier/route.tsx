@@ -17,7 +17,7 @@ import {
   getNogginTotalAllocatedCreditQuastra,
   getNogginTotalIncurredCostQuastra,
 } from '~/models/nogginRuns.server';
-import { getPermittedAdditionalBudgetForOrganizationAndUser } from '~/models/organization.server';
+import { getPermittedAdditionalBudgetForOrganizationAndOwner } from '~/models/organization.server';
 import { notFound } from '~/route-utils/status-code';
 import {
   NogginEditorStore,
@@ -64,8 +64,9 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const permittedBudgetQuastraIncludingThisNoggin =
     noggin.parentOrgId === null
       ? null
-      : await getPermittedAdditionalBudgetForOrganizationAndUser(context, {
+      : await getPermittedAdditionalBudgetForOrganizationAndOwner(context, {
           organizationId: noggin.parentOrgId,
+          teamOwnerId: noggin.teamOwnerId,
         });
 
   const permittedBudgetQuastra =

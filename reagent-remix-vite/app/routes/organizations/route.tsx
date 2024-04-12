@@ -56,6 +56,7 @@ export const action = async ({
 
 export default function OrganizationsRoot() {
   const matches = useMatches();
+  // console.log({ matches: matches.filter((m) => m.handle?.breadcrumb) });
 
   // @ts-expect-error
   const hideAllBreadcrumbs = last(matches)?.handle?.hideAllBreadcrumbs;

@@ -84,10 +84,18 @@ function NogginCard({
                     component="p"
                     className="noggin-description"
                   >
-                    <T flagged>
-                      Within the organization{' '}
-                      <strong>{noggin.parentOrg.name}</strong>
-                    </T>
+                    {noggin.teamOwner ? (
+                      <T flagged>
+                        Within the team <strong>{noggin.teamOwner.name}</strong>{' '}
+                        in the organization{' '}
+                        <strong>{noggin.parentOrg.name}</strong>
+                      </T>
+                    ) : (
+                      <T flagged>
+                        Within the organization{' '}
+                        <strong>{noggin.parentOrg.name}</strong>
+                      </T>
+                    )}
                   </Typography>
                 )}
               </Stack>

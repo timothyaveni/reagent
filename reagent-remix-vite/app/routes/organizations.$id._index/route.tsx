@@ -5,7 +5,7 @@ import MUILink from '~/components/MUILink';
 import T from '~/i18n/T';
 import {
   OrganizationLoadResponse,
-  getTotalNogginBudgetsForOrganizationAndUser,
+  getTotalNogginBudgetsForOrganizationAndOwner,
   getTotalOrganizationSpendForUser,
   getUserOrganizationRole,
   loadOrganization,
@@ -33,8 +33,9 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
       getTotalOrganizationSpendForUser(context, {
         organizationId: organizationData.id,
       }),
-      getTotalNogginBudgetsForOrganizationAndUser(context, {
+      getTotalNogginBudgetsForOrganizationAndOwner(context, {
         organizationId: organizationData.id,
+        teamOwnerId: null,
       }),
       getUserOrganizationRole(context, {
         organizationId: organizationData.id,

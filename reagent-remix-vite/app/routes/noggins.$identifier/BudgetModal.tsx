@@ -20,7 +20,7 @@ type BudgetModalProps = {
 };
 
 export default function BudgetModal(props: BudgetModalProps) {
-  const { totalIncurredCostQuastra, permittedBudgetQuastra } =
+  const { noggin, totalIncurredCostQuastra, permittedBudgetQuastra } =
     useLoaderData<NogginRouteLoaderType>();
   // const totalIncurredCostCredits = roundedCreditCount(totalIncurredCostQuastra);
 
@@ -87,6 +87,7 @@ export default function BudgetModal(props: BudgetModalProps) {
           chosenRadio={chosenRadio}
           setChosenRadio={setChosenRadio}
           maxPermittedBudgetQuastra={permittedBudgetQuastra}
+          isTeam={noggin.teamOwnerId !== null}
         />
       </DialogContent>
       <DialogActions>
