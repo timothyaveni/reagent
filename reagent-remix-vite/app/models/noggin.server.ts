@@ -15,10 +15,14 @@ import { OrganizationRole } from '~/shared/organization';
 import { getNogginTotalAllocatedCreditQuastra } from './nogginRuns.server';
 import {
   getPermittedAdditionalBudgetForOrganizationAndOwner,
+  hasAtLeastUserOrganizationRole,
   isModelEnabledForOrganization,
   requireAtLeastUserOrganizationRole,
 } from './organization.server';
-import { requireUserMayParticipateInTeam } from './team.server';
+import {
+  requireUserMayParticipateInTeam,
+  userMayParticipateInTeam,
+} from './team.server';
 
 export const createNoggin = async (
   context: AppLoadContext,
@@ -244,17 +248,26 @@ export const authorizeNoggin = async (
 
   // temp
   if (noggin.parentOrgId !== null) {
-    await requireAtLeastUserOrganizationRole(context, {
-      organizationId: noggin.parentOrgId,
-      role: OrganizationRole.MANAGER,
-    });
+    if (
+      await hasAtLeastUserOrganizationRole(context, {
+        organizationId: noggin.parentOrgId,
+        role: OrganizationRole.MANAGER,
+      })
+    ) {
+      return true;
+    }
 
-    return true;
+    if (noggin.teamOwnerId !== null) {
+      if (await userMayParticipateInTeam(context, noggin.teamOwnerId)) {
+        return true;
+      }
+    }
   }
 
   // TODO
   // show if:
   // - noggin is user-owned and this is that user (todo: merges)
+
   // - noggin is team-owned and this user is in that team
 
   throw notFound();

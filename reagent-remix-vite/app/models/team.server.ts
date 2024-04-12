@@ -105,7 +105,7 @@ const isUserOnTeam = async (userId: number, teamId: number) => {
   return team.members.length > 0;
 };
 
-const userMayParticipateInTeam = async (
+export const userMayParticipateInTeam = async (
   context: AppLoadContext,
   teamId: number,
 ): Promise<boolean> => {
