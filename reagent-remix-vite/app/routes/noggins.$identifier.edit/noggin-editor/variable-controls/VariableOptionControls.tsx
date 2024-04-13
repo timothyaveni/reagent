@@ -1,4 +1,5 @@
 import { Skeleton, Typography } from '@mui/material';
+import { createContext } from 'react';
 import T from '~/i18n/T';
 import { useHasPopulatedStore } from '../editor-utils';
 import { VariableControlsInner } from './VariableControlsInner.client';
@@ -8,7 +9,11 @@ type Props = {
   // (i'm making the call now that changing the model/schema will require at least a page reload, at least for v0)
   // what this means is that we can safely use this as a way to call into hooks, but we might get in trouble with a linter
   documentIds: string[];
+  anyImagesPermitted: boolean;
 };
+
+// this drilling was sucking so i put the stop to it here. best spot? idk, editor schema maybe should be in wider ctx
+export const AnyImagesPermittedContext = createContext<boolean>(false);
 
 export const AllVariableOptionControls = (props: Props) => {
   return (
@@ -28,7 +33,9 @@ export const AllVariableOptionControls = (props: Props) => {
           into the text prompts you write here.
         </T>
       </Typography>
-      <ControlsWrapper documentIds={props.documentIds} />
+      <AnyImagesPermittedContext.Provider value={props.anyImagesPermitted}>
+        <ControlsWrapper documentIds={props.documentIds} />
+      </AnyImagesPermittedContext.Provider>
     </div>
   );
 };

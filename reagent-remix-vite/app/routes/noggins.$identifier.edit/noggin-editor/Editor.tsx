@@ -11,6 +11,7 @@ import {
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import T from '~/i18n/T';
 import InputsColumn from './InputsColumn';
+import { editorSchemaPermitsImageVariables } from './editor-schema-permits-images.js';
 import { ModelOutputEditor } from './output-editor/ModelOutputEditor';
 import { AllVariableOptionControls } from './variable-controls/VariableOptionControls';
 
@@ -105,6 +106,9 @@ const Editor: React.FC<EditorProps> = (props) => {
         <Stack spacing={6} flex={1}>
           <AllVariableOptionControls
             documentIds={editorSchema.modelInputComponents}
+            // this is pretty temporary -- it's better do this by editor (see kb#156)
+            // images may still be permitted by 'override' variables. this just controls inline
+            anyImagesPermitted={editorSchemaPermitsImageVariables(editorSchema)}
           />
           <ModelParametersBox {...props} />
         </Stack>
@@ -116,6 +120,7 @@ const Editor: React.FC<EditorProps> = (props) => {
         <ModelInputsBox {...props} />
         <AllVariableOptionControls
           documentIds={editorSchema.modelInputComponents}
+          anyImagesPermitted={editorSchemaPermitsImageVariables(editorSchema)}
         />
         <ModelOutputsBox {...props} />
         <ModelParametersBox {...props} />
