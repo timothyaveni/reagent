@@ -11,6 +11,7 @@ import {
 import { useNavigate } from '@remix-run/react';
 import T from '~/i18n/T';
 
+import AnthropicSVG from './provider-logos/anthropic.svg';
 import OpenAISVG from './provider-logos/openai-white-lockup.svg';
 import ReplicateSVG from './provider-logos/replicate.svg';
 
@@ -143,6 +144,40 @@ export default function Providers() {
                       Replicate offers individually-billed requests to a wide
                       variety of open-source models, like Llama and Stable
                       Diffusion.
+                    </T>
+                  </p>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardActionArea
+                onClick={() => {
+                  navigate('/providers/anthropic');
+                }}
+              >
+                <CardMedia
+                  sx={{
+                    height: 200,
+                    backgroundColor: 'white',
+                    backgroundSize: 'contain',
+                    padding: '1rem',
+                    backgroundOrigin: 'content-box',
+                  }}
+                  image={AnthropicSVG}
+                  title="Anthropic logo"
+                />
+                <CardContent>
+                  <h2>
+                    <T>Anthropic</T>
+                  </h2>
+
+                  <p>
+                    <T>
+                      Anthropic is known for Claude, a general-purpose large
+                      language model with multimodal and reasoning capabilities
+                      at various price points.
                     </T>
                   </p>
                 </CardContent>

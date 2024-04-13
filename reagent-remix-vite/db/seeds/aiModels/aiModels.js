@@ -282,6 +282,50 @@ async function main() {
     },
   });
 
+  const anthropicProvider = await prisma.modelProvider.upsert({
+    where: {
+      name: 'anthropic',
+    },
+    update: {},
+    create: {
+      name: 'anthropic',
+      friendlyName: 'Anthropic',
+      credentialsSchemaVersion: 1,
+      credentialsSchema: {
+        apiKey: {
+          type: 'string',
+          name: {
+            en_US: 'API Key',
+          },
+        },
+      },
+      needsCredentials: true,
+    },
+  });
+
+  const { default: claude3Haiku20240307EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/anthropic/claude-3-haiku-20240307.js'
+  );
+
+  const _claude3Haiku20240307 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: anthropicProvider.id,
+        name: 'claude-3-haiku-20240307',
+        revision: '2024-03-07',
+      },
+    },
+    update: {
+      editorSchema: claude3Haiku20240307EditorSchema,
+    },
+    create: {
+      modelProviderId: anthropicProvider.id,
+      name: 'claude-3-haiku-20240307',
+      revision: '2024-03-07',
+      editorSchema: claude3Haiku20240307EditorSchema,
+    },
+  });
+
   const testProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'test',
