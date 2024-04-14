@@ -326,6 +326,52 @@ async function main() {
     },
   });
 
+  const { default: claude3Sonnet20240229EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/anthropic/claude-3-sonnet-20240229.js'
+  );
+
+  const _claude3Sonnet20240229 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: anthropicProvider.id,
+        name: 'claude-3-sonnet-20240229',
+        revision: '2024-02-29',
+      },
+    },
+    update: {
+      editorSchema: claude3Sonnet20240229EditorSchema,
+    },
+    create: {
+      modelProviderId: anthropicProvider.id,
+      name: 'claude-3-sonnet-20240229',
+      revision: '2024-02-29',
+      editorSchema: claude3Sonnet20240229EditorSchema,
+    },
+  });
+
+  const { default: claude3Opus20240229EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/anthropic/claude-3-opus-20240229.js'
+  );
+
+  const _claude3Opus20240229 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: anthropicProvider.id,
+        name: 'claude-3-opus-20240229',
+        revision: '2024-02-29',
+      },
+    },
+    update: {
+      editorSchema: claude3Opus20240229EditorSchema,
+    },
+    create: {
+      modelProviderId: anthropicProvider.id,
+      name: 'claude-3-opus-20240229',
+      revision: '2024-02-29',
+      editorSchema: claude3Opus20240229EditorSchema,
+    },
+  });
+
   const testProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'test',
