@@ -353,6 +353,8 @@ model NogginRunLogEntry {
   stage       NogginRunLogEntryStage
   message     Json
   privateData Json? // so we can store extra (secret?) debug data that shouldn't make it to the client
+
+  @@index([runId, stage])
 }
 
 enum NogginRunOutputEntryContentType {
@@ -382,6 +384,8 @@ model NogginRunOutputEntry {
   metadata    Json?
 
   stage NogginRunOutputEntryStage
+
+  @@index([runId, stage])
 }
 
 enum NogginRunStatus {
