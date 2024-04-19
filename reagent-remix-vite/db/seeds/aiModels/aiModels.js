@@ -234,6 +234,31 @@ async function main() {
     },
   });
 
+  const { default: bytedance_sdxlLightning4StepEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/bytedance_sdxl-lightning-4step.js'
+  );
+
+  const _bytedance_sdxlLightning4Step = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'bytedance_sdxl-lightning-4step',
+        revision:
+          '727e49a643e999d602a896c774a0658ffefea21465756a6ce24b7ea4165eba6a_2024-04-18',
+      },
+    },
+    update: {
+      editorSchema: bytedance_sdxlLightning4StepEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'bytedance_sdxl-lightning-4step',
+      revision:
+        '727e49a643e999d602a896c774a0658ffefea21465756a6ce24b7ea4165eba6a_2024-04-18',
+      editorSchema: bytedance_sdxlLightning4StepEditorSchema,
+    },
+  });
+
   const { default: andreasjansson_llama213bChatJsonSchema } = await import(
     '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/andreasjansson_llama-2-13b-chat-json-schema.js'
   );
