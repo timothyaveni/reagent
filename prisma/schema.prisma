@@ -249,7 +249,7 @@ model NogginRevision {
 
   runs NogginRun[]
 
-  @@unique([nogginId])
+  @@index([nogginId])
 }
 
 model NogginAPIKey {
