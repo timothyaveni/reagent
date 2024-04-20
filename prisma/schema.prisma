@@ -6,6 +6,9 @@ generator client {
 datasource db {
   provider = "postgres"
   url      = env("DATABASE_URL")
+  // we don't actually use this, but the linter gives us some foreign key index guidance if we use it:
+  // relationMode = "prisma"
+  // (postgres doesn't create these indexes automatically)
 }
 
 model User {
@@ -149,6 +152,7 @@ model OrganizationMembership {
   totalPermittedSpendQuastra BigInt?
 
   @@unique([organizationId, userId])
+  @@index([userId])
 }
 
 enum OrganizationInviteStatus {
@@ -231,6 +235,11 @@ model Noggin {
   apiKeys NogginAPIKey[]
 
   totalAllocatedCreditQuastra BigInt?
+
+  // don't need one for org, because we'll only query through team/user
+  // also don't need one for aiModel of course
+  @@index([userOwnerId])
+  @@index([teamOwnerId])
 }
 
 model NogginRevision {
@@ -490,4 +499,6 @@ model NogginOutputAssetObject {
   uuid     String @unique
   filename String
   url      String
+
+  @@index([nogginRunId])
 }
