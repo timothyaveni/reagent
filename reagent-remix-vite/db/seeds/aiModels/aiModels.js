@@ -307,6 +307,29 @@ async function main() {
     },
   });
 
+  const { default: metaLlama370BInstructEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/meta-llama-3-70b-instruct.js'
+  );
+
+  const _metaLlama370BInstruct = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'meta-llama-3-70b-instruct',
+        revision: '2024-04-24',
+      },
+    },
+    update: {
+      editorSchema: metaLlama370BInstructEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'meta-llama-3-70b-instruct',
+      revision: '2024-04-24',
+      editorSchema: metaLlama370BInstructEditorSchema,
+    },
+  });
+
   const anthropicProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'anthropic',
