@@ -1,3 +1,4 @@
+import { slateNodesToInsertDelta } from '@slate-yjs/core';
 import { prisma } from 'db/db';
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import * as Y from 'yjs';
@@ -20,7 +21,16 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
         modelInputs.set(inputKey, new Y.XmlText());
         break;
       case 'plain-text-with-parameters':
-        modelInputs.set(inputKey, new Y.XmlText(input.default || undefined));
+        const plainTextWithParameters = new Y.XmlText();
+        const slateNode = {
+          type: 'paragraph',
+          children: [{ text: input.default || '' }],
+        };
+        const delta = slateNodesToInsertDelta([slateNode]);
+        // this will be 'pending' until it gets added to the ydoc
+        plainTextWithParameters.applyDelta(delta, { sanitize: false });
+
+        modelInputs.set(inputKey, plainTextWithParameters);
         break;
       case 'image':
         modelInputs.set(inputKey, input.default ?? '');
