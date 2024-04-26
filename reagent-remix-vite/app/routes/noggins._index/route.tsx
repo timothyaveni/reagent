@@ -1,8 +1,10 @@
 import { BlurOn } from '@mui/icons-material';
 import { json } from '@remix-run/node';
-import { useLoaderData, useNavigate } from '@remix-run/react';
-import { requireUser } from '~/auth/auth.server';
-import { loadNogginsIndex } from '~/models/noggin.server';
+import { Link, useLoaderData, useNavigate } from '@remix-run/react';
+import {
+  loadNogginsIndex,
+  loadNogginsIndexCount,
+} from '~/models/noggin.server';
 
 import {
   Box,
@@ -10,6 +12,8 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Pagination,
+  PaginationItem,
   Paper,
   Stack,
   Typography,
@@ -33,12 +37,21 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const user = requireUser(context);
+const PAGE_SIZE = 20;
 
-  const noggins = await loadNogginsIndex(context);
+export const loader = async ({ context, request }: LoaderFunctionArgs) => {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get('page')?.toString() || '1', 10) || 1;
 
-  return json({ noggins });
+  const [count, noggins] = await Promise.all([
+    loadNogginsIndexCount(context),
+    loadNogginsIndex(context, {
+      pageSize: PAGE_SIZE,
+      pageZeroIndexed: page - 1,
+    }),
+  ]);
+
+  return json({ count, page, noggins });
 };
 
 type NogginIndexLoader = typeof loader;
@@ -186,8 +199,10 @@ function NogginIndexBody({
 }
 
 export default function NogginList() {
-  const { noggins } = useLoaderData<typeof loader>();
+  const { count, page, noggins } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+
+  const pageCount = Math.ceil(count / PAGE_SIZE);
 
   return (
     <Stack mt={4} spacing={5}>
@@ -217,6 +232,21 @@ export default function NogginList() {
       <NogginIndexDescription />
 
       <NogginIndexBody noggins={noggins} />
+
+      <Box alignSelf="center">
+        <Pagination
+          page={page}
+          count={pageCount}
+          renderItem={(item) => (
+            <PaginationItem
+              component={Link}
+              to={`/noggins${item.page === 1 ? '' : `?page=${item.page}`}`}
+              preventScrollReset
+              {...item}
+            />
+          )}
+        />
+      </Box>
     </Stack>
   );
 }

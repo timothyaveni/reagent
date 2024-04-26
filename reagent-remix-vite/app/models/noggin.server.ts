@@ -365,10 +365,59 @@ export const updateNogginBudget = async (
   });
 };
 
-export const loadNogginsIndex = async (context: AppLoadContext) => {
+export const loadNogginsIndexCount = async (context: AppLoadContext) => {
   const user = requireUser(context);
 
-  const nogginsRaw = (await prisma.$queryRaw`
+  const count = await prisma.$queryRaw<{ count: number }[]>`
+    select
+      count(*)
+    from "Noggin"
+    where
+      (
+        "Noggin"."userOwnerId" = ${user.id}
+      ) or (
+        "Noggin"."teamOwnerId" in (
+          select
+            "Team"."id"
+          from "Team"
+          inner join "_TeamToUser" on "Team"."id" = "_TeamToUser"."A"
+          where
+            "_TeamToUser"."B" = ${user.id}
+        )
+      )
+  `;
+
+  return Number(count[0].count);
+};
+
+export const loadNogginsIndex = async (
+  context: AppLoadContext,
+  {
+    pageSize = 20,
+    pageZeroIndexed = 0,
+  }: {
+    pageSize: number;
+    pageZeroIndexed: number;
+  },
+) => {
+  const user = requireUser(context);
+  const offset = pageZeroIndexed * pageSize;
+
+  const nogginsRaw = await prisma.$queryRaw<
+    {
+      id: number;
+      slug: string;
+      title: string;
+      aiModelName: string;
+      modelProviderName: string;
+      parentOrgName: string;
+      teamOwnerName: string;
+      latestNogginRevisionUpdatedAt: Date;
+      latestNogginRevisionId: number;
+      latestNogginRevisionNogginVariables: any;
+      latestNogginRevisionOutputSchema: any;
+    }[]
+  >`
     select
       "Noggin"."id",
       "Noggin"."slug",
@@ -412,20 +461,9 @@ export const loadNogginsIndex = async (context: AppLoadContext) => {
         )
       )
     order by "NogginRevision"."updatedAt" desc
-    -- limit 10
-  `) as {
-    id: number;
-    slug: string;
-    title: string;
-    aiModelName: string;
-    modelProviderName: string;
-    parentOrgName: string;
-    teamOwnerName: string;
-    latestNogginRevisionUpdatedAt: Date;
-    latestNogginRevisionId: number;
-    latestNogginRevisionNogginVariables: string;
-    latestNogginRevisionOutputSchema: string;
-  }[];
+    limit ${pageSize}
+    offset ${offset}
+  `;
 
   // reformat to how prisma would return it if we didn't need to query raw
 
