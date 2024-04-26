@@ -368,77 +368,110 @@ export const updateNogginBudget = async (
 export const loadNogginsIndex = async (context: AppLoadContext) => {
   const user = requireUser(context);
 
-  // TODO: load for teams as well
-  // TODO: limit
-  const noggins = await prisma.noggin.findMany({
-    where: {
-      OR: [
-        {
-          userOwnerId: user.id,
+  const nogginsRaw = (await prisma.$queryRaw`
+    select
+      "Noggin"."id",
+      "Noggin"."slug",
+      "Noggin"."title",
+      "AIModel"."name" as "aiModelName",
+      "ModelProvider"."name" as "modelProviderName",
+      "Organization"."name" as "parentOrgName",
+      "Team"."name" as "teamOwnerName",
+      "NogginRevision"."updatedAt" as "latestNogginRevisionUpdatedAt",
+      "NogginRevision"."id" as "latestNogginRevisionId",
+      "NogginRevision"."nogginVariables" as "latestNogginRevisionNogginVariables",
+      "NogginRevision"."outputSchema" as "latestNogginRevisionOutputSchema"
+    from "Noggin"
+    left join "AIModel" on "Noggin"."aiModelId" = "AIModel"."id"
+    left join "ModelProvider" on "AIModel"."modelProviderId" = "ModelProvider"."id"
+    left join "Organization" on "Noggin"."parentOrgId" = "Organization"."id"
+    left join "Team" on "Noggin"."teamOwnerId" = "Team"."id"
+    -- get just the most recent revision
+    left join lateral (
+      select
+        "id",
+        "updatedAt",
+        "nogginVariables",
+        "outputSchema"
+      from "NogginRevision"
+      where "nogginId" = "Noggin"."id"
+      order by "updatedAt" desc
+      limit 1
+    ) as "NogginRevision" on true
+    where
+      (
+        "Noggin"."userOwnerId" = ${user.id}
+      ) or (
+        "Noggin"."teamOwnerId" in (
+          select
+            "Team"."id"
+          from "Team"
+          inner join "_TeamToUser" on "Team"."id" = "_TeamToUser"."A"
+          where
+            "_TeamToUser"."B" = ${user.id}
+        )
+      )
+    order by "NogginRevision"."updatedAt" desc
+    -- limit 10
+  `) as {
+    id: number;
+    slug: string;
+    title: string;
+    aiModelName: string;
+    modelProviderName: string;
+    parentOrgName: string;
+    teamOwnerName: string;
+    latestNogginRevisionUpdatedAt: Date;
+    latestNogginRevisionId: number;
+    latestNogginRevisionNogginVariables: string;
+    latestNogginRevisionOutputSchema: string;
+  }[];
+
+  // reformat to how prisma would return it if we didn't need to query raw
+
+  const noggins = nogginsRaw.map((noggin) => {
+    return {
+      id: noggin.id,
+      slug: noggin.slug,
+      title: noggin.title,
+      aiModel: {
+        name: noggin.aiModelName,
+        modelProvider: {
+          name: noggin.modelProviderName,
         },
-        {
-          teamOwner: {
-            members: {
-              some: {
-                id: user.id,
-              },
+      },
+      parentOrg:
+        noggin.parentOrgName === null
+          ? null
+          : {
+              name: noggin.parentOrgName,
             },
-          },
+      teamOwner:
+        noggin.teamOwnerName === null
+          ? null
+          : {
+              name: noggin.teamOwnerName,
+            },
+      nogginRevisions: [
+        {
+          id: noggin.latestNogginRevisionId,
+          updatedAt: noggin.latestNogginRevisionUpdatedAt,
+          nogginVariables: noggin.latestNogginRevisionNogginVariables,
+          outputSchema: noggin.latestNogginRevisionOutputSchema,
         },
       ],
-    },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      nogginRevisions: {
-        orderBy: {
-          createdAt: 'desc',
-        },
-        take: 1,
-        select: {
-          id: true,
-          updatedAt: true,
-          nogginVariables: true,
-          outputSchema: true,
-        },
-      },
-      aiModel: {
-        select: {
-          name: true,
-          modelProvider: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      },
-      parentOrg: {
-        select: {
-          name: true,
-        },
-      },
-      teamOwner: {
-        select: {
-          name: true,
-        },
-      },
-    },
+    };
   });
 
-  // todo do this with sql (don't think prisma supports bleh)
-  // todo while we're refactoring that, let's also include a noggin run count through nogginrevisions
-  noggins.sort((a, b) => {
-    if (!a.nogginRevisions[0]) {
-      return 1;
-    } else if (!b.nogginRevisions[0]) {
-      return -1;
-    } else {
-      return +b.nogginRevisions[0].updatedAt > +a.nogginRevisions[0].updatedAt
-        ? 1
-        : -1;
-    }
-  });
+  // double check auth for each noggin -- at least while we test this refactor
+  // this will just hard error if it fails, which is spooky but not as spooky as a privacy sev!
+  await Promise.all(
+    noggins.map((noggin) =>
+      authorizeNoggin(context, {
+        nogginId: noggin.id,
+      }),
+    ),
+  );
 
   return noggins;
 };
