@@ -2,7 +2,7 @@
 
 cd /app
 
-npm install --force
+npm install
 
 npx prisma generate
 npx prisma generate --watch &

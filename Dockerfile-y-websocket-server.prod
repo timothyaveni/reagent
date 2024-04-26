@@ -5,7 +5,7 @@ WORKDIR /app
 COPY ./y-websocket-server/package.json /app
 COPY ./y-websocket-server/package-lock.json /app
 
-RUN npm ci --force # we don't love --force but i think react canary ends up making us need it
+RUN npm ci
 
 COPY ./y-websocket-server /app
 
