@@ -241,7 +241,6 @@ export default function NogginList() {
             <PaginationItem
               component={Link}
               to={`/noggins${item.page === 1 ? '' : `?page=${item.page}`}`}
-              preventScrollReset
               {...item}
             />
           )}
