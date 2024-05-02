@@ -1,31 +1,15 @@
-import { BlurOn } from '@mui/icons-material';
 import { json } from '@remix-run/node';
-import { Link, useLoaderData, useNavigate } from '@remix-run/react';
+import { useLoaderData, useNavigate } from '@remix-run/react';
 import {
   loadNogginsIndex,
   loadNogginsIndexCount,
 } from '~/models/noggin.server';
 
-import {
-  Box,
-  Button,
-  Card,
-  CardActionArea,
-  CardContent,
-  Pagination,
-  PaginationItem,
-  Paper,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { MetaFunction } from '@remix-run/react';
-import { LoaderFunctionArgs, SerializeFrom } from '@remix-run/server-runtime';
-import {
-  NogginRevisionOutputSchema,
-  NogginRevisionVariables,
-} from 'reagent-noggin-shared/types/NogginRevision';
+import { LoaderFunctionArgs } from '@remix-run/server-runtime';
 import T from '~/i18n/T';
-import NogginCardIOSchema from './NogginCardIOSchema';
+import { NogginIndexBody } from './NogginIndexBody';
 
 export const meta: MetaFunction = () => {
   return [
@@ -54,82 +38,6 @@ export const loader = async ({ context, request }: LoaderFunctionArgs) => {
   return json({ count, page, noggins });
 };
 
-type NogginIndexLoader = typeof loader;
-type NogginIndexLoaderData = SerializeFrom<NogginIndexLoader>;
-
-function NogginCard({
-  noggin,
-}: {
-  noggin: NogginIndexLoaderData['noggins'][0];
-}) {
-  const navigate = useNavigate();
-
-  return (
-    <div className="noggin-card" key={noggin.slug}>
-      <Card variant="outlined">
-        <CardActionArea
-          onClick={() => navigate(`/noggins/${noggin.slug}/edit`)}
-        >
-          <CardContent>
-            <Stack
-              direction={'row'}
-              spacing={2}
-              alignItems={'center'}
-              justifyContent={'space-between'}
-            >
-              <Stack>
-                <Typography variant="h2">{noggin.title}</Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  component="p"
-                  className="noggin-description"
-                >
-                  <T flagged>
-                    {noggin.aiModel.modelProvider.name}/
-                    <strong>{noggin.aiModel.name}</strong>
-                  </T>
-                </Typography>
-                {noggin.parentOrg && (
-                  <Typography
-                    variant="body2"
-                    color="textSecondary"
-                    component="p"
-                    className="noggin-description"
-                  >
-                    {noggin.teamOwner ? (
-                      <T flagged>
-                        Within the team <strong>{noggin.teamOwner.name}</strong>{' '}
-                        in the organization{' '}
-                        <strong>{noggin.parentOrg.name}</strong>
-                      </T>
-                    ) : (
-                      <T flagged>
-                        Within the organization{' '}
-                        <strong>{noggin.parentOrg.name}</strong>
-                      </T>
-                    )}
-                  </Typography>
-                )}
-              </Stack>
-              <NogginCardIOSchema
-                variables={
-                  noggin.nogginRevisions[0]
-                    .nogginVariables as NogginRevisionVariables
-                }
-                outputSchema={
-                  noggin.nogginRevisions[0]
-                    .outputSchema as NogginRevisionOutputSchema
-                }
-              />
-            </Stack>
-          </CardContent>
-        </CardActionArea>
-      </Card>
-    </div>
-  );
-}
-
 function NogginIndexDescription() {
   return (
     <Box>
@@ -155,46 +63,6 @@ function NogginIndexDescription() {
         </T>
       </Typography>
     </Box>
-  );
-}
-
-function NogginIndexBody({
-  noggins,
-}: {
-  noggins: NogginIndexLoaderData['noggins'];
-}) {
-  if (noggins.length === 0) {
-    return (
-      <Box>
-        <Paper
-          elevation={2}
-          // don't take up the full width:
-          sx={{
-            width: 'fit-content',
-            mx: 'auto',
-            p: 3,
-          }}
-        >
-          <Stack spacing={2} alignItems={'center'}>
-            <BlurOn htmlColor="#666" fontSize="large" />
-            <Typography variant="body1" color="textSecondary">
-              <T>
-                Looks like you don't have any noggins yet! You can add one with
-                the button above.
-              </T>
-            </Typography>
-          </Stack>
-        </Paper>
-      </Box>
-    );
-  }
-
-  return (
-    <Stack spacing={2}>
-      {noggins.map((noggin) => (
-        <NogginCard key={noggin.slug} noggin={noggin} />
-      ))}
-    </Stack>
   );
 }
 
@@ -231,21 +99,17 @@ export default function NogginList() {
 
       <NogginIndexDescription />
 
-      <NogginIndexBody noggins={noggins} />
-
-      <Box alignSelf="center">
-        <Pagination
-          page={page}
-          count={pageCount}
-          renderItem={(item) => (
-            <PaginationItem
-              component={Link}
-              to={`/noggins${item.page === 1 ? '' : `?page=${item.page}`}`}
-              {...item}
-            />
-          )}
-        />
-      </Box>
+      <NogginIndexBody
+        noggins={noggins}
+        page={page}
+        pageCount={pageCount}
+        emptyMessage={
+          <T>
+            Looks like you don't have any noggins yet! You can add one with the
+            button above.
+          </T>
+        }
+      />
     </Stack>
   );
 }
