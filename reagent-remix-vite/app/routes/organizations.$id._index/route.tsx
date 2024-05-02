@@ -110,6 +110,11 @@ export default function OrganizationLoadIndex() {
               <T>Manage invites</T>
             </MUILink>
           </div>
+          <div>
+            <MUILink to={`/organizations/${organization.id}/teams/manage`}>
+              <T>Manage teams</T>
+            </MUILink>
+          </div>
         </>
       ) : null}
     </>

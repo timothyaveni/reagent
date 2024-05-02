@@ -1,11 +1,21 @@
 import { Outlet, UIMatch } from '@remix-run/react';
 import { ActionFunctionArgs, redirect } from '@remix-run/server-runtime';
+import { BreadcrumbLink } from '~/components/BreadcrumbLink';
+import T from '~/i18n/T';
 import { createTeam } from '~/models/team.server.js';
 import { notFound } from '~/route-utils/status-code.js';
 
 export const handle = {
   breadcrumb: ({ match, isLeaf }: { match: UIMatch; isLeaf: boolean }) => {
-    return 'Teams'; // TODO
+    return (
+      // a lil awkward not to link to the manage page but fine
+      <BreadcrumbLink
+        to={`/organizations/${match.params.id}/teams`}
+        isLeaf={isLeaf}
+      >
+        <T>Teams</T>
+      </BreadcrumbLink>
+    );
   },
 };
 

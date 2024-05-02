@@ -416,6 +416,7 @@ export const loadNogginsIndex = async (
       latestNogginRevisionId: number;
       latestNogginRevisionNogginVariables: any;
       latestNogginRevisionOutputSchema: any;
+      nonFailingRunCount: bigint;
     }[]
   >`
     select
@@ -429,7 +430,8 @@ export const loadNogginsIndex = async (
       "NogginRevision"."updatedAt" as "latestNogginRevisionUpdatedAt",
       "NogginRevision"."id" as "latestNogginRevisionId",
       "NogginRevision"."nogginVariables" as "latestNogginRevisionNogginVariables",
-      "NogginRevision"."outputSchema" as "latestNogginRevisionOutputSchema"
+      "NogginRevision"."outputSchema" as "latestNogginRevisionOutputSchema",
+      COALESCE("RunCount"."nonFailingRunCount", 0) as "nonFailingRunCount"
     from "Noggin"
     left join "AIModel" on "Noggin"."aiModelId" = "AIModel"."id"
     left join "ModelProvider" on "AIModel"."modelProviderId" = "ModelProvider"."id"
@@ -447,6 +449,16 @@ export const loadNogginsIndex = async (
       order by "updatedAt" desc
       limit 1
     ) as "NogginRevision" on true
+    -- get all revisions' runs
+    left join lateral (
+      select
+        "NogginRevision"."nogginId",
+        count(*) as "nonFailingRunCount"
+      from "NogginRevision"
+      join "NogginRun" on "NogginRevision"."id" = "NogginRun"."nogginRevisionId"
+      where "NogginRevision"."nogginId" = "Noggin"."id" and "NogginRun"."status" != 'failed'
+      group by "NogginRevision"."nogginId"
+    ) as "RunCount" on "RunCount"."nogginId" = "Noggin"."id"
     where
       (
         "Noggin"."userOwnerId" = ${user.id}
@@ -498,6 +510,7 @@ export const loadNogginsIndex = async (
           outputSchema: noggin.latestNogginRevisionOutputSchema,
         },
       ],
+      nonFailingRunCount: Number(noggin.nonFailingRunCount),
     };
   });
 

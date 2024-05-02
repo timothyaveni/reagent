@@ -12,6 +12,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Chip,
   Pagination,
   PaginationItem,
   Paper,
@@ -78,7 +79,12 @@ function NogginCard({
               justifyContent={'space-between'}
             >
               <Stack>
-                <Typography variant="h2">{noggin.title}</Typography>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography variant="h2">{noggin.title}</Typography>
+                  <Chip
+                    label={<T flagged>{noggin.nonFailingRunCount} runs</T>}
+                  />
+                </Stack>
                 <Typography
                   variant="body2"
                   color="textSecondary"

@@ -114,7 +114,7 @@ export const handle = {
     match: UIMatch<typeof loader>;
     isLeaf: boolean;
   }) => {
-    return match.data.team.name;
+    return <Typography>{match.data.team.name}</Typography>;
   },
 };
 
