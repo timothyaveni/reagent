@@ -18,7 +18,7 @@ import {
   NogginRevisionOutputSchema,
   NogginRevisionVariables,
 } from 'reagent-noggin-shared/types/NogginRevision';
-import T from '~/i18n/T';
+import T, { pluralize } from '~/i18n/T';
 import { loadNogginsIndex } from '~/models/noggin.server';
 import NogginCardIOSchema from './NogginCardIOSchema';
 
@@ -46,7 +46,12 @@ function NogginCard({
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Typography variant="h2">{noggin.title}</Typography>
                   <Chip
-                    label={<T flagged>{noggin.nonFailingRunCount} runs</T>}
+                    label={pluralize(
+                      noggin.nonFailingRunCount,
+                      'run',
+                      'runs',
+                      true,
+                    )}
                   />
                 </Stack>
                 <Typography
