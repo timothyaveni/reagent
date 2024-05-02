@@ -38,7 +38,9 @@ function NogginCardInputSchema({
   if (!variables || !Object.keys(variables).length) {
     return (
       <Paper elevation={1} sx={{ p: 1 }}>
-        <T>no variables</T>
+        <Typography variant="body2" color="textPrimary">
+          <T>no variables</T>
+        </Typography>
       </Paper>
     );
   }

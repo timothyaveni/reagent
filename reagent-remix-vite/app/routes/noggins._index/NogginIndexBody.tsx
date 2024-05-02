@@ -11,13 +11,14 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { Link, useMatches, useNavigate } from '@remix-run/react';
+import { Link, useMatches } from '@remix-run/react';
 import { Jsonify } from '@remix-run/server-runtime/dist/jsonify';
 import { ReactNode } from 'react';
 import {
   NogginRevisionOutputSchema,
   NogginRevisionVariables,
 } from 'reagent-noggin-shared/types/NogginRevision';
+import MUILink from '~/components/MUILink';
 import T, { pluralize } from '~/i18n/T';
 import { loadNogginsIndex } from '~/models/noggin.server';
 import NogginCardIOSchema from './NogginCardIOSchema';
@@ -27,13 +28,20 @@ function NogginCard({
 }: {
   noggin: Jsonify<Awaited<ReturnType<typeof loadNogginsIndex>>[0]>;
 }) {
-  const navigate = useNavigate();
-
   return (
     <div className="noggin-card" key={noggin.slug}>
       <Card variant="outlined">
-        <CardActionArea
-          onClick={() => navigate(`/noggins/${noggin.slug}/edit`)}
+        <MUILink
+          component={CardActionArea}
+          sx={{
+            textDecoration: 'none',
+            color: 'inherit',
+
+            '&:visited': {
+              color: 'inherit',
+            },
+          }}
+          to={`/noggins/${noggin.slug}/edit`}
         >
           <CardContent>
             <Stack
@@ -99,7 +107,7 @@ function NogginCard({
               />
             </Stack>
           </CardContent>
-        </CardActionArea>
+        </MUILink>
       </Card>
     </div>
   );
