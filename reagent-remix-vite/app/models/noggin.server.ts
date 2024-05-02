@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { AppLoadContext } from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
 import prisma from '~/db';
@@ -365,61 +366,23 @@ export const updateNogginBudget = async (
   });
 };
 
-export const loadNogginsIndexCount = async (context: AppLoadContext) => {
-  const user = requireUser(context);
+type NogginIndexQueryType = {
+  id: number;
+  slug: string;
+  title: string;
+  aiModelName: string;
+  modelProviderName: string;
+  parentOrgName: string;
+  teamOwnerName: string;
+  latestNogginRevisionUpdatedAt: Date;
+  latestNogginRevisionId: number;
+  latestNogginRevisionNogginVariables: any;
+  latestNogginRevisionOutputSchema: any;
+  nonFailingRunCount: bigint;
+}[];
 
-  const count = await prisma.$queryRaw<{ count: number }[]>`
-    select
-      count(*)
-    from "Noggin"
-    where
-      (
-        "Noggin"."userOwnerId" = ${user.id}
-      ) or (
-        "Noggin"."teamOwnerId" in (
-          select
-            "Team"."id"
-          from "Team"
-          inner join "_TeamToUser" on "Team"."id" = "_TeamToUser"."A"
-          where
-            "_TeamToUser"."B" = ${user.id}
-        )
-      )
-  `;
-
-  return Number(count[0].count);
-};
-
-export const loadNogginsIndex = async (
-  context: AppLoadContext,
-  {
-    pageSize = 20,
-    pageZeroIndexed = 0,
-  }: {
-    pageSize: number;
-    pageZeroIndexed: number;
-  },
-) => {
-  const user = requireUser(context);
-  const offset = pageZeroIndexed * pageSize;
-
-  const nogginsRaw = await prisma.$queryRaw<
-    {
-      id: number;
-      slug: string;
-      title: string;
-      aiModelName: string;
-      modelProviderName: string;
-      parentOrgName: string;
-      teamOwnerName: string;
-      latestNogginRevisionUpdatedAt: Date;
-      latestNogginRevisionId: number;
-      latestNogginRevisionNogginVariables: any;
-      latestNogginRevisionOutputSchema: any;
-      nonFailingRunCount: bigint;
-    }[]
-  >`
-    select
+const NOGGIN_INDEX_SELECT = `
+  select
       "Noggin"."id",
       "Noggin"."slug",
       "Noggin"."title",
@@ -459,27 +422,34 @@ export const loadNogginsIndex = async (
       where "NogginRevision"."nogginId" = "Noggin"."id" and "NogginRun"."status" != 'failed'
       group by "NogginRevision"."nogginId"
     ) as "RunCount" on "RunCount"."nogginId" = "Noggin"."id"
-    where
-      (
-        "Noggin"."userOwnerId" = ${user.id}
-      ) or (
-        "Noggin"."teamOwnerId" in (
-          select
-            "Team"."id"
-          from "Team"
-          inner join "_TeamToUser" on "Team"."id" = "_TeamToUser"."A"
-          where
-            "_TeamToUser"."B" = ${user.id}
-        )
-      )
-    order by "NogginRevision"."updatedAt" desc
-    limit ${pageSize}
-    offset ${offset}
-  `;
+`;
 
+const NOGGIN_INDEX_PERSONAL_WHERE = `
+  where
+  (
+    "Noggin"."userOwnerId" = $1
+  ) or (
+    "Noggin"."teamOwnerId" in (
+      select
+        "Team"."id"
+      from "Team"
+      inner join "_TeamToUser" on "Team"."id" = "_TeamToUser"."A"
+      where
+        "_TeamToUser"."B" = $1
+    )
+  )`;
+
+const NOGGIN_INDEX_TEAM_WHERE = `
+  where "Noggin"."teamOwnerId" = $1`;
+
+const NOGGIN_INDEX_PAGE_INFO = `
+  order by "NogginRevision"."updatedAt" desc
+  limit $2
+  offset $3`;
+
+const reformatNogginIndex = (noggins: NogginIndexQueryType) => {
   // reformat to how prisma would return it if we didn't need to query raw
-
-  const noggins = nogginsRaw.map((noggin) => {
+  return noggins.map((noggin) => {
     return {
       id: noggin.id,
       slug: noggin.slug,
@@ -513,7 +483,12 @@ export const loadNogginsIndex = async (
       nonFailingRunCount: Number(noggin.nonFailingRunCount),
     };
   });
+};
 
+export const authorizeNoggins = async (
+  context: AppLoadContext,
+  noggins: { id: number }[],
+) => {
   // double check auth for each noggin -- at least while we test this refactor
   // this will just hard error if it fails, which is spooky but not as spooky as a privacy sev!
   await Promise.all(
@@ -523,8 +498,102 @@ export const loadNogginsIndex = async (
       }),
     ),
   );
+};
+
+export const loadNogginsIndex = async (
+  context: AppLoadContext,
+  {
+    pageSize = 20,
+    pageZeroIndexed = 0,
+  }: {
+    pageSize: number;
+    pageZeroIndexed: number;
+  },
+) => {
+  const user = requireUser(context);
+  const offset = pageZeroIndexed * pageSize;
+
+  const query = Prisma.raw(`
+    ${NOGGIN_INDEX_SELECT}
+    ${NOGGIN_INDEX_PERSONAL_WHERE}
+    ${NOGGIN_INDEX_PAGE_INFO}
+  `);
+  // @ts-expect-error wtf? this is from the prisma docs
+  query.values = [user.id, pageSize, offset];
+
+  const nogginsRaw = await prisma.$queryRaw<NogginIndexQueryType>(query);
+  const noggins = reformatNogginIndex(nogginsRaw);
+
+  await authorizeNoggins(context, noggins);
 
   return noggins;
+};
+
+export const loadNogginsIndexCount = async (context: AppLoadContext) => {
+  const user = requireUser(context);
+
+  const query = Prisma.raw(`
+    select
+      count(*)
+    from "Noggin"
+    ${NOGGIN_INDEX_PERSONAL_WHERE}`);
+
+  // @ts-expect-error
+  query.values = [user.id];
+  const count = await prisma.$queryRaw<{ count: number }[]>(query);
+
+  return Number(count[0].count);
+};
+
+export const loadNogginsIndexForTeam = async (
+  context: AppLoadContext,
+  {
+    teamId,
+    pageSize = 20,
+    pageZeroIndexed = 0,
+  }: {
+    teamId: number;
+    pageSize: number;
+    pageZeroIndexed: number;
+  },
+) => {
+  await requireUserMayParticipateInTeam(context, teamId);
+
+  const offset = pageZeroIndexed * pageSize;
+
+  const query = Prisma.raw(`
+    ${NOGGIN_INDEX_SELECT}
+    ${NOGGIN_INDEX_TEAM_WHERE}
+    ${NOGGIN_INDEX_PAGE_INFO}
+  `);
+  // @ts-expect-error wtf? this is from the prisma docs
+  query.values = [teamId, pageSize, offset];
+
+  const nogginsRaw = await prisma.$queryRaw<NogginIndexQueryType>(query);
+  const noggins = reformatNogginIndex(nogginsRaw);
+
+  await authorizeNoggins(context, noggins);
+
+  return noggins;
+};
+
+export const loadNogginIndexCountForTeam = async (
+  context: AppLoadContext,
+  teamId: number,
+) => {
+  await requireUserMayParticipateInTeam(context, teamId);
+
+  const query = Prisma.raw(`
+    select
+      count(*)
+    from "Noggin"
+    ${NOGGIN_INDEX_TEAM_WHERE}`);
+
+  // @ts-expect-error
+  query.values = [teamId];
+  const count = await prisma.$queryRaw<{ count: number }[]>(query);
+
+  return Number(count[0].count);
 };
 
 export const getNogginEditorSchema_OMNISCIENT = async (

@@ -1,7 +1,17 @@
-import { Autocomplete, Button, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Form, UIMatch, useLoaderData } from '@remix-run/react';
 import { LoaderFunctionArgs, redirect } from '@remix-run/server-runtime';
 import { useState } from 'react';
+import {
+  loadNogginIndexCountForTeam,
+  loadNogginsIndexForTeam,
+} from '~/models/noggin.server';
 import {
   addMemberToTeam,
   getAddableMembersForTeam,
@@ -11,8 +21,15 @@ import {
   setTeamTotalBudget,
 } from '~/models/team.server';
 import { notFound } from '~/route-utils/status-code';
+import { NogginIndexBody } from '../noggins._index/NogginIndexBody';
 
-export const loader = async ({ params, context }: LoaderFunctionArgs) => {
+const NOGGIN_PAGE_SIZE = 20;
+
+export const loader = async ({
+  params,
+  context,
+  request,
+}: LoaderFunctionArgs) => {
   const { teamId } = params;
 
   if (!teamId) {
@@ -32,12 +49,28 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   const currentTeamTotalBudgetQuastra = team.totalPermittedSpendQuastra;
   const userMayManageBudget = await mayManageTeamBudget(context, team.id);
 
+  const { searchParams } = new URL(request.url);
+  const nogginsPage =
+    parseInt(searchParams.get('nogginsPage')?.toString() || '1', 10) || 1;
+
+  const [teamNoggins, teamNogginsCount] = await Promise.all([
+    loadNogginsIndexForTeam(context, {
+      teamId: team.id,
+      pageSize: NOGGIN_PAGE_SIZE,
+      pageZeroIndexed: nogginsPage - 1,
+    }),
+    loadNogginIndexCountForTeam(context, team.id),
+  ]);
+
   return {
     team,
     userMayAddMembers,
     addableMembers,
     userMayManageBudget,
     currentTeamTotalBudgetQuastra,
+    teamNoggins,
+    nogginsPage,
+    teamNogginsCount,
   };
 };
 
@@ -125,11 +158,14 @@ export default function TeamView() {
     addableMembers,
     currentTeamTotalBudgetQuastra,
     userMayManageBudget,
+    teamNoggins,
+    nogginsPage,
+    teamNogginsCount,
   } = useLoaderData<typeof loader>();
   const [memberId, setMemberId] = useState('');
 
   return (
-    <div>
+    <Stack spacing={3}>
       <Typography variant="h2">{team.name}</Typography>
 
       <Typography variant="h3">Members</Typography>
@@ -181,6 +217,14 @@ export default function TeamView() {
           Total Budget: {currentTeamTotalBudgetQuastra}
         </Typography>
       )}
-    </div>
+
+      <NogginIndexBody
+        noggins={teamNoggins}
+        emptyMessage="No noggins"
+        page={nogginsPage}
+        pageCount={Math.ceil(teamNogginsCount / NOGGIN_PAGE_SIZE)}
+        paginationParameter="nogginsPage"
+      />
+    </Stack>
   );
 }
