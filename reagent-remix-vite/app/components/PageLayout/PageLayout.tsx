@@ -12,7 +12,8 @@ export const PageLayout = ({
   children: React.ReactNode;
 }) => {
   const routes = useMatches();
-  const wide = routes.some((r) => r.id === 'routes/noggins.$identifier');
+  // @ts-expect-error
+  const wide = routes.some((r) => r.handle?.wideLayout);
 
   if (loggedIn) {
     return (

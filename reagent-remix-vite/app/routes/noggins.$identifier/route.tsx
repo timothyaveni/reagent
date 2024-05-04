@@ -28,6 +28,10 @@ import EditorHeader from './EditorHeader';
 import { StoreContext } from './StoreContext';
 import { genAuthTokenForNoggin } from './jwt.server';
 
+export const handle = {
+  wideLayout: true,
+};
+
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
     { title: `${data?.noggin.title} :: reagent` },
