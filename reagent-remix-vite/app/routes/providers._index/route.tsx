@@ -1,7 +1,6 @@
 import {
   Box,
   Card,
-  CardActionArea,
   CardContent,
   CardMedia,
   Grid,
@@ -16,6 +15,7 @@ import OpenAISVG from './provider-logos/openai-white-lockup.svg';
 import ReplicateSVG from './provider-logos/replicate.svg';
 
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+import { CardActionAreaLink } from '~/components/CardActionAreaLink.js';
 export const meta: MetaFunction = () => {
   return [
     { title: `Providers :: reagent` },
@@ -84,11 +84,7 @@ export default function Providers() {
           <Grid item xs={12} md={6}>
             {/* TODO: we should maybe populate this from the database and keep provider-specific code to noggin-server */}
             <Card>
-              <CardActionArea
-                onClick={() => {
-                  navigate('/providers/openai');
-                }}
-              >
+              <CardActionAreaLink to="/providers/openai">
                 <CardMedia
                   sx={{
                     height: 200,
@@ -113,16 +109,12 @@ export default function Providers() {
                     </T>
                   </p>
                 </CardContent>
-              </CardActionArea>
+              </CardActionAreaLink>
             </Card>
           </Grid>
           <Grid item xs={12} md={6}>
             <Card>
-              <CardActionArea
-                onClick={() => {
-                  navigate('/providers/replicate');
-                }}
-              >
+              <CardActionAreaLink to="/providers/replicate">
                 <CardMedia
                   sx={{
                     height: 200,
@@ -147,16 +139,12 @@ export default function Providers() {
                     </T>
                   </p>
                 </CardContent>
-              </CardActionArea>
+              </CardActionAreaLink>
             </Card>
           </Grid>
           <Grid item xs={12} md={6}>
             <Card>
-              <CardActionArea
-                onClick={() => {
-                  navigate('/providers/anthropic');
-                }}
-              >
+              <CardActionAreaLink to="/providers/anthropic">
                 <CardMedia
                   sx={{
                     height: 200,
@@ -181,7 +169,7 @@ export default function Providers() {
                     </T>
                   </p>
                 </CardContent>
-              </CardActionArea>
+              </CardActionAreaLink>
             </Card>
           </Grid>
         </Grid>

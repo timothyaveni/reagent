@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Card,
-  CardActionArea,
   CardContent,
   Paper,
   Stack,
@@ -16,6 +15,7 @@ import T, { pluralize } from '~/i18n/T';
 import { indexOrganizations } from '~/models/organization.server';
 
 import { ServerRuntimeMetaFunction as MetaFunction } from '@remix-run/server-runtime';
+import { CardActionAreaLink } from '~/components/CardActionAreaLink.js';
 import { getPendingOrganizationInvitesForUser } from '~/models/organizationMembership.server';
 import { PendingOrganizationInvite } from './PendingOrganizationInvite';
 
@@ -87,9 +87,7 @@ function OrganizationsListBody({
         {organizations.map((organization) => {
           return (
             <Card variant="outlined" key={organization.id}>
-              <CardActionArea
-                onClick={() => navigate(`/organizations/${organization.id}`)}
-              >
+              <CardActionAreaLink to={`/organizations/${organization.id}`}>
                 <CardContent>
                   <Typography variant="h2">{organization.name}</Typography>
                   <Typography
@@ -106,7 +104,7 @@ function OrganizationsListBody({
                     )}
                   </Typography>
                 </CardContent>
-              </CardActionArea>
+              </CardActionAreaLink>
             </Card>
           );
         })}

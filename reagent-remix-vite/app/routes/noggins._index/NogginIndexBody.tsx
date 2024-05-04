@@ -2,7 +2,6 @@ import { BlurOn } from '@mui/icons-material';
 import {
   Box,
   Card,
-  CardActionArea,
   CardContent,
   Chip,
   Pagination,
@@ -18,7 +17,7 @@ import {
   NogginRevisionOutputSchema,
   NogginRevisionVariables,
 } from 'reagent-noggin-shared/types/NogginRevision';
-import MUILink from '~/components/MUILink';
+import { CardActionAreaLink } from '~/components/CardActionAreaLink.js';
 import T, { pluralize } from '~/i18n/T';
 import { loadNogginsIndex } from '~/models/noggin.server';
 import NogginCardIOSchema from './NogginCardIOSchema';
@@ -31,18 +30,7 @@ function NogginCard({
   return (
     <div className="noggin-card" key={noggin.slug}>
       <Card variant="outlined">
-        <MUILink
-          component={CardActionArea}
-          sx={{
-            textDecoration: 'none',
-            color: 'inherit',
-
-            '&:visited': {
-              color: 'inherit',
-            },
-          }}
-          to={`/noggins/${noggin.slug}/edit`}
-        >
+        <CardActionAreaLink to={`/noggins/${noggin.slug}/edit`}>
           <CardContent>
             <Stack
               direction={'row'}
@@ -107,7 +95,7 @@ function NogginCard({
               />
             </Stack>
           </CardContent>
-        </MUILink>
+        </CardActionAreaLink>
       </Card>
     </div>
   );

@@ -1,9 +1,18 @@
 import { BlurOn } from '@mui/icons-material';
-import { Box, Paper, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { useLoaderData } from '@remix-run/react';
 
 import { ActionFunctionArgs, json } from '@remix-run/server-runtime';
-import T from '~/i18n/T';
+import { CardActionAreaLink } from '~/components/CardActionAreaLink.js';
+import T, { pluralize } from '~/i18n/T';
 import { getTeamsForOrgAndUser } from '~/models/team.server';
 import { notFound } from '~/route-utils/status-code';
 
@@ -32,20 +41,23 @@ export default function OrganizationTeamList() {
       <Typography variant="h2">Your teams</Typography>
 
       {teams.map((team) => (
-        <Paper
-          key={team.id}
-          elevation={2}
-          sx={{
-            maxWidth: '80%',
-            mx: 'auto',
-            p: 3,
-            mt: 2,
-          }}
-        >
-          <a href={`/organizations/${orgId}/teams/${team.id}`}>
-            <Typography variant="h4">{team.name}</Typography>
-          </a>
-        </Paper>
+        <Card variant="outlined" key={team.id} sx={{ mt: 2 }}>
+          <CardActionAreaLink to={`/organizations/${orgId}/teams/${team.id}`}>
+            <CardContent>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography variant="h2">{team.name}</Typography>
+                <Chip
+                  label={pluralize(
+                    team._count.noggins,
+                    'noggin',
+                    'noggins',
+                    true,
+                  )}
+                />
+              </Stack>
+            </CardContent>
+          </CardActionAreaLink>
+        </Card>
       ))}
 
       {teams.length === 0 && (

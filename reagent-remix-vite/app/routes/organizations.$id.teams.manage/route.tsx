@@ -1,7 +1,18 @@
-import { Button, Dialog, Paper, Typography } from '@mui/material';
+import {
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  Paper,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { useLoaderData, useSubmit } from '@remix-run/react';
 import { LoaderFunctionArgs, json } from '@remix-run/server-runtime';
 import { useState } from 'react';
+import { CardActionAreaLink } from '~/components/CardActionAreaLink.js';
+import { pluralize } from '~/i18n/T.js';
 import { getAllOrgTeamsForManagement } from '~/models/team.server';
 import { notFound } from '~/route-utils/status-code';
 
@@ -74,20 +85,23 @@ export default function OrganizationTeamManagement() {
       </Dialog>
 
       {teams.map((team) => (
-        <Paper
-          key={team.id}
-          elevation={2}
-          sx={{
-            maxWidth: '80%',
-            mx: 'auto',
-            p: 3,
-            mt: 2,
-          }}
-        >
-          <a href={`/organizations/${orgId}/teams/${team.id}`}>
-            <Typography variant="h4">{team.name}</Typography>
-          </a>
-        </Paper>
+        <Card variant="outlined" key={team.id} sx={{ mt: 2 }}>
+          <CardActionAreaLink to={`/organizations/${orgId}/teams/${team.id}`}>
+            <CardContent>
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Typography variant="h2">{team.name}</Typography>
+                <Chip
+                  label={pluralize(
+                    team._count.noggins,
+                    'noggin',
+                    'noggins',
+                    true,
+                  )}
+                />
+              </Stack>
+            </CardContent>
+          </CardActionAreaLink>
+        </Card>
       ))}
     </>
   );

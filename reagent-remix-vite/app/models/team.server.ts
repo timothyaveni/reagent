@@ -31,6 +31,11 @@ export const getTeamsForOrgAndUser = async (
     select: {
       id: true,
       name: true,
+      _count: {
+        select: {
+          noggins: true,
+        },
+      },
     },
   });
 
@@ -53,6 +58,12 @@ export const getAllOrgTeamsForManagement = async (
     select: {
       id: true,
       name: true,
+      // count noggins:
+      _count: {
+        select: {
+          noggins: true,
+        },
+      },
     },
   });
 
