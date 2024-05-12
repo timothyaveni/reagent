@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     environment:
       - REAGENT_EXTERNAL_URL=https://rea.gent
-      - VITE_REAGENT_EXTERNAL_URL=https://rea.gent
+      - VITE_REAGENT_EXTERNAL_URL=https://rea.gent # needs to be changed in the prod dockerfile as well
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres?schema=public
       - Y_WEBSOCKET_SERVER_EXTERNAL_URL=wss://ws.rea.gent
       - NOGGIN_SERVER_EXTERNAL_URL=https://noggin.rea.gent
