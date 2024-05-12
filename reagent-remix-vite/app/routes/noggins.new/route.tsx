@@ -1,11 +1,11 @@
 import { json, redirect } from '@remix-run/node';
-import { Form, useLoaderData } from '@remix-run/react';
+import { Form, useLoaderData, useSearchParams } from '@remix-run/react';
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from '@remix-run/server-runtime';
 import { requireUser } from '~/auth/auth.server';
-import { createNoggin } from '~/models/noggin.server';
+import { createNoggin, createProvisionalNoggin } from '~/models/noggin.server';
 import {
   getEnabledAIModelIDsForOrganization,
   getPermittedAdditionalBudgetForOrganizationAndOwner,
@@ -35,6 +35,7 @@ import { indexAIModels } from '~/models/aiModel.server';
 import { getAllTeamsForUser } from '~/models/team.server.js';
 
 import { groupBy } from 'underscore';
+import { notFound } from '~/route-utils/status-code.js';
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -104,12 +105,6 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   const user = requireUser(context);
 
   const formData = await request.formData();
-  const aiModelIdString = formData.get('aiModelId')?.toString();
-  if (!aiModelIdString) {
-    throw new Error('aiModelId is required');
-  }
-
-  const aiModelId = parseInt(aiModelIdString, 10);
 
   const name = formData.get('name')?.toString();
 
@@ -149,15 +144,37 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     };
   }
 
-  const noggin = await createNoggin(context, {
-    ...ownerData,
-    containingOrganizationId: nogginOrgOwner,
-    aiModelId,
-    name,
-    budgetQuastra,
-  });
+  const action = formData.get('action')?.toString();
 
-  return redirect(`/noggins/${noggin.slug}/edit`);
+  if (action === 'create') {
+    const aiModelIdString = formData.get('aiModelId')?.toString();
+    if (!aiModelIdString) {
+      throw new Error('aiModelId is required');
+    }
+
+    const aiModelId = parseInt(aiModelIdString, 10);
+
+    const noggin = await createNoggin(context, {
+      ...ownerData,
+      containingOrganizationId: nogginOrgOwner,
+      aiModelId,
+      name,
+      budgetQuastra,
+    });
+
+    return redirect(`/noggins/${noggin.slug}/edit`);
+  } else if (action === 'createProvisional') {
+    const provisionalNoggin = await createProvisionalNoggin(context, {
+      ...ownerData,
+      containingOrganizationId: nogginOrgOwner,
+      name,
+      budgetQuastra,
+    });
+
+    return redirect(`/noggins/link/${provisionalNoggin.id}`);
+  }
+
+  return notFound();
 };
 
 export default function NewNoggin() {
@@ -169,6 +186,8 @@ export default function NewNoggin() {
     aiModels,
     enabledModelsForOrgs,
   } = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const createLinked = !!searchParams.get('createLinked');
 
   const teamsByOrgId = groupBy(teams, 'organizationId');
 
@@ -213,6 +232,12 @@ export default function NewNoggin() {
     unit(15, 'credits').toNumber('quastra'),
   );
 
+  const [nogginName, setNogginName] = useState<string>('');
+
+  const finalButtonEnabled = createLinked
+    ? nogginName !== ''
+    : nogginName !== '' && selectedModelId !== null;
+
   const permittedAdditionalSpend =
     nogginOrgOwner === null
       ? null
@@ -227,16 +252,6 @@ export default function NewNoggin() {
       </Typography>
 
       <Form method="post">
-        {/* todo we don't do anything with this */}
-        {/* <label>
-          <T>org-owned</T>
-          <Switch
-            checked={nogginOwnershipType === 'org'}
-            onChange={(e) => {
-              setNogginOwnershipType(e.target.checked ? 'org' : 'personal');
-            }}
-          />
-        </label> */}
         <Box
           sx={{
             maxWidth: 600,
@@ -250,7 +265,12 @@ export default function NewNoggin() {
               }}
             >
               <Stack spacing={2}>
-                <TextField name="name" label={t('Noggin name')} />
+                <TextField
+                  name="name"
+                  label={t('Noggin name')}
+                  value={nogginName}
+                  onChange={(e) => setNogginName(e.target.value)}
+                />
 
                 {orgs.length > 0 && (
                   <FormControl>
@@ -399,28 +419,35 @@ export default function NewNoggin() {
                     </FormControl>
                   )}
 
-                <Autocomplete
-                  options={filteredAIModelOptions}
-                  getOptionLabel={(option) =>
-                    `${option.modelProvider.name}/${option.name}`
-                  }
-                  renderInput={(params) => (
-                    <TextField {...params} label={t('AI Model')} />
-                  )}
-                  onChange={(e, value) => {
-                    setSelectedModelId(value?.id ?? null);
-                  }}
-                  value={
-                    filteredAIModelOptions.find(
-                      (model) => model.id === selectedModelId,
-                    ) ?? null
-                  }
-                />
-                <input
-                  type="hidden"
-                  name="aiModelId"
-                  value={selectedModelId ?? ''}
-                />
+                {createLinked ? null : (
+                  <>
+                    <Typography variant="h3" color="textPrimary" gutterBottom>
+                      <T>Choose a model</T>
+                    </Typography>
+                    <Autocomplete
+                      options={filteredAIModelOptions}
+                      getOptionLabel={(option) =>
+                        `${option.modelProvider.name}/${option.name}`
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} label={t('AI Model')} />
+                      )}
+                      onChange={(e, value) => {
+                        setSelectedModelId(value?.id ?? null);
+                      }}
+                      value={
+                        filteredAIModelOptions.find(
+                          (model) => model.id === selectedModelId,
+                        ) ?? null
+                      }
+                    />
+                    <input
+                      type="hidden"
+                      name="aiModelId"
+                      value={selectedModelId ?? ''}
+                    />
+                  </>
+                )}
 
                 <Typography variant="h3" color="textPrimary" gutterBottom>
                   <T>Noggin budget</T>
@@ -457,16 +484,39 @@ export default function NewNoggin() {
                 />
               </Stack>
             </Paper>
-            <Box alignSelf="flex-end">
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={
-                  selectedModelId === null // TODO ... make this better ... actual validation. for name, too
-                }
-              >
-                Create
-              </Button>
+            <Box
+              alignSelf="flex-end"
+              sx={{
+                display: 'formState === "initial" ? "block" : "none"',
+              }}
+            >
+              {createLinked ? (
+                <>
+                  <input
+                    type="hidden"
+                    name="action"
+                    value="createProvisional"
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={!finalButtonEnabled}
+                  >
+                    Link to application
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <input type="hidden" name="action" value="create" />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={!finalButtonEnabled}
+                  >
+                    Create
+                  </Button>
+                </>
+              )}
             </Box>
           </Stack>
         </Box>

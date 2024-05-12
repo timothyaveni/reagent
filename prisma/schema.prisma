@@ -38,6 +38,8 @@ model User {
   noggins                          Noggin[]
   modelProviderPersonalCredentials ModelProviderPersonalCredentials[]
   organizationInvite               OrganizationInvite[]
+  provisionalNoggins               ProvisionalNoggin[]
+  provisionalNogginsInitiated      ProvisionalNoggin[]                @relation("provisionalNogginInitiator")
 }
 
 model UserInfo {
@@ -127,6 +129,7 @@ model Organization {
   modelProviderOrgCredentials ModelProviderOrgCredentials[]
   enabledAIModels             AIModel[]
   organizationInvite          OrganizationInvite[]
+  provisionalNoggins          ProvisionalNoggin[]
 }
 
 enum OrganizationMembershipRole {
@@ -203,6 +206,7 @@ model Team {
   noggins Noggin[]
 
   totalPermittedSpendQuastra BigInt?
+  provisionalNoggins         ProvisionalNoggin[]
 
   @@unique([organizationId, name])
 }
@@ -235,6 +239,7 @@ model Noggin {
   apiKeys NogginAPIKey[]
 
   totalAllocatedCreditQuastra BigInt?
+  provisionalNoggin           ProvisionalNoggin?
 
   // don't need one for org, because we'll only query through team/user
   // also don't need one for aiModel of course
@@ -501,4 +506,35 @@ model NogginOutputAssetObject {
   url      String
 
   @@index([nogginRunId])
+}
+
+//
+
+model ProvisionalNoggin {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expiresAt DateTime
+
+  linkingCode     String @unique
+  userInitiator   User   @relation("provisionalNogginInitiator", fields: [userInitiatorId], references: [id])
+  userInitiatorId Int
+
+  // only once it's finished
+  createdNoggin   Noggin? @relation(fields: [createdNogginId], references: [id])
+  createdNogginId Int?    @unique
+
+  // don't love this ad hoc copy-paste of the noggin model, but there's not really a clear other answer imo
+  title String
+
+  userOwner   User? @relation(fields: [userOwnerId], references: [id])
+  userOwnerId Int?
+  teamOwner   Team? @relation(fields: [teamOwnerId], references: [id])
+  teamOwnerId Int?
+
+  parentOrg   Organization? @relation(fields: [parentOrgId], references: [id])
+  parentOrgId Int?
+
+  totalAllocatedCreditQuastra BigInt?
 }

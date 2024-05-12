@@ -1,8 +1,17 @@
 import { Prisma } from '@prisma/client';
 import { AppLoadContext } from '@remix-run/server-runtime';
-import { requireUser } from '~/auth/auth.server';
+import {
+  createFakeUserContext_OMNIPOTENT,
+  requireUser,
+} from '~/auth/auth.server';
 import prisma from '~/db';
-import { createInitialRevisionForNoggin_OMNIPOTENT } from './nogginRevision.server';
+import {
+  createBoostrappedRevisionForNoggin_OMNIPOTENT,
+  createInitialRevisionForNoggin_OMNIPOTENT,
+} from './nogginRevision.server';
+
+import { DateTime } from 'luxon';
+import { v4 as uuidv4 } from 'uuid';
 
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
 import {
@@ -13,6 +22,7 @@ import {
 } from 'unique-names-generator';
 import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
+import { getAIModel_OMNISCIENT } from './aiModel.server.js';
 import { getNogginTotalAllocatedCreditQuastra } from './nogginRuns.server';
 import {
   getPermittedAdditionalBudgetForOrganizationAndOwner,
@@ -25,15 +35,15 @@ import {
   userMayParticipateInTeam,
 } from './team.server';
 
-export const createNoggin = async (
+const authorizeNogginCreation = async (
   context: AppLoadContext,
   nogginData: {
     ownerType: 'user' | 'team';
     ownerId: number;
     containingOrganizationId: number | null;
-    aiModelId: number;
     name: string;
     budgetQuastra: bigint | null;
+    aiModelId?: number;
   },
 ) => {
   const user = requireUser(context);
@@ -51,9 +61,6 @@ export const createNoggin = async (
       role: OrganizationRole.MEMBER,
     });
   }
-
-  // there is a race condition of course but the database has a uniqueness constraint. user will live
-  const slug = await generateFreeSlug();
 
   // TODO: here is where we would authenticate that you're permitted to create a noggin with this model
   // (or that you/your org has an api key for this model)
@@ -92,42 +99,81 @@ export const createNoggin = async (
       }
     }
 
-    const modelEnabled = await isModelEnabledForOrganization(context, {
-      organizationId: containingOrganizationId,
-      modelId: nogginData.aiModelId,
-    });
+    if (nogginData.aiModelId !== undefined) {
+      const modelEnabled = await isModelEnabledForOrganization(context, {
+        organizationId: containingOrganizationId,
+        modelId: nogginData.aiModelId,
+      });
 
-    if (!modelEnabled) {
-      throw new Error('Model not enabled for organization');
+      if (!modelEnabled) {
+        throw new Error('Model not enabled for organization');
+      }
     }
   }
+};
+
+const nogginOwnerData = (nogginData: {
+  ownerType: 'user' | 'team';
+  ownerId: number;
+  containingOrganizationId: number | null;
+}):
+  | {
+      userOwner: { connect: { id: number } };
+      parentOrg?: { connect: { id: number } };
+    }
+  | {
+      teamOwner: { connect: { id: number } };
+      parentOrg?: { connect: { id: number } }; // strictly speaking this shouldn't have ? but ts isn't convinced and i don't want to bring it all up
+    } => {
+  return {
+    ...(nogginData.ownerType === 'user'
+      ? {
+          userOwner: {
+            connect: {
+              id: nogginData.ownerId,
+            },
+          },
+        }
+      : {
+          teamOwner: {
+            connect: {
+              id: nogginData.ownerId,
+            },
+          },
+        }),
+    ...(nogginData.containingOrganizationId !== null
+      ? {
+          parentOrg: { connect: { id: nogginData.containingOrganizationId } },
+        }
+      : {}),
+  };
+};
+
+export const createNoggin = async (
+  context: AppLoadContext,
+  nogginData: {
+    ownerType: 'user' | 'team';
+    ownerId: number;
+    containingOrganizationId: number | null;
+    aiModelId: number;
+    name: string;
+    budgetQuastra: bigint | null;
+  },
+) => {
+  const user = requireUser(context);
+
+  await authorizeNogginCreation(context, nogginData);
+
+  // there is a race condition of course but the database has a uniqueness constraint. user will live
+  const slug = await generateFreeSlug();
 
   const noggin = await prisma.noggin.create({
     data: {
       slug,
       title: nogginData.name || slug,
       aiModel: { connect: { id: nogginData.aiModelId } },
-      ...(nogginData.ownerType === 'user'
-        ? {
-            userOwner: {
-              connect: {
-                id: nogginData.ownerId,
-              },
-            },
-          }
-        : {
-            teamOwner: {
-              connect: {
-                id: nogginData.ownerId,
-              },
-            },
-          }),
-      ...(containingOrganizationId !== null
-        ? {
-            parentOrg: { connect: { id: containingOrganizationId } },
-          }
-        : {}),
       totalAllocatedCreditQuastra: nogginData.budgetQuastra,
+      ...nogginOwnerData(nogginData),
     },
   });
 
@@ -136,7 +182,159 @@ export const createNoggin = async (
   return noggin;
 };
 
-export const randomSlug = () => {
+export const createProvisionalNoggin = async (
+  context: AppLoadContext,
+  nogginData: {
+    ownerType: 'user' | 'team';
+    ownerId: number;
+    containingOrganizationId: number | null;
+    name: string;
+    budgetQuastra: bigint | null;
+    initialRevisionData: object | null;
+  },
+) => {
+  const user = requireUser(context);
+
+  await authorizeNogginCreation(context, nogginData);
+
+  const expiresAt = DateTime.now().plus({ minutes: 30 }).toJSDate(); // TODO make sure you use this
+  const linkingCode = uuidv4();
+
+  return await prisma.provisionalNoggin.create({
+    data: {
+      title: nogginData.name,
+      totalAllocatedCreditQuastra: nogginData.budgetQuastra,
+      ...nogginOwnerData(nogginData),
+      expiresAt,
+      linkingCode,
+      userInitiator: {
+        connect: {
+          id: user.id,
+        },
+      },
+    },
+  });
+};
+
+// this isn't quite omnipotent -- it requires the linking code for authentication in this case, and then we will
+// create an appropriate user context -- but the point is it doesn't use context
+export const convertProvisionalNogginToNoggin_OMNIPOTENT = async ({
+  linkingCode,
+  modelProviderName,
+  aiModelName,
+  aiModelRevision,
+  initialRevision,
+}: {
+  linkingCode: string;
+  modelProviderName: string;
+  aiModelName: string;
+  aiModelRevision: string;
+  initialRevision: object;
+}) => {
+  const provisionalNoggin = await prisma.provisionalNoggin.findUnique({
+    where: {
+      linkingCode,
+    },
+    select: {
+      id: true,
+      expiresAt: true,
+      userInitiatorId: true,
+
+      createdNogginId: true,
+
+      title: true,
+      totalAllocatedCreditQuastra: true,
+      userOwnerId: true,
+      teamOwnerId: true,
+      parentOrgId: true,
+    },
+  });
+
+  if (!provisionalNoggin) {
+    throw new Error('Provisional noggin not found');
+  }
+
+  if (provisionalNoggin.expiresAt < new Date()) {
+    throw new Error('Provisional noggin expired');
+  }
+
+  if (provisionalNoggin.createdNogginId !== null) {
+    throw new Error('Provisional noggin already converted');
+  }
+
+  const context = createFakeUserContext_OMNIPOTENT({
+    id: provisionalNoggin.userInitiatorId,
+  });
+
+  const aiModel = await getAIModel_OMNISCIENT({
+    modelProviderName,
+    modelName: aiModelName,
+    revision: aiModelRevision,
+  });
+
+  const {
+    ownerType,
+    ownerId,
+  }: {
+    ownerType: 'user' | 'team';
+    ownerId: number;
+  } =
+    provisionalNoggin.userOwnerId !== null
+      ? { ownerType: 'user', ownerId: provisionalNoggin.userOwnerId }
+      : { ownerType: 'team', ownerId: provisionalNoggin.teamOwnerId! };
+
+  const noggin = await createNoggin(context, {
+    ownerType,
+    ownerId,
+    containingOrganizationId: provisionalNoggin.parentOrgId,
+    aiModelId: aiModel.id,
+    name: provisionalNoggin.title,
+    budgetQuastra: provisionalNoggin.totalAllocatedCreditQuastra,
+  });
+
+  if (initialRevision === null) {
+    const nogginRevision = await createInitialRevisionForNoggin_OMNIPOTENT(
+      noggin.id,
+    );
+  } else {
+    const nogginRevision = await createBoostrappedRevisionForNoggin_OMNIPOTENT(
+      noggin.id,
+      initialRevision,
+    );
+  }
+
+  await prisma.provisionalNoggin.update({
+    where: {
+      id: provisionalNoggin.id,
+    },
+    data: {
+      createdNogginId: noggin.id,
+    },
+  });
+
+  return noggin;
+};
+
+export const getInitiatorForProvisionalNoggin_OMNISCIENT = async (
+  provisionalNogginId: number,
+) => {
+  const provisionalNoggin = await prisma.provisionalNoggin.findUnique({
+    where: {
+      id: provisionalNogginId,
+    },
+    select: {
+      userInitiatorId: true,
+    },
+  });
+
+  if (!provisionalNoggin) {
+    throw new Error('Provisional noggin not found');
+  }
+
+  return provisionalNoggin.userInitiatorId;
+};
+
+const randomSlug = () => {
   const numberDictionary = NumberDictionary.generate({ min: 1000, max: 9999 });
   return uniqueNamesGenerator({
     dictionaries: [adjectives, animals, numberDictionary],
@@ -146,7 +344,7 @@ export const randomSlug = () => {
   });
 };
 
-export const generateFreeSlug = async () => {
+const generateFreeSlug = async () => {
   let tries = 0;
   while (tries < 10) {
     const slug = randomSlug();
@@ -210,6 +408,44 @@ export const loadNogginBySlug = async (
   }
 
   return noggin;
+};
+
+export const loadProvisionalNoggin = async (
+  context: AppLoadContext,
+  { id }: { id: number },
+) => {
+  const user = requireUser(context);
+
+  const provisionalNoggin = await prisma.provisionalNoggin.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+      userInitiatorId: true,
+      linkingCode: true,
+      expiresAt: true,
+      createdNoggin: {
+        select: {
+          slug: true,
+        },
+      },
+    },
+  });
+
+  if (!provisionalNoggin) {
+    throw notFound();
+  }
+
+  if (provisionalNoggin.userInitiatorId !== user.id) {
+    throw notFound();
+  }
+
+  if (provisionalNoggin.expiresAt < new Date()) {
+    throw notFound();
+  }
+
+  return provisionalNoggin;
 };
 
 export const authorizeNoggin = async (
