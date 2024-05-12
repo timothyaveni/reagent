@@ -252,29 +252,6 @@ export default function NewNoggin() {
               <Stack spacing={2}>
                 <TextField name="name" label={t('Noggin name')} />
 
-                <Autocomplete
-                  options={filteredAIModelOptions}
-                  getOptionLabel={(option) =>
-                    `${option.modelProvider.name}/${option.name}`
-                  }
-                  renderInput={(params) => (
-                    <TextField {...params} label={t('AI Model')} />
-                  )}
-                  onChange={(e, value) => {
-                    setSelectedModelId(value?.id ?? null);
-                  }}
-                  value={
-                    filteredAIModelOptions.find(
-                      (model) => model.id === selectedModelId,
-                    ) ?? null
-                  }
-                />
-                <input
-                  type="hidden"
-                  name="aiModelId"
-                  value={selectedModelId ?? ''}
-                />
-
                 {orgs.length > 0 && (
                   <FormControl>
                     <FormLabel id="org-control-label">
@@ -421,6 +398,29 @@ export default function NewNoggin() {
                       />
                     </FormControl>
                   )}
+
+                <Autocomplete
+                  options={filteredAIModelOptions}
+                  getOptionLabel={(option) =>
+                    `${option.modelProvider.name}/${option.name}`
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label={t('AI Model')} />
+                  )}
+                  onChange={(e, value) => {
+                    setSelectedModelId(value?.id ?? null);
+                  }}
+                  value={
+                    filteredAIModelOptions.find(
+                      (model) => model.id === selectedModelId,
+                    ) ?? null
+                  }
+                />
+                <input
+                  type="hidden"
+                  name="aiModelId"
+                  value={selectedModelId ?? ''}
+                />
 
                 <Typography variant="h3" color="textPrimary" gutterBottom>
                   <T>Noggin budget</T>
