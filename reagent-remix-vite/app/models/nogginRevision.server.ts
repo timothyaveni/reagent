@@ -1,6 +1,8 @@
 import { slateNodesToInsertDelta } from '@slate-yjs/core';
 import { prisma } from 'db/db';
+import { JSONDocType } from 'reagent-noggin-shared/types/DocType.js';
 import { EditorSchema } from 'reagent-noggin-shared/types/editorSchema';
+import { importDocFromObject } from 'reagent-noggin-shared/ydoc-io/importDocFromJSON';
 import * as Y from 'yjs';
 import { getNogginEditorSchema_OMNISCIENT } from './noggin.server';
 
@@ -93,6 +95,25 @@ export const createInitialRevisionForNoggin_OMNIPOTENT = async (
   const editorSchema = await getNogginEditorSchema_OMNISCIENT(nogginId);
   const yDoc = createNogginYjsDoc(editorSchema);
   const buffer = serializeYDoc(yDoc);
+
+  await prisma.nogginRevision.create({
+    data: {
+      content: buffer,
+      nogginId,
+    },
+  });
+};
+
+export const createBoostrappedRevisionForNoggin_OMNIPOTENT = async (
+  nogginId: number,
+  initialRevisionJson: object,
+) => {
+  const editorSchema = await getNogginEditorSchema_OMNISCIENT(nogginId);
+  const ydoc = importDocFromObject(
+    editorSchema,
+    initialRevisionJson as JSONDocType,
+  );
+  const buffer = serializeYDoc(ydoc);
 
   await prisma.nogginRevision.create({
     data: {
