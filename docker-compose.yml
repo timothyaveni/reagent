@@ -18,9 +18,10 @@ services:
     environment:
       # external URL is for external services (e.g. LTI consumers) to hit this instance, so even in dev may need a reverse proxy
       - REAGENT_EXTERNAL_URL=http://dev.rea.gent
+      - VITE_REAGENT_EXTERNAL_URL=https://dev.rea.gent
       - DATABASE_URL=postgresql://postgres:pg_dev_password@postgres:5432/postgres?schema=public
       - Y_WEBSOCKET_SERVER_EXTERNAL_URL=ws://localhost:2347
-      - NOGGIN_SERVER_EXTERNAL_URL=http://localhost:2358
+      - NOGGIN_SERVER_EXTERNAL_URL=https://noggin.dev.rea.gent
       - NOGGIN_SERVER_EXTERNAL_WEBSOCKET_URL=ws://localhost:2358
       - NOGGIN_SERVER_INTERNAL_URL=http://noggin-server:2358
       - OBJECT_STORAGE_INTERNAL_HOST=minio
@@ -80,6 +81,14 @@ services:
       PGDATA: /pg-data
     volumes:
       - ./pg-data:/pg-data
+    restart: unless-stopped
+  postgres-shadow:
+    image: postgres:16.0
+    environment:
+      POSTGRES_PASSWORD: pg_dev_password
+      PGDATA: /pg-data-shadow
+    volumes:
+      - ./pg-data-shadow:/pg-data
     restart: unless-stopped
   minio:
     image: quay.io/minio/minio

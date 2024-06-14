@@ -27,6 +27,7 @@ RUN cd /noggin-server && npm run build
 ENV PRISMA_OUTPUT="/app/node_modules/.prisma/client"
 RUN npx prisma generate
 
+ENV VITE_REAGENT_EXTERNAL_URL="https://rea.gent"
 RUN npm run build
 
 ENTRYPOINT ["node", "server.mjs"]

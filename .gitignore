@@ -1,6 +1,7 @@
 prisma/dev.db
 node_modules/
 pg-data/
+pg-data-shadow/
 pg-data-prod/
 .env
 .env.production
