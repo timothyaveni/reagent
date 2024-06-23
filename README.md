@@ -7,31 +7,43 @@ The platform offers a prompt authoring interface for generative AI models, creat
 
 AI can help us **augment traditional UIs**, rather than just turning everything into a chat text field:
 
-![Video demo of a "todo list" app, where items are automatically categorized correctly](.readme-images/todo-ai.gif)
+<p align="center">
+  <img src=".readme-images/todo-ai.gif" alt="Video demo of a 'todo list' app, where items are automatically categorized correctly">
+</p>
 
-![Diagram showing a configured prompt and runtime variable, resulting in AI output for use in the software prototype](.readme-images/todo-in-use.png)
+<p align="center">
+  <img src=".readme-images/todo-in-use.png" alt="Diagram showing a configured prompt and runtime variable, resulting in AI output for use in the software prototype">
+</p>
 
 We designed reagent to facilitate the process of integrating AI models into a wide range of software prototypes. See this walkthrough video for our [programming assignment](https://docs.google.com/document/d/1icRnM4s_1evEevnNxXBkORqz7et-GxB-e9VXt5pOEyU/edit) designed to introduce students to reagent and the use of AI models in software prototyping:
 
-[![reagent programming assignment walkthrough](https://img.youtube.com/vi/zW6F4dyj4eg/0.jpg)](https://www.youtube.com/watch?v=zW6F4dyj4eg)
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=zW6F4dyj4eg"><img src="https://img.youtube.com/vi/zW6F4dyj4eg/0.jpg" alt="reagent programming assignment walkthrough"></a>
+</p>
 
 ## 1. Create a "noggin" to perform a particular task
 
-![Screenshot of the noggin authoring interface](.readme-images/noggin-authoring.png)
+<p align="center">
+  <img src=".readme-images/noggin-authoring.png" alt="Screenshot of the noggin authoring interface">
+</p>
 
 Use the noggin authoring interface to design a prompt template for a generative AI model.
 Specify variables that will be used at runtime to construct the full prompt.
 
 ## 2. "Use your noggin" in your software prototype
 
-![The "use" page, allowing for experimentation in reagent and offering a code sample](.readme-images/noggin-use.png)
+<p align="center">
+  <img src=".readme-images/noggin-use.png" alt="The 'use' page, allowing for experimentation in reagent and offering a code sample">
+</p>
 
 Experiment within reagent, and once you're satisfied, use the automatically-created hosted API in your own software prototypes.
 Any variables you created in your prompt will be input variables in the API.
 
 # 3. Visualize past runs
 
-![A visualization of a "chat" instance where the noggin was used](.readme-images/noggin-use-instance.png)
+<p align="center">
+  <img src=".readme-images/noggin-use-instance.png" alt="A visualization of a 'chat' instance where the noggin was used">
+</p>
 
 Visualize all API calls, even those made from your prototype code, to see the exact input and output in the AI call.
 
@@ -39,17 +51,23 @@ Visualize all API calls, even those made from your prototype code, to see the ex
 
 ### Rich prompt-editing sandbox
 
-![The prompt editor supports chat turns, variables, and live collaboration.](.readme-images/reagent-editor.gif)
+<p align="center">
+  <img src=".readme-images/reagent-editor.gif" alt="The prompt editor supports chat turns, variables, and live collaboration.">
+</p>
 
 reagent's prompt editor is designed from the beginning for generative AI and offers first-class support for live collaboration. Each model uses a declarative configuration file to customize exactly which fields are present in the editor and how they behave.
 
-![Graphical JSON schema editor for model output structure](.readme-images/output-structure.png)
+<p align="center">
+  <img src=".readme-images/output-structure.png" alt="Graphical JSON schema editor for model output structure">
+</p>
 
 reagent includes an "output structure" editor, allowing you to configure the format of the AI output, for supported models.
 
 ### Multimodal input and TTI support
 
-![A screenshot of a text-to-image prompt and its output](.readme-images/tti-dragon.webp)
+<p align="center">
+  <img src=".readme-images/tti-dragon.webp" alt="A screenshot of a text-to-image prompt and its output">
+</p>
 
 reagent and its prompt sandbox are designed from the ground up to support inputs and outputs of various formats, meaning it's easy to prototype with the latest AI models.
 
@@ -57,13 +75,17 @@ reagent is provider-agnostic, provided the right adapters are implemented in `no
 
 ### Automatic streaming output
 
-![Video showing a raw reagent API call, with its output streamed](.readme-images/reagent-streaming.gif)
+<p align="center">
+  <img src=".readme-images/reagent-streaming.gif" alt="Video showing a raw reagent API call, with its output streamed">
+</p>
 
 Hosted APIs can automatically stream their output, where supported by the backing AI model.
 
 ### Budgeting and per-request cost tracking
 
-![Noggins can have their budgets configured individually.](.readme-images/budget-1.png)
+<p align="center">
+  <img src=".readme-images/budget-1.png" alt="Noggins can have their budgets configured individually.">
+</p>
 
 When providers support cost calculation, reagent keeps track of how much each request costs and can cut off access before racking up a big bill.
 
