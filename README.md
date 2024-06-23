@@ -1,7 +1,7 @@
 # reagent
 
 reagent is an open-source Web platform designed to facilitate rapid prototyping of AI-backed software for developers.
-The platform offers a prompt authoring interface for generative AI models, creating a **hosted API**for each prompt that can be used immediately in software prototypes, with instrumentation that allows for quick debugging and refinement.
+The platform offers a prompt authoring interface for generative AI models, creating a **hosted API** for each prompt that can be used immediately in software prototypes, with instrumentation that allows for quick debugging and refinement.
 
 ## Why?
 
@@ -64,9 +64,12 @@ Hosted APIs can automatically stream their output, where supported by the backin
 ### Budgeting and per-request cost tracking
 
 ![Noggins can have their budgets configured individually.](.readme-images/budget-1.png)
-![Each request has its consumed shown.](.readme-images/budget-2.png)
 
 When providers support cost calculation, reagent keeps track of how much each request costs and can cut off access before racking up a big bill.
+
+<p align="center">
+  <img src=".readme-images/budget-2.png" alt="Each request has its consumed shown.">
+</p>
 
 ### Tools for instructors and team managers
 
