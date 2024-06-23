@@ -39,7 +39,7 @@ Specify variables that will be used at runtime to construct the full prompt.
 Experiment within reagent, and once you're satisfied, use the automatically-created hosted API in your own software prototypes.
 Any variables you created in your prompt will be input variables in the API.
 
-# 3. Visualize past runs
+## 3. Visualize past runs
 
 <p align="center">
   <img src=".readme-images/noggin-use-instance.png" alt="A visualization of a 'chat' instance where the noggin was used">
