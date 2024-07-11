@@ -443,6 +443,29 @@ async function main() {
     },
   });
 
+  const { default: claude35Sonnet20240620EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/anthropic/claude-3-5-sonnet-20240620.js'
+  );
+
+  const _claude35Sonnet20240620 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: anthropicProvider.id,
+        name: 'claude-3-5-sonnet-20240620',
+        revision: '2024-06-20',
+      },
+    },
+    update: {
+      editorSchema: claude35Sonnet20240620EditorSchema,
+    },
+    create: {
+      modelProviderId: anthropicProvider.id,
+      name: 'claude-3-5-sonnet-20240620',
+      revision: '2024-06-20',
+      editorSchema: claude35Sonnet20240620EditorSchema,
+    },
+  });
+
   const testProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'test',
