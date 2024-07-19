@@ -1,5 +1,10 @@
-import { Slider, Stack, TextField } from '@mui/material';
+import { Slider, Stack } from '@mui/material';
 import { ModelInput_Integer } from 'reagent-noggin-shared/types/editorSchemaV1';
+import {
+  TextFieldWithSuspendedEvaluation,
+  validateMinMax,
+  validateNotNaN,
+} from '~/components/TextFieldWithSuspendedEvaluation.js';
 import { useInputValueState } from '../editor-utils';
 
 export function IntegerEditor({
@@ -38,19 +43,18 @@ export function IntegerEditor({
           setValue(value as number);
         }}
       />
-      <TextField
+      <TextFieldWithSuspendedEvaluation
         sx={{
           flex: 1,
         }}
         type="text"
         size="small"
         value={value}
-        onChange={(event) => {
-          const newValue = parseInt(event.target.value, 10);
-          const notNaN = isNaN(newValue) ? min : newValue;
-          const capped = Math.min(max, Math.max(min, notNaN));
-          setValue(capped);
+        onChange={(value) => {
+          setValue(value);
         }}
+        parse={(value) => parseInt(value, 10)}
+        validations={[validateNotNaN(min), validateMinMax(min, max)]}
       />
     </Stack>
   );

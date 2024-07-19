@@ -3,13 +3,16 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  TextField,
   Typography,
 } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { unit } from 'reagent-noggin-shared/cost-calculation/units';
 import { CostText, roundedCreditCount } from '~/components/CostText';
 import T from '~/i18n/T';
+import {
+  TextFieldWithSuspendedEvaluation,
+  validateNotNaN,
+} from './TextFieldWithSuspendedEvaluation.js';
 
 type NogginBudgetEntryProps = {
   totalIncurredCostQuastra: number;
@@ -41,21 +44,42 @@ export function NogginBudgetEntry({
 
   const allowUnlimited = maxPermittedBudgetQuastra === null;
 
-  const creditsToClampedQuastra = (credits: number) => {
+  const creditsToClampedCredits = (credits: number) => {
     const withMin = Math.max(credits, totalIncurredCostCredits);
     const withMinQuastra = unit(withMin, 'credits').toNumber('quastra');
 
+    let withMaxQuastra;
     if (maxPermittedBudgetQuastra === null) {
-      return withMinQuastra;
+      withMaxQuastra = withMinQuastra;
+    } else {
+      withMaxQuastra = Math.min(withMinQuastra, maxPermittedBudgetQuastra);
     }
 
-    return Math.min(withMinQuastra, maxPermittedBudgetQuastra);
+    const returnCredits = roundedCreditCount(withMaxQuastra);
+
+    return returnCredits;
   };
 
+  const creditsToQuastra = (credits: number) => {
+    return Math.round(unit(credits, 'credits').toNumber('quastra'));
+  };
+
+  const lastMax = useRef(maxPermittedBudgetQuastra);
+  const lastMin = useRef(totalIncurredCostQuastra);
   useEffect(() => {
-    const clamped = creditsToClampedQuastra(currentBudgetAmountCredits);
-    if (clamped !== currentBudgetAmountQuastra) {
-      setCurrentBudgetAmountQuastra(clamped);
+    if (
+      lastMax.current !== maxPermittedBudgetQuastra ||
+      lastMin.current !== totalIncurredCostQuastra
+    ) {
+      lastMax.current = maxPermittedBudgetQuastra;
+      lastMin.current = totalIncurredCostQuastra;
+
+      const clampedQ = creditsToQuastra(
+        creditsToClampedCredits(currentBudgetAmountCredits),
+      );
+      if (clampedQ !== currentBudgetAmountQuastra) {
+        setCurrentBudgetAmountQuastra(clampedQ);
+      }
     }
   }, [
     currentBudgetAmountQuastra,
@@ -127,11 +151,10 @@ export function NogginBudgetEntry({
               <Typography>
                 <T flagged>Limit to</T>
               </Typography>
-              <TextField
+              <TextFieldWithSuspendedEvaluation
                 type="text"
                 variant="standard"
                 inputProps={{
-                  min: totalIncurredCostCredits,
                   step: 0.01,
                   sx: {
                     width: '12ch',
@@ -142,16 +165,14 @@ export function NogginBudgetEntry({
                   setChosenRadio('limited');
                 }}
                 value={currentBudgetAmountCredits}
-                onChange={(event) => {
-                  const newParsed = parseFloat(event.target.value);
-
-                  if (isNaN(newParsed)) {
-                    return;
-                  }
-
-                  const newBudget = creditsToClampedQuastra(newParsed);
-                  setCurrentBudgetAmountQuastra(newBudget);
+                onChange={(validCredits: number) => {
+                  setCurrentBudgetAmountQuastra(creditsToQuastra(validCredits));
                 }}
+                parse={(value) => parseFloat(value)}
+                validations={[
+                  validateNotNaN(totalIncurredCostCredits),
+                  creditsToClampedCredits,
+                ]}
               />
               <T flagged>credits</T>
             </Box>
