@@ -125,7 +125,9 @@ function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => {
+                    href={`/noggins/${identifier}/use/${run.uuid}`}
+                    onClick={(e) => {
+                      e.preventDefault();
                       navigate(`/noggins/${identifier}/use/${run.uuid}`);
                     }}
                   >
