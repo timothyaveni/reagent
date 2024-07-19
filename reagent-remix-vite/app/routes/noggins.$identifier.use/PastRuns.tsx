@@ -12,6 +12,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  styled,
 } from '@mui/material';
 import { Link, useNavigate, useParams } from '@remix-run/react';
 import { SerializeFrom } from '@remix-run/server-runtime';
@@ -76,6 +77,78 @@ function renderCost(cost: PastRunsProps['runs'][0]['cost']) {
   return null;
 }
 
+const Image = styled('img')();
+
+const trunc = (s: string, n: number) =>
+  s.length > n ? s.substr(0, n - 1) + '...' : s;
+
+function renderVariable(variable: any) {
+  switch (variable.variableType) {
+    case 'text':
+      return (
+        <Typography fontSize="small" title={variable.variableValue.text}>
+          {trunc(variable.variableValue.text, 20)}
+        </Typography>
+      );
+    case 'number':
+      return (
+        <Typography fontSize="small" title={variable.variableValue.number}>
+          {trunc(variable.variableValue.number, 20)}
+        </Typography>
+      );
+    case 'integer':
+      return (
+        <Typography fontSize="small" title={variable.variableValue.integer}>
+          {trunc(variable.variableValue.integer, 20)}
+        </Typography>
+      );
+    case 'image':
+      return (
+        <Image
+          // src={variable.variableValue.url}
+          src={'https://via.placeholder.com/150'}
+          sx={{
+            maxWidth: '32px',
+            maxHeight: '32px',
+            objectFit: 'contain',
+          }}
+        />
+      );
+    default:
+      return null;
+  }
+}
+
+function renderEvaluatedVariables(
+  evaluatedParameters: PastRunsProps['runs'][0]['evaluatedParameters'],
+) {
+  if (evaluatedParameters === null) {
+    return null;
+  }
+
+  return (
+    <Stack spacing={0.5}>
+      {Object.values(evaluatedParameters)
+        .slice(0, 3)
+        .map((v: any) => {
+          return (
+            <Stack
+              direction="row"
+              key={v.variableName}
+              alignItems="center"
+              spacing={2}
+            >
+              <Box>
+                <strong>{v.variableName}</strong>:
+              </Box>
+              <Box>{renderVariable(v)}</Box>
+            </Stack>
+          );
+        })}
+    </Stack>
+  );
+}
+
 function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
   const navigate = useNavigate();
   const { identifier } = useParams();
@@ -117,8 +190,9 @@ function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
                     })}
                   </T>
                 </TableCell>
-                {/* TODO variables */}
-                <TableCell></TableCell>
+                <TableCell>
+                  {renderEvaluatedVariables(run.evaluatedParameters)}
+                </TableCell>
                 <TableCell>{renderNogginRunStatus(run.status)}</TableCell>
                 <TableCell>{renderCost(run.cost)}</TableCell>
                 <TableCell>

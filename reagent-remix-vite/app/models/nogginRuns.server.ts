@@ -34,6 +34,7 @@ export async function getNogginRuns(
             computationMetadata: true,
           },
         },
+        evaluatedParameters: true,
       },
       orderBy: {
         createdAt: 'desc',
