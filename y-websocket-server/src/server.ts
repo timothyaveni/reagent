@@ -20,6 +20,7 @@ const { setupWSConnection, setPersistence } = YWebsocketUtils;
 // TODO: awareness info should be authenticated
 type JWTPayload = {
   nogginId: number;
+  userId: number;
 };
 
 const wss = new WebSocketServer({ noServer: true });
@@ -197,6 +198,49 @@ const getOutputFormatFromYdoc = async (
 // todo memory leaks...
 const docLoaded = {};
 const updateDocFunction = {};
+const docEditors: {
+  [docName: string]: {
+    userId: number;
+    lastEditTs: number;
+  }[];
+} = {};
+
+const trackDocEditor = (docName: string, userId: number) => {
+  if (!docEditors[docName]) {
+    docEditors[docName] = [];
+  }
+
+  const existingIndex = docEditors[docName].findIndex(
+    (editor) => editor.userId === userId,
+  );
+
+  if (existingIndex !== -1) {
+    docEditors[docName].splice(existingIndex, 1);
+  }
+
+  docEditors[docName].push({
+    userId,
+    lastEditTs: Date.now(),
+  });
+
+  console.log(docEditors);
+};
+
+const EDIT_THRESHOLD = 1000 * 60; // 1 minute
+
+const getAndRefreshDocEditors = (docName: string) => {
+  if (!docEditors[docName]) {
+    return [];
+  }
+
+  const now = Date.now();
+
+  docEditors[docName] = docEditors[docName].filter(
+    (editor) => now - editor.lastEditTs < EDIT_THRESHOLD,
+  );
+
+  return docEditors[docName];
+};
 
 setPersistence({
   provider: prisma, // i don't think this does anyhting
@@ -240,6 +284,11 @@ setPersistence({
             content: serialized,
             nogginVariables: vars,
             outputSchema: outputSchema,
+            editors: {
+              connect: getAndRefreshDocEditors(docName).map((editor) => ({
+                id: editor.userId,
+              })),
+            },
           },
         });
       };
@@ -275,6 +324,11 @@ setPersistence({
           content: serialized,
           nogginVariables: vars,
           outputSchema: outputSchema,
+          editors: {
+            connect: getAndRefreshDocEditors(docName).map((editor) => ({
+              id: editor.userId,
+            })),
+          },
         },
       });
     } catch (e) {
@@ -284,7 +338,21 @@ setPersistence({
   },
 });
 
-wss.on('connection', setupWSConnection);
+wss.on('connection', function (conn, req) {
+  // stolen from yjs ws code ... yikers
+  const docName = req.url.slice(1).split('?')[0];
+  conn.on('message', (m) => {
+    const userId = socketToUserId.get(conn);
+    if (userId !== undefined) {
+      // can happen during initial deploy
+      trackDocEditor(docName, userId);
+    }
+  });
+
+  setupWSConnection(...arguments);
+});
+
+const socketToUserId = new WeakMap();
 
 // TODO: any errors here will crash the server (like if the deserialize breaks)
 server.on('upgrade', async (request, socket, head) => {
@@ -329,7 +397,7 @@ server.on('upgrade', async (request, socket, head) => {
 
   console.log('decoded', decoded);
 
-  const { nogginId } = decoded as JWTPayload;
+  const { nogginId, userId } = decoded as JWTPayload;
 
   // from utils.cjs. really we already know the room ID but i don't want to figure out how to pass it into the setup handler
   const requestedNogginId = parseInt(request.url.slice(1).split('?')[0], 10);
@@ -344,6 +412,7 @@ server.on('upgrade', async (request, socket, head) => {
   }
 
   wss.handleUpgrade(request, socket, head, (ws) => {
+    socketToUserId.set(ws, userId);
     wss.emit('connection', ws, request);
   });
 });
