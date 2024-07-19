@@ -105,8 +105,8 @@ function renderVariable(variable: any) {
     case 'image':
       return (
         <Image
-          // src={variable.variableValue.url}
-          src={'https://via.placeholder.com/150'}
+          src={variable.variableValue.url}
+          // src={'https://via.placeholder.com/150'}
           sx={{
             maxWidth: '32px',
             maxHeight: '32px',
