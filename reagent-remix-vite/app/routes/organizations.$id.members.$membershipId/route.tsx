@@ -1,15 +1,24 @@
-import { useLoaderData, useSubmit } from '@remix-run/react';
+import { Stack, Typography } from '@mui/material';
+import { useLoaderData } from '@remix-run/react';
 import { LoaderFunctionArgs, json } from '@remix-run/server-runtime';
+import T from '~/i18n/T.js';
 import {
   loadOrganization,
-  loadOrganizationMemberList,
+  loadOrganizationMembership,
   requireAtLeastUserOrganizationRole,
 } from '~/models/organization.server';
 import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
+import { NogginIndexBody } from '../noggins._index/NogginIndexBody.js';
 
-export const loader = async ({ params, context }: LoaderFunctionArgs) => {
-  const { id } = params;
+const NOGGIN_PAGE_SIZE = 20;
+
+export const loader = async ({
+  params,
+  request,
+  context,
+}: LoaderFunctionArgs) => {
+  const { id, membershipId } = params;
 
   if (!id) {
     throw notFound();
@@ -28,20 +37,38 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     role: OrganizationRole.MANAGER,
   });
 
-  const memberList = await loadOrganizationMemberList(context, {
+  const { searchParams } = new URL(request.url);
+  const nogginsPage =
+    parseInt(searchParams.get('nogginsPage')?.toString() || '1', 10) || 1;
+  const membership = await loadOrganizationMembership(context, {
     organizationId: organization.id,
+    membershipId: parseInt(membershipId || '0', 10),
+    nogginsPageSize: NOGGIN_PAGE_SIZE,
+    nogginsPageZeroIndexed: nogginsPage - 1,
   });
 
   return json({
-    organization,
-    memberList,
+    // organization,
+    membership,
+    nogginsPage,
   });
 };
 
 export default function OrganizationMembership() {
-  const { organization, memberList } = useLoaderData<typeof loader>();
+  const { membership, nogginsPage } = useLoaderData<typeof loader>();
 
-  const submit = useSubmit();
-
-  return 'hi';
+  return (
+    <Stack spacing={2}>
+      <Typography>
+        <T>Noggins within this organization for this user:</T>
+      </Typography>
+      <NogginIndexBody
+        noggins={membership.noggins}
+        emptyMessage="No noggins"
+        page={nogginsPage}
+        pageCount={Math.ceil(membership.nogginsCount / NOGGIN_PAGE_SIZE)}
+        paginationParameter="nogginsPage"
+      />
+    </Stack>
+  );
 }

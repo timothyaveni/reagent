@@ -678,10 +678,24 @@ const NOGGIN_INDEX_PERSONAL_WHERE = `
 const NOGGIN_INDEX_TEAM_WHERE = `
   where "Noggin"."teamOwnerId" = $1`;
 
+const NOGGIN_INDEX_ORG_MEMBER_WHERE = `
+  where (
+    "Noggin"."userOwnerId" = $1
+  ) and (
+    "Noggin"."parentOrgId" = $2 
+  )
+`;
+
 const NOGGIN_INDEX_PAGE_INFO = `
   order by "NogginRevision"."updatedAt" desc
   limit $2
   offset $3`;
+
+// lol
+const NOGGIN_INDEX_PAGE_INFO_OFFSETVARIABLES = `
+  order by "NogginRevision"."updatedAt" desc
+  limit $3
+  offset $4`;
 
 const reformatNogginIndex = (noggins: NogginIndexQueryType) => {
   // reformat to how prisma would return it if we didn't need to query raw
@@ -827,6 +841,71 @@ export const loadNogginIndexCountForTeam = async (
 
   // @ts-expect-error
   query.values = [teamId];
+  const count = await prisma.$queryRaw<{ count: number }[]>(query);
+
+  return Number(count[0].count);
+};
+
+export const loadNogginsIndexForOrgMember = async (
+  context: AppLoadContext,
+  {
+    orgId,
+    userId,
+    pageSize = 20,
+    pageZeroIndexed = 0,
+  }: {
+    orgId: number;
+    userId: number;
+    pageSize: number;
+    pageZeroIndexed: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId: orgId,
+    role: OrganizationRole.MANAGER,
+  });
+
+  const offset = pageZeroIndexed * pageSize;
+
+  const query = Prisma.raw(`
+    ${NOGGIN_INDEX_SELECT}
+    ${NOGGIN_INDEX_ORG_MEMBER_WHERE}
+    ${NOGGIN_INDEX_PAGE_INFO_OFFSETVARIABLES}
+  `);
+  // @ts-expect-error wtf? this is from the prisma docs
+  query.values = [userId, orgId, pageSize, offset];
+
+  const nogginsRaw = await prisma.$queryRaw<NogginIndexQueryType>(query);
+  const noggins = reformatNogginIndex(nogginsRaw);
+
+  await authorizeNoggins(context, noggins);
+
+  return noggins;
+};
+
+export const loadNogginIndexCountForOrgMember = async (
+  context: AppLoadContext,
+  {
+    orgId,
+    userId,
+  }: {
+    orgId: number;
+    userId: number;
+  },
+) => {
+  await requireAtLeastUserOrganizationRole(context, {
+    organizationId: orgId,
+    role: OrganizationRole.MANAGER,
+  });
+
+  const query = Prisma.raw(`
+    select
+      count(*)
+    from "Noggin"
+    ${NOGGIN_INDEX_ORG_MEMBER_WHERE}`);
+
+  // @ts-expect-error
+  query.values = [userId, orgId];
   const count = await prisma.$queryRaw<{ count: number }[]>(query);
 
   return Number(count[0].count);

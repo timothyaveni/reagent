@@ -14,6 +14,7 @@ import {
 } from '@remix-run/server-runtime';
 import { unit } from 'reagent-noggin-shared/cost-calculation/units';
 import { CostText } from '~/components/CostText';
+import MUILink from '~/components/MUILink.js';
 import T from '~/i18n/T';
 import {
   loadOrganization,
@@ -173,7 +174,13 @@ export default function OrganizationMemberList() {
       <TableBody>
         {memberList.map((membership) => (
           <TableRow key={membership.user.id}>
-            <TableCell>{membership.user.userInfo?.displayName}</TableCell>
+            <TableCell>
+              <MUILink
+                to={`/organizations/${organization.id}/members/${membership.id}`}
+              >
+                {membership.user.userInfo?.displayName}
+              </MUILink>
+            </TableCell>
             <TableCell>{membership.role}</TableCell>
             <TableCell>
               <MemberBudgetCell

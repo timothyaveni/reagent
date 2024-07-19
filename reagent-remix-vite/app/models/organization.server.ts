@@ -1,9 +1,13 @@
-import { AppLoadContext } from '@remix-run/node';
+import { AppLoadContext } from '@remix-run/server-runtime';
 import { getTotalOrganizationSpendForUser_OMNISCIENT } from 'reagent-noggin-shared/cost-calculation/get-noggin-total-incurred-cost';
 import { requireUser } from '~/auth/auth.server';
 import prisma from '~/db';
 import { notFound } from '~/route-utils/status-code';
 import { OrganizationRole } from '~/shared/organization';
+import {
+  loadNogginIndexCountForOrgMember,
+  loadNogginsIndexForOrgMember,
+} from './noggin.server.js';
 
 export const indexOrganizations = async (context: AppLoadContext) => {
   const user = requireUser(context);
@@ -259,9 +263,13 @@ export const loadOrganizationMembership = async (
   {
     organizationId,
     membershipId,
+    nogginsPageSize,
+    nogginsPageZeroIndexed,
   }: {
     organizationId: number;
     membershipId: number;
+    nogginsPageSize: number;
+    nogginsPageZeroIndexed: number;
   },
 ) => {
   await requireAtLeastUserOrganizationRole(context, {
@@ -277,6 +285,7 @@ export const loadOrganizationMembership = async (
       id: true,
       role: true,
       totalPermittedSpendQuastra: true,
+      userId: true,
     },
   });
 
@@ -284,12 +293,28 @@ export const loadOrganizationMembership = async (
     throw notFound();
   }
 
+  const [noggins, nogginCount] = await Promise.all([
+    loadNogginsIndexForOrgMember(context, {
+      orgId: organizationId,
+      userId: membership.userId,
+      pageSize: nogginsPageSize,
+      pageZeroIndexed: nogginsPageZeroIndexed,
+    }),
+
+    loadNogginIndexCountForOrgMember(context, {
+      orgId: organizationId,
+      userId: membership.userId,
+    }),
+  ]);
+
   return {
     ...membership,
     totalPermittedSpendQuastra:
       membership.totalPermittedSpendQuastra === null
         ? null
         : Number(membership.totalPermittedSpendQuastra),
+    noggins,
+    nogginsCount: nogginCount,
   };
 };
 
