@@ -135,9 +135,8 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   };
 
   const teamId = formData.get('teamId')?.toString();
-  if (teamId) {
-    const teamIdInt = parseInt(teamId, 10);
-
+  const teamIdInt = parseInt(teamId || '', 10);
+  if (!isNaN(teamIdInt)) {
     ownerData = {
       ownerType: 'team',
       ownerId: teamIdInt,

@@ -95,7 +95,7 @@ export const createTeam = async (
   return team;
 };
 
-const isUserOnTeam = async (userId: number, teamId: number) => {
+const isUserOnTeam_OMNISCIENT = async (userId: number, teamId: number) => {
   const team = await prisma.team.findUnique({
     where: {
       id: teamId,
@@ -122,7 +122,7 @@ export const userMayParticipateInTeam = async (
 ): Promise<boolean> => {
   const user = requireUser(context);
 
-  if (await isUserOnTeam(user.id, teamId)) {
+  if (await isUserOnTeam_OMNISCIENT(user.id, teamId)) {
     return true;
   }
 
