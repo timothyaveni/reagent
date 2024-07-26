@@ -13,6 +13,7 @@ import {
   ServerRuntimeMetaFunction as MetaFunction,
 } from '@remix-run/server-runtime';
 import { WebsocketProvider } from 'y-websocket';
+import { requireUser } from '~/auth/auth.server.js';
 import {
   getNogginTotalAllocatedCreditQuastra,
   getNogginTotalIncurredCostQuastra,
@@ -26,7 +27,7 @@ import {
 import { useRootHasPopulatedStore } from '../noggins.$identifier.edit/noggin-editor/editor-utils';
 import EditorHeader from './EditorHeader';
 import { StoreContext } from './StoreContext';
-import { genAuthTokenForNoggin } from './jwt.server';
+import { genAuthTokenForNoggin_OMNIPOTENT } from './jwt.server';
 
 export const handle = {
   wideLayout: true,
@@ -51,7 +52,12 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw notFound();
   }
 
-  const authToken = genAuthTokenForNoggin(noggin.id);
+  const userId = requireUser(context).id;
+
+  const authToken = genAuthTokenForNoggin_OMNIPOTENT({
+    nogginId: noggin.id,
+    userId,
+  });
 
   const totalIncurredCostQuastra = await getNogginTotalIncurredCostQuastra(
     context,
