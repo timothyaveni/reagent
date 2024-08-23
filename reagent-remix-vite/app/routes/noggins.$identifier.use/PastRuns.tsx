@@ -184,11 +184,13 @@ function RunTable({ runs }: { runs: PastRunsProps['runs'] }) {
             return (
               <TableRow key={run.uuid}>
                 <TableCell>
-                  <T flagged>
-                    {formatDistance(new Date(run.createdAt), new Date(), {
-                      addSuffix: true,
-                    })}
-                  </T>
+                  <span title={new Date(run.createdAt).toLocaleDateString()}>
+                    <T flagged>
+                      {formatDistance(new Date(run.createdAt), new Date(), {
+                        addSuffix: true,
+                      })}
+                    </T>
+                  </span>
                 </TableCell>
                 <TableCell>
                   {renderEvaluatedVariables(run.evaluatedParameters)}
