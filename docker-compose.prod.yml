@@ -19,6 +19,7 @@ services:
       - OBJECT_STORAGE_INTERNAL_USE_SSL=false
       - OBJECT_STORAGE_ACCESS_KEY
       - OBJECT_STORAGE_SECRET_KEY
+      - OBJECT_STORAGE_PATH_TYPE
       - OBJECT_STORAGE_EXTERNAL_URL=https://objects.rea.gent
       - GITHUB_REDIRECT_URL=https://rea.gent/auth/github/callback
 

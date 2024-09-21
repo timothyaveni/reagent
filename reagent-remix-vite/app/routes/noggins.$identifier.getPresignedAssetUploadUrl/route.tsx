@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, json } from '@remix-run/server-runtime';
-import { ReagentBucket } from 'reagent-noggin-shared/object-storage-buckets';
+import { ReagentBucketExternalUrl } from 'reagent-noggin-shared/object-storage-buckets';
 import { loadNogginBySlug } from '~/models/noggin.server';
 import { getBucket, minioClient } from '~/object-storage/minio';
 import { notFound } from '~/route-utils/status-code';
@@ -24,36 +24,54 @@ export const action = async ({
     throw notFound();
   }
 
-  const externalHost = (process.env.OBJECT_STORAGE_EXTERNAL_URL || '').replace(
-    /https?:\/\//,
-    '',
-  );
+  const bucketName = await getBucket('NOGGIN_RUN_INPUTS');
+  const bucketExternalUrl = ReagentBucketExternalUrl['NOGGIN_RUN_INPUTS'];
+
+  const externalHost = process.env.OBJECT_STORAGE_PRESIGNED_HOST;
+
+  if (!externalHost) {
+    throw new Error('Missing OBJECT_STORAGE_PRESIGNED_HOST');
+  }
 
   const filename = `${uuid()}.${extension}`;
 
   // method, bucketName, objectName, expires, reqParams, requestDate, signedHost, cb
-  const url = await minioClient.presignedUrl(
-    'PUT',
-    await getBucket(ReagentBucket.NOGGIN_RUN_INPUTS),
-    filename,
-    60 * 60 * 24,
-    {},
-    new Date(),
-    // @ts-expect-error
-    externalHost,
-  );
+  let url: string = (
+    await minioClient.presignedUrl(
+      'PUT',
+      bucketName,
+      filename,
+      60 * 60 * 24,
+      {},
+      new Date(),
+      // @ts-expect-error this is added by @timothyaveni/minio
+      externalHost,
+    )
+  ).toString(); // don't ask about the toString
 
-  console.log('url', url);
+  // console.log(
+  //   'url',
+  //   url,
+  //   'PUT',
+  //   await getBucket('NOGGIN_RUN_INPUTS'),
+  //   filename,
+  //   60 * 60 * 24,
+  //   {},
+  //   new Date(),
+  //   externalHost,
+  //   bucketExternalUrl,
+  // );
 
   // TODO: toss this in prisma as well, linked to a noggin but not to a run yet
 
+  // related to having to hack minio to accept different URLs for upload and public access
   const objectStorageExternalUrlIsHttps =
-    !!process.env.OBJECT_STORAGE_EXTERNAL_URL?.startsWith('https');
+    !!bucketExternalUrl.startsWith('https');
 
   return json({
     presignedUrl: objectStorageExternalUrlIsHttps
-      ? url.toString().replace('http', 'https') // don't ask about the toString
+      ? url.replace(/^https?/, 'https')
       : url,
-    uploadUrl: `${process.env.OBJECT_STORAGE_EXTERNAL_URL}/${ReagentBucket.NOGGIN_RUN_INPUTS}/${filename}`,
+    uploadUrl: `${bucketExternalUrl}/${filename}`,
   });
 };
