@@ -44,17 +44,19 @@ const jwtPublicKey = fs.readFileSync(
   'utf8',
 );
 
+const log = (...args: any[]) => {};
+
 const server = http.createServer((request, response) => {
   // console.log('request', request);
   if (request.method === 'POST' && request.url === '/immediate-sync') {
-    console.log('immediate-sync');
+    log('immediate-sync');
     // Check for the correct Authorization header
     const authHeader = request.headers['authorization'] || '';
     const token = authHeader.split(' ')[1]; // Get the token part of the header
 
     // thanks gpt
     if (token === process.env.SHARED_Y_WEBSOCKET_SERVER_SECRET) {
-      console.log('token matches');
+      log('token matches');
       // Parse the request body to get the nogginId
       let body = '';
       const decoder = new StringDecoder('utf-8');
@@ -66,16 +68,16 @@ const server = http.createServer((request, response) => {
         body += decoder.end();
 
         try {
-          console.log('body', body);
+          log('body', body);
           const parsedBody = JSON.parse(body);
           const nogginId = parsedBody.nogginId;
 
           if (nogginId) {
-            console.log('nogginId', nogginId);
+            log('nogginId', nogginId);
             const updateFunc = updateDocFunction[nogginId];
 
             if (!updateFunc) {
-              console.log('no updateFunc');
+              log('no updateFunc');
               response.writeHead(200, { 'Content-Type': 'text/plain' });
               response.end('already up to date');
               return;
@@ -83,7 +85,7 @@ const server = http.createServer((request, response) => {
 
             updateDocFunction[nogginId]()
               .then(() => {
-                console.log('synced noggin');
+                log('synced noggin');
                 // When the function finishes, respond to the request
                 response.writeHead(200, { 'Content-Type': 'text/plain' });
                 response.end('');
@@ -95,7 +97,7 @@ const server = http.createServer((request, response) => {
                 response.end('Error syncing noggin');
               });
           } else {
-            console.log('no nogginId');
+            log('no nogginId');
             // nogginId not found in the body
             response.writeHead(400, { 'Content-Type': 'text/plain' });
             response.end('Missing nogginId parameter');
@@ -108,7 +110,7 @@ const server = http.createServer((request, response) => {
         }
       });
     } else {
-      console.log('token does not match');
+      log('token does not match');
       // Invalid or missing Authorization header
       response.writeHead(401, { 'Content-Type': 'text/plain' });
       response.end('Unauthorized');
@@ -149,7 +151,7 @@ const getNogginVariablesFromYdoc = (ydoc: Y.Doc): /*NogginVariables*/ any => {
     }
   }
 
-  console.log('getNogginVariablesFromYdoc', usedVariables);
+  log('getNogginVariablesFromYdoc', usedVariables);
 
   // TODO: include override variables
 
@@ -223,7 +225,7 @@ const trackDocEditor = (docName: string, userId: number) => {
     lastEditTs: Date.now(),
   });
 
-  console.log(docEditors);
+  log(docEditors); // this line took gigabytes of disk space :))
 };
 
 const EDIT_THRESHOLD = 1000 * 60; // 1 minute
@@ -247,7 +249,7 @@ setPersistence({
   bindState: async (docName, ydoc) => {
     try {
       docLoaded[docName] = false;
-      console.log('bindState', docName);
+      log('bindState', docName);
       const { content } = await prisma.nogginRevision.findFirst({
         where: {
           nogginId: parseInt(docName, 10),
@@ -267,9 +269,9 @@ setPersistence({
 
       docLoaded[docName] = true;
       updateDocFunction[docName] = async (update) => {
-        console.log('update');
+        log('update');
         const serialized = serializeYDoc(ydoc);
-        console.log({ serialized });
+        log({ serialized });
         const vars = getNogginVariablesFromYdoc(ydoc);
         const nogginId = parseInt(docName, 10);
         const outputSchema = await getOutputFormatFromYdoc(nogginId, ydoc);
@@ -306,7 +308,7 @@ setPersistence({
     }
 
     try {
-      console.log('writeState', docName);
+      log('writeState', docName);
 
       // here we probably always want to make a new revision, but idk, maybe not
       // TODO: dry it out
@@ -356,7 +358,7 @@ const socketToUserId = new WeakMap();
 
 // TODO: any errors here will crash the server (like if the deserialize breaks)
 server.on('upgrade', async (request, socket, head) => {
-  console.log('upgrade');
+  log('upgrade');
 
   let decoded: JWTPayload;
   try {
@@ -395,7 +397,7 @@ server.on('upgrade', async (request, socket, head) => {
     }
   }
 
-  console.log('decoded', decoded);
+  log('decoded', decoded);
 
   const { nogginId, userId } = decoded as JWTPayload;
 
