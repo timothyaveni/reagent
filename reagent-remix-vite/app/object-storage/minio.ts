@@ -17,11 +17,11 @@ export const minioClient = new Minio.Client({
 export const getBucket = async (bucketId: ReagentBucketId): Promise<string> => {
   const bucketName = ReagentBucket[bucketId];
 
-  console.log(
-    'remix',
-    { bucketId, bucketName },
-    process.env.OBJECT_STORAGE_NOGGIN_RUN_OUTPUTS_BUCKET,
-  );
+  // console.log(
+  //   'remix',
+  //   { bucketId, bucketName },
+  //   process.env.OBJECT_STORAGE_NOGGIN_RUN_OUTPUTS_BUCKET,
+  // );
 
   if (await minioClient.bucketExists(bucketName)) {
     return bucketName;
