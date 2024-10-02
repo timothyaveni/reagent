@@ -3,6 +3,7 @@ import { useLoaderData, useNavigate } from '@remix-run/react';
 import { ActionFunctionArgs, json } from '@remix-run/server-runtime';
 import * as QRCode from 'qrcode.react'; // weird, docs say it's esm
 import { useEffect, useState } from 'react';
+import CopyableCode from '~/components/CopyableCode.js';
 import { loadProvisionalNoggin } from '~/models/noggin.server.js';
 
 export const loader = async ({
@@ -24,7 +25,7 @@ export const loader = async ({
 
 export default function LinkNoggin() {
   const { id, linkingCode } = useLoaderData<typeof loader>();
-  const [showQRCode, setShowQRCode] = useState(false);
+  const [showLinkingCode, setShowLinkingCode] = useState(false);
   const navigate = useNavigate();
 
   const linkingCodeWithUrl = `${
@@ -33,7 +34,7 @@ export default function LinkNoggin() {
 
   useEffect(() => {
     // breaks in ssr /shrug
-    setShowQRCode(true);
+    setShowLinkingCode(true);
   }, []);
 
   useEffect(() => {
@@ -75,10 +76,12 @@ export default function LinkNoggin() {
         }}
         elevation={2}
       >
-        {showQRCode && (
+        {showLinkingCode && (
           <QRCode.QRCodeSVG value={linkingCodeWithUrl} size={340} />
         )}
       </Paper>
+
+      {showLinkingCode && <CopyableCode text={linkingCodeWithUrl} />}
     </Stack>
   );
 }
