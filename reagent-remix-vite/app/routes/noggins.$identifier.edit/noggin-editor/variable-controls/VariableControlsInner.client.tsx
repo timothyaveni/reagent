@@ -4,6 +4,7 @@ import { DocumentVariable } from 'reagent-noggin-shared/types/DocType';
 import { uniq } from 'underscore';
 import T from '~/i18n/T';
 import { useEditorStore } from '../editor-utils';
+import { BooleanVariableOptionControls } from './BooleanVariableOptionControls copy.js';
 import { ImageVariableOptionControls } from './ImageVariableOptionControls';
 import { IntegerVariableOptionControls } from './IntegerVariableOptionControls';
 import { NumberVariableOptionControls } from './NumberVariableOptionControls';
@@ -70,6 +71,8 @@ function VariableOptionControls({ id }: { id: string }) {
       return <NumberVariableOptionControls id={id} variable={thisVariable} />;
     case 'integer':
       return <IntegerVariableOptionControls id={id} variable={thisVariable} />;
+    case 'boolean':
+      return <BooleanVariableOptionControls id={id} variable={thisVariable} />;
     case 'text':
     default: // TODO probably get rid of this -- i just didn't want to migrate my test db
       return <TextVariableOptionControls id={id} variable={thisVariable} />;

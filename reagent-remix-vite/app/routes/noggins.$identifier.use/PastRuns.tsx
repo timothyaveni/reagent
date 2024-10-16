@@ -102,6 +102,16 @@ function renderVariable(variable: any) {
           {trunc(variable.variableValue.integer, 20)}
         </Typography>
       );
+    case 'boolean':
+      console.log({ variable });
+      return (
+        <Typography
+          fontSize="small"
+          title={variable.variableValue.boolean.toString()}
+        >
+          {trunc(variable.variableValue.boolean.toString(), 20)}
+        </Typography>
+      );
     case 'image':
       return (
         <Image
