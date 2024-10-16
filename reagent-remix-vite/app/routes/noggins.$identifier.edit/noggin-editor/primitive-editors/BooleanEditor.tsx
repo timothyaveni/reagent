@@ -16,17 +16,20 @@ export function BooleanEditor({
       direction={'row'}
       spacing={3}
       alignItems={'center'}
+      justifyContent={'center'}
       sx={{
         mb: 2,
       }}
     >
       <Checkbox
-        sx={{
-          flex: 3,
-        }}
+        sx={
+          {
+            // flex: 3,
+          }
+        }
         checked={value}
         onChange={(event, checked) => {
-          setValue(value);
+          setValue(checked);
         }}
       />
     </Stack>

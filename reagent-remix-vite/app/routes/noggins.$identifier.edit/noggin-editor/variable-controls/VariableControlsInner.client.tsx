@@ -4,7 +4,7 @@ import { DocumentVariable } from 'reagent-noggin-shared/types/DocType';
 import { uniq } from 'underscore';
 import T from '~/i18n/T';
 import { useEditorStore } from '../editor-utils';
-import { BooleanVariableOptionControls } from './BooleanVariableOptionControls copy.js';
+import { BooleanVariableOptionControls } from './BooleanVariableOptionControls.js';
 import { ImageVariableOptionControls } from './ImageVariableOptionControls';
 import { IntegerVariableOptionControls } from './IntegerVariableOptionControls';
 import { NumberVariableOptionControls } from './NumberVariableOptionControls';
