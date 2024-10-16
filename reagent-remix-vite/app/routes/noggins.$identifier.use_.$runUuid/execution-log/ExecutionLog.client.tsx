@@ -2,7 +2,7 @@ import { Alert, Box, Chip, Stack, Typography } from '@mui/material';
 import { ErrorBoundary } from 'react-error-boundary';
 import { LogEntry } from 'reagent-noggin-shared/log';
 import { CostText } from '~/components/CostText';
-import T from '~/i18n/T';
+import T, { pluralize } from '~/i18n/T';
 
 const SEVERITY_MAP = {
   debug: 'info' as 'info',
@@ -132,12 +132,16 @@ function LogLine({ logEntry }: { logEntry: LogEntry }) {
 }
 
 export function ExecutionLog({ logEntries }: { logEntries: LogEntry[] }) {
+  const debugMessagesCount = logEntries.filter(
+    (e) => e.level === 'debug',
+  ).length;
+
   return (
     <Box>
       <Typography variant="body2" color="textSecondary" mb={3}>
         <T flagged>
-          {logEntries.filter((e) => e.level === 'debug').length} debug-level
-          messages hidden
+          {debugMessagesCount} debug-level{' '}
+          {pluralize(debugMessagesCount, 'message', 'messages')} hidden
         </T>
       </Typography>
       <Stack spacing={1}>
