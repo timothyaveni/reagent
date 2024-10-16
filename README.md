@@ -15,11 +15,7 @@ AI can help us **augment traditional UIs**, rather than just turning everything 
   <img src=".readme-images/todo-in-use.png" alt="Diagram showing a configured prompt and runtime variable, resulting in AI output for use in the software prototype">
 </p>
 
-We designed reagent to facilitate the process of integrating AI models into a wide range of software prototypes. See this walkthrough video for our [programming assignment](https://docs.google.com/document/d/1icRnM4s_1evEevnNxXBkORqz7et-GxB-e9VXt5pOEyU/edit) designed to introduce students to reagent and the use of AI models in software prototyping:
-
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=zW6F4dyj4eg"><img src="https://img.youtube.com/vi/zW6F4dyj4eg/0.jpg" alt="reagent programming assignment walkthrough"></a>
-</p>
+We designed reagent to facilitate the process of integrating AI models into a wide range of software prototypes.
 
 ## 1. Create a "noggin" to perform a particular task
 
