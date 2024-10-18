@@ -376,6 +376,98 @@ async function main() {
     },
   });
 
+  const { default: metaLlama31405BInstructEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/meta-llama-3-1-405b-instruct.js'
+  );
+
+  const _metaLlama31405BInstruct = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'meta-llama-3-1-405b-instruct',
+        revision: '2024-10-17',
+      },
+    },
+    update: {
+      editorSchema: metaLlama31405BInstructEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'meta-llama-3-1-405b-instruct',
+      revision: '2024-10-17',
+      editorSchema: metaLlama31405BInstructEditorSchema,
+    },
+  });
+
+  const { default: metaLlama370BBaseEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/meta-llama-3-70b-base.js'
+  );
+
+  const _metaLlama370BBase = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'meta-llama-3-70b-base',
+        revision: '2024-10-17',
+      },
+    },
+    update: {
+      editorSchema: metaLlama370BBaseEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'meta-llama-3-70b-base',
+      revision: '2024-10-17',
+      editorSchema: metaLlama370BBaseEditorSchema,
+    },
+  });
+
+  const { default: blackForestLabsFlux11ProEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/black-forest-labs_flux-1-1-pro.js'
+  );
+
+  const _blackForestLabsFlux11Pro = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'black-forest-labs_flux-1.1-pro',
+        revision: '2024-10-06',
+      },
+    },
+    update: {
+      editorSchema: blackForestLabsFlux11ProEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'black-forest-labs_flux-1.1-pro',
+      revision: '2024-10-06',
+      editorSchema: blackForestLabsFlux11ProEditorSchema,
+    },
+  });
+
+  const { default: blackForestLabsFlux1SchellEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/black-forest-labs_flux-1-schnell.js'
+  );
+
+  const _blackForestLabsFlux1Schell = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'black-forest-labs_flux-1-schnell',
+        revision: '2024-10-06',
+      },
+    },
+    update: {
+      editorSchema: blackForestLabsFlux1SchellEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'black-forest-labs_flux-1-schnell',
+      revision: '2024-10-06',
+      editorSchema: blackForestLabsFlux1SchellEditorSchema,
+    },
+  });
+
   const anthropicProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'anthropic',
