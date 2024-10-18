@@ -3,6 +3,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import T from '~/i18n/T';
 import { EditorComponentProps } from './EditorComponent';
 import { ImageEditor } from './image-editor/ImageEditor';
+import { BooleanEditor } from './primitive-editors/BooleanEditor.js';
 import { IntegerEditor } from './primitive-editors/IntegerEditor';
 import { NumberEditor } from './primitive-editors/NumberEditor';
 import { SimpleSchemaEditor } from './simple-schema-editor/SimpleSchemaEditor.client';
@@ -43,7 +44,7 @@ function EditorComponentInnerInner({ inputKey, input }: EditorComponentProps) {
     case 'number':
       return <NumberEditor inputKey={inputKey} input={input} />;
     case 'boolean':
-      return <>Not implemented</>;
+      return <BooleanEditor inputKey={inputKey} input={input} />;
     case 'select':
       return <>Not implemented</>;
     case 'simple-schema':

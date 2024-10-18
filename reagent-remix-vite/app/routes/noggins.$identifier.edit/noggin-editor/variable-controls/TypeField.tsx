@@ -39,6 +39,9 @@ export function TypeField({
         <MenuItem value="integer">
           <T>Integer</T>
         </MenuItem>
+        <MenuItem value="boolean">
+          <T>Boolean</T>
+        </MenuItem>
         {anyImagesPermitted && (
           <MenuItem value="image">
             <T>Image</T>
