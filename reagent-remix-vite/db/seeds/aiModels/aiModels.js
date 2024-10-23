@@ -184,6 +184,29 @@ async function main() {
     },
   });
 
+  const { default: gpt4o20240806EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-4o-2024-08-06.js'
+  );
+
+  const _gpt4o20240806 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'gpt-4o-2024-08-06',
+        revision: '2024-08-06',
+      },
+    },
+    update: {
+      editorSchema: gpt4o20240806EditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'gpt-4o-2024-08-06',
+      revision: '2024-08-06',
+      editorSchema: gpt4o20240806EditorSchema,
+    },
+  });
+
   const replicateProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'replicate',
