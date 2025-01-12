@@ -491,6 +491,29 @@ async function main() {
     },
   });
 
+  const { default: pharmapsychoticClipInterrogatorEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/pharmapsychotic_clip-interrogator.js'
+  );
+
+  const _pharmapsychoticClipInterrogator = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'pharmapsychotic_clip-interrogator',
+        revision: '2025-01-11',
+      },
+    },
+    update: {
+      editorSchema: pharmapsychoticClipInterrogatorEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'pharmapsychotic_clip-interrogator',
+      revision: '2025-01-11',
+      editorSchema: pharmapsychoticClipInterrogatorEditorSchema,
+    },
+  });
+
   const anthropicProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'anthropic',

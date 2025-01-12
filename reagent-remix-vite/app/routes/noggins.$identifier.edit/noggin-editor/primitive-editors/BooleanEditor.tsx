@@ -16,9 +16,10 @@ export function BooleanEditor({
       direction={'row'}
       spacing={3}
       alignItems={'center'}
-      justifyContent={'center'}
+      justifyContent={'flex-start'}
       sx={{
         mb: 2,
+        pl: 4,
       }}
     >
       <Checkbox

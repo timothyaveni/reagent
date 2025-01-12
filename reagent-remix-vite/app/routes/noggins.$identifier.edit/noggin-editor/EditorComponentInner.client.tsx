@@ -6,6 +6,7 @@ import { ImageEditor } from './image-editor/ImageEditor';
 import { BooleanEditor } from './primitive-editors/BooleanEditor.js';
 import { IntegerEditor } from './primitive-editors/IntegerEditor';
 import { NumberEditor } from './primitive-editors/NumberEditor';
+import { SelectEditor } from './primitive-editors/SelectEditor.js';
 import { SimpleSchemaEditor } from './simple-schema-editor/SimpleSchemaEditor.client';
 import TextEditor from './slate/TextEditor.client';
 
@@ -46,7 +47,7 @@ function EditorComponentInnerInner({ inputKey, input }: EditorComponentProps) {
     case 'boolean':
       return <BooleanEditor inputKey={inputKey} input={input} />;
     case 'select':
-      return <>Not implemented</>;
+      return <SelectEditor inputKey={inputKey} input={input} />;
     case 'simple-schema':
       return <SimpleSchemaEditor inputKey={inputKey} input={input} />;
     default:
