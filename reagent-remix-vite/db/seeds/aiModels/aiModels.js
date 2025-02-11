@@ -207,6 +207,29 @@ async function main() {
     },
   });
 
+  const { default: o3Mini20250131EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/o3-mini-2025-01-31.js'
+  );
+
+  const _o3Mini20250131 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'o3-mini-2025-01-31',
+        revision: '2025-01-31',
+      },
+    },
+    update: {
+      editorSchema: o3Mini20250131EditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'o3-mini-2025-01-31',
+      revision: '2025-01-31',
+      editorSchema: o3Mini20250131EditorSchema,
+    },
+  });
+
   const replicateProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'replicate',

@@ -18,6 +18,7 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
   for (const inputKey of Object.keys(editorSchema.allEditorComponents)) {
     const input = editorSchema.allEditorComponents[inputKey];
     switch (input.type) {
+      case 'chat-text':
       case 'chat-text-user-images-with-parameters':
       case 'chat-text-with-parameters':
         modelInputs.set(inputKey, new Y.XmlText());
@@ -61,6 +62,7 @@ const createNogginYjsDoc = (editorSchema: EditorSchema): Y.Doc => {
   for (const inputKey of Object.keys(editorSchema.allEditorComponents)) {
     const input = editorSchema.allEditorComponents[inputKey];
     switch (input.type) {
+      case 'chat-text':
       case 'chat-text-user-images-with-parameters':
       case 'chat-text-with-parameters':
       case 'plain-text-with-parameters':

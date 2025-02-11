@@ -13,6 +13,19 @@ import TextEditor from './slate/TextEditor.client';
 // lol
 function EditorComponentInnerInner({ inputKey, input }: EditorComponentProps) {
   switch (input.type) {
+    case 'chat-text':
+      // todo we should use context for capabilities
+      return (
+        <TextEditor
+          documentKey={inputKey}
+          textType="chat"
+          // obviously not quite right
+          allowImages={
+            input.chatTextCapabilities.images !== false ? 'user' : undefined
+          }
+          editorHeight={input.editorHeight}
+        />
+      );
     case 'chat-text-user-images-with-parameters':
       return (
         <TextEditor

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import {
   Box,
@@ -14,6 +14,7 @@ import InputsColumn from './InputsColumn';
 import { editorSchemaPermitsImageVariables } from './editor-schema-permits-images.js';
 import { ModelOutputEditor } from './output-editor/ModelOutputEditor';
 import { AllVariableOptionControls } from './variable-controls/VariableOptionControls';
+import { EditorSchemaContext } from './EditorSchemaContext.js';
 
 export interface EditorProps {
   noggin: {
@@ -22,7 +23,9 @@ export interface EditorProps {
   editorSchema: EditorSchema;
 }
 
-const ModelInputsBox = ({ editorSchema }: EditorProps) => {
+const ModelInputsBox = () => {
+  const editorSchema = useContext(EditorSchemaContext);
+
   return (
     <Box>
       <Typography variant="h2" mb={2}>
@@ -41,7 +44,9 @@ const ModelInputsBox = ({ editorSchema }: EditorProps) => {
   );
 };
 
-const ModelOutputsBox = ({ editorSchema }: EditorProps) => {
+const ModelOutputsBox = () => {
+  const editorSchema = useContext(EditorSchemaContext);
+
   return (
     <Box>
       <Typography variant="h2" mb={2}>
@@ -97,34 +102,40 @@ const Editor: React.FC<EditorProps> = (props) => {
 
   if (!isNarrow) {
     return (
-      <Stack direction="row" spacing={3} alignItems="top">
-        <Stack spacing={6} width="calc(100% / 3 * 2)">
-          <ModelInputsBox {...props} />
-          <ModelOutputsBox {...props} />
-        </Stack>
+      <EditorSchemaContext.Provider value={editorSchema}>
+        <Stack direction="row" spacing={3} alignItems="top">
+          <Stack spacing={6} width="calc(100% / 3 * 2)">
+            <ModelInputsBox />
+            <ModelOutputsBox />
+          </Stack>
 
-        <Stack spacing={6} width="calc(100% / 3 * 1)">
-          <AllVariableOptionControls
-            documentIds={editorSchema.modelInputComponents}
-            // this is pretty temporary -- it's better do this by editor (see kb#156)
-            // images may still be permitted by 'override' variables. this just controls inline
-            anyImagesPermitted={editorSchemaPermitsImageVariables(editorSchema)}
-          />
-          <ModelParametersBox {...props} />
+          <Stack spacing={6} width="calc(100% / 3 * 1)">
+            <AllVariableOptionControls
+              documentIds={editorSchema.modelInputComponents}
+              // this is pretty temporary -- it's better do this by editor (see kb#156)
+              // images may still be permitted by 'override' variables. this just controls inline
+              anyImagesPermitted={editorSchemaPermitsImageVariables(
+                editorSchema,
+              )}
+            />
+            <ModelParametersBox {...props} />
+          </Stack>
         </Stack>
-      </Stack>
+      </EditorSchemaContext.Provider>
     );
   } else {
     return (
-      <Stack spacing={5}>
-        <ModelInputsBox {...props} />
-        <AllVariableOptionControls
-          documentIds={editorSchema.modelInputComponents}
-          anyImagesPermitted={editorSchemaPermitsImageVariables(editorSchema)}
-        />
-        <ModelOutputsBox {...props} />
-        <ModelParametersBox {...props} />
-      </Stack>
+      <EditorSchemaContext.Provider value={editorSchema}>
+        <Stack spacing={5}>
+          <ModelInputsBox />
+          <AllVariableOptionControls
+            documentIds={editorSchema.modelInputComponents}
+            anyImagesPermitted={editorSchemaPermitsImageVariables(editorSchema)}
+          />
+          <ModelOutputsBox />
+          <ModelParametersBox {...props} />
+        </Stack>
+      </EditorSchemaContext.Provider>
     );
   }
 };

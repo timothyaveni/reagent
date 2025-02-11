@@ -14,7 +14,7 @@ export interface VariableNode extends BaseElement {
 
 export interface ChatTurnNode extends BaseElement {
   type: 'chat-turn';
-  speaker: 'user' | 'assistant';
+  speaker: 'user' | 'assistant' | 'developer';
 }
 
 export interface InlineImage extends BaseElement {

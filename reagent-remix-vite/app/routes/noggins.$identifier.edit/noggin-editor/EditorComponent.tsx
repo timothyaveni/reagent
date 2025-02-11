@@ -20,6 +20,7 @@ export default function EditorComponentWrapper({
 
   if (!hasPopulatedStore) {
     switch (input.type) {
+      case 'chat-text':
       case 'chat-text-user-images-with-parameters':
       case 'chat-text-with-parameters':
       case 'plain-text-with-parameters':
