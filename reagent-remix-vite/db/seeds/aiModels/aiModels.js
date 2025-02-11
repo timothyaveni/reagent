@@ -207,6 +207,29 @@ async function main() {
     },
   });
 
+  const { default: o120241217 } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/o1-2024-12-17.js'
+  );
+
+  const _o120241217 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'o1-2024-12-17',
+        revision: '2024-12-17',
+      },
+    },
+    update: {
+      editorSchema: o120241217,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'o1-2024-12-17',
+      revision: '2024-12-17',
+      editorSchema: o120241217,
+    },
+  });
+
   const { default: o3Mini20250131EditorSchema } = await import(
     '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/o3-mini-2025-01-31.js'
   );
