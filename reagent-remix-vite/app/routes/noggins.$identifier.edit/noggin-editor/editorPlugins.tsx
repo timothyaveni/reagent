@@ -248,8 +248,14 @@ const withChatSoftBreak = (editor: ReactEditor): ReactEditor => {
           // @ts-ignore
           node.type === 'chat-turn'
         ) {
-          // @ts-ignore
-          speaker = node.speaker === 'user' ? 'assistant' : 'user';
+          speaker =
+            // @ts-ignore
+            node.speaker === 'developer'
+              ? 'user'
+              : // @ts-ignore
+              node.speaker === 'user'
+              ? 'assistant'
+              : 'user';
           break;
         }
       }

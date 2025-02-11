@@ -1,7 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { Transforms } from 'slate';
 import { ReactEditor, useSelected, useSlate } from 'slate-react';
 import { ChatTurnNode } from '../editor-types';
+import T from '~/i18n/T.js';
+import { Box } from '@mui/material';
+import { ModelInputContext } from '../InputsColumn.js';
 
 export const ChatTurn = ({
   attributes,
@@ -16,7 +19,14 @@ export const ChatTurn = ({
 
   const editor = useSlate() as ReactEditor; // i really think this will work...
 
-  const setSpeaker = (speaker: 'user' | 'assistant') => {
+  const modelInput = useContext(ModelInputContext);
+  const cycle =
+    modelInput.type === 'chat-text'
+      ? modelInput.chatTextCapabilities.messageTypes
+      : // legacy chat-text types
+        ['user', 'assistant'];
+
+  const setSpeaker = (speaker: ChatTurnNode['speaker']) => {
     const path = ReactEditor.findPath(editor, element);
     const update: Partial<ChatTurnNode> = {
       speaker,
@@ -25,34 +35,42 @@ export const ChatTurn = ({
     // force slate rerender on paragraphs
   };
 
-  const setUser = useCallback(() => {
-    setSpeaker('user');
-  }, []);
-
-  const setAssistant = useCallback(() => {
-    setSpeaker('assistant');
-  }, []);
+  const cycleSpeaker = useCallback(() => {
+    const currentSpeaker = element.speaker;
+    const currentIndex = cycle.indexOf(currentSpeaker);
+    const nextIndex = (currentIndex + 1) % cycle.length;
+    const nextSpeaker = cycle[nextIndex] as ChatTurnNode['speaker'];
+    setSpeaker(nextSpeaker);
+  }, [element.speaker]);
 
   return (
     <div {...attributes} className="chat-turn" contentEditable={false}>
       <div className={'chat-turn-inner' + (selected ? ' selected' : '')}>
         {element.speaker === 'user' ? (
-          <div
+          <Box
             className="chat-turn-button chat-turn-button-user"
             role="button"
-            onClick={setAssistant}
+            onClick={cycleSpeaker}
           >
-            User
-          </div>
-        ) : (
-          <div
+            <T>User</T>
+          </Box>
+        ) : element.speaker === 'assistant' ? (
+          <Box
             className="chat-turn-button chat-turn-button-assistant"
             role="button"
-            onClick={setUser}
+            onClick={cycleSpeaker}
           >
-            Assistant
-          </div>
-        )}
+            <T>Assistant</T>
+          </Box>
+        ) : element.speaker === 'developer' ? (
+          <Box
+            className="chat-turn-button chat-turn-button-developer"
+            role="button"
+            onClick={cycleSpeaker}
+          >
+            <T>Developer</T>
+          </Box>
+        ) : null}
       </div>
       {children}
     </div>
