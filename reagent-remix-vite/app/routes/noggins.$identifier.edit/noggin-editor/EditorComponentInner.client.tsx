@@ -21,7 +21,7 @@ function EditorComponentInnerInner({ inputKey, input }: EditorComponentProps) {
           textType="chat"
           // obviously not quite right
           allowImages={
-            input.chatTextCapabilities.images !== false ? 'user' : undefined
+            input.chatTextCapabilities.images !== false ? 'user' : 'none'
           }
           editorHeight={input.editorHeight}
         />

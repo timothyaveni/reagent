@@ -4,6 +4,10 @@ export const editorSchemaPermitsImageVariables = (
   editorSchema: EditorSchema,
 ): boolean => {
   return Object.values(editorSchema.allEditorComponents).some((component) => {
-    return component.type === 'chat-text-user-images-with-parameters';
+    return (
+      component.type === 'chat-text-user-images-with-parameters' ||
+      (component.type === 'chat-text' &&
+        component.chatTextCapabilities.images !== false)
+    );
   });
 };
