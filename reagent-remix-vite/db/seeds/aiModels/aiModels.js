@@ -560,6 +560,31 @@ async function main() {
     },
   });
 
+  const { default: rossjillianControlnetEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/replicate/rossjillian_controlnet.js'
+  );
+
+  const _rossjillianControlnet = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: replicateProvider.id,
+        name: 'rossjillian_controlnet',
+        revision:
+          '795433b19458d0f4fa172a7ccf93178d2adb1cb8ab2ad6c8fdc33fdbcd49f477',
+      },
+    },
+    update: {
+      editorSchema: rossjillianControlnetEditorSchema,
+    },
+    create: {
+      modelProviderId: replicateProvider.id,
+      name: 'rossjillian_controlnet',
+      revision:
+        '795433b19458d0f4fa172a7ccf93178d2adb1cb8ab2ad6c8fdc33fdbcd49f477',
+      editorSchema: rossjillianControlnetEditorSchema,
+    },
+  });
+
   const anthropicProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'anthropic',
