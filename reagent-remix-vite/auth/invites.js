@@ -6,7 +6,7 @@ export const attachUnattachedInvitesForGithubUsername = async (
 ) => {
   const invites = await prisma.organizationInvite.findMany({
     where: {
-      githubUsername,
+      githubUsernameLower: githubUsername.toLowerCase(),
       attachedUserId: null,
     },
   });
