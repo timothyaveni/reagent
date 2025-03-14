@@ -116,6 +116,7 @@ export async function inviteGithubUserToOrganization(
       organizationId: args.organizationId,
       role: args.role,
       githubUsername: args.githubUsername,
+      githubUsernameLower: args.githubUsername.toLowerCase(),
       attachedUserId: null,
       inviteStatus: 'pending',
       initialBudgetQuastra: args.initialBudgetQuastra,
