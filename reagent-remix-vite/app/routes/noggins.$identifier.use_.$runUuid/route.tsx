@@ -80,16 +80,23 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
   });
 
   // todo: this goes in the model as well
-  const logEntries = await prisma.nogginRunLogEntry.findMany({
-    where: {
-      runId: run.id,
-    },
-    select: {
-      level: true,
-      stage: true,
-      message: true,
-      timestamp: true,
-    },
+  const logEntries = (
+    await prisma.nogginRunLogEntry.findMany({
+      where: {
+        runId: run.id,
+      },
+      select: {
+        level: true,
+        stage: true,
+        message: true,
+        timestamp: true,
+      },
+    })
+  ).map((logEntry) => {
+    return {
+      ...logEntry,
+      timestamp: Number(logEntry.timestamp),
+    };
   });
 
   const apiKey = await createOrGetPrimaryUINogginAPIKey_OMNIPOTENT(
