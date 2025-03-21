@@ -88,6 +88,7 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
       level: true,
       stage: true,
       message: true,
+      timestamp: true,
     },
   });
 
