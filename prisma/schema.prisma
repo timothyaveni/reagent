@@ -175,6 +175,9 @@ model OrganizationInvite {
 
   // tentative data that might be used to attach the user to the invite
   githubUsername String?
+  // this I added later -- probably there are better ways to do
+  // case insensitive search/indexing, but a bit of a historical artifact
+  githubUsernameLower String?
 
   // may not have one yet -- the stuff above is for doing this attaching
   attachedUser   User? @relation(fields: [attachedUserId], references: [id])
@@ -186,6 +189,7 @@ model OrganizationInvite {
   inviteStatus OrganizationInviteStatus
 
   @@index([githubUsername])
+  @@index([githubUsernameLower])
   @@index([attachedUserId, inviteStatus])
   @@index([organizationId, inviteStatus])
 }
