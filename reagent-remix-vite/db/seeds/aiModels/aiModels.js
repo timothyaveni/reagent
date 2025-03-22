@@ -698,6 +698,72 @@ async function main() {
     },
   });
 
+  const togetherProvider = await prisma.modelProvider.upsert({
+    where: {
+      name: 'together',
+    },
+    update: {},
+    create: {
+      name: 'together',
+      friendlyName: 'together.ai',
+      credentialsSchemaVersion: 1,
+      credentialsSchema: {
+        apiKey: {
+          type: 'string',
+          name: {
+            en_US: 'API Key',
+          },
+        },
+      },
+      needsCredentials: true,
+    },
+  });
+
+  const { default: deepseekR1EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/together/deepseek-r1.js'
+  );
+
+  const _deepseekR1Together = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: togetherProvider.id,
+        name: 'deepseek-r1',
+        revision: '2025-03-21',
+      },
+    },
+    update: {
+      editorSchema: deepseekR1EditorSchema,
+    },
+    create: {
+      modelProviderId: togetherProvider.id,
+      name: 'deepseek-r1',
+      revision: '2025-03-21',
+      editorSchema: deepseekR1EditorSchema,
+    },
+  });
+
+  const { default: deepseekR1DistillQwen14BEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/together/deepseek-r1-distill-qwen-14b.js'
+  );
+  const _deepseekR1DistillQwen14B = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: togetherProvider.id,
+        name: 'deepseek-r1-distill-qwen-14b',
+        revision: '2025-03-21',
+      },
+    },
+    update: {
+      editorSchema: deepseekR1DistillQwen14BEditorSchema,
+    },
+    create: {
+      modelProviderId: togetherProvider.id,
+      name: 'deepseek-r1-distill-qwen-14b',
+      revision: '2025-03-21',
+      editorSchema: deepseekR1DistillQwen14BEditorSchema,
+    },
+  });
+
   const testProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'test',
