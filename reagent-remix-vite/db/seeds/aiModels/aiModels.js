@@ -764,6 +764,50 @@ async function main() {
     },
   });
 
+  const groqProvider = await prisma.modelProvider.upsert({
+    where: {
+      name: 'groq',
+    },
+    update: {},
+    create: {
+      name: 'groq',
+      friendlyName: 'Groq',
+      credentialsSchemaVersion: 1,
+      credentialsSchema: {
+        apiKey: {
+          type: 'string',
+          name: {
+            en_US: 'API Key',
+          },
+        },
+      },
+      needsCredentials: true,
+    },
+  });
+
+  const { default: groqDeepseekR1DistillLlama70BSpecDecEditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/groq/deepseek-r1-distill-llama-70b-specdec.js'
+  );
+
+  const _groqDeepseekR1DistillLlama70BSpecDec = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: groqProvider.id,
+        name: 'deepseek-r1-distill-llama-70b-specdec',
+        revision: '2025-03-22',
+      },
+    },
+    update: {
+      editorSchema: groqDeepseekR1DistillLlama70BSpecDecEditorSchema,
+    },
+    create: {
+      modelProviderId: groqProvider.id,
+      name: 'deepseek-r1-distill-llama-70b-specdec',
+      revision: '2025-03-22',
+      editorSchema: groqDeepseekR1DistillLlama70BSpecDecEditorSchema,
+    },
+  });
+
   const testProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'test',
