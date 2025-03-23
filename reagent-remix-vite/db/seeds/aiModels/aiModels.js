@@ -698,6 +698,30 @@ async function main() {
     },
   });
 
+  const { default: claude37Sonnet20250219EditorSchema } =
+    await import(
+      '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/anthropic/claude-3-7-sonnet-20250219.js'
+    );
+
+  const _claude37Sonnet20250219 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: anthropicProvider.id,
+        name: 'claude-3-7-sonnet-20250219',
+        revision: '2024-02-19',
+      },
+    },
+    update: {
+      editorSchema: claude37Sonnet20250219EditorSchema,
+    },
+    create: {
+      modelProviderId: anthropicProvider.id,
+      name: 'claude-3-7-sonnet-20250219',
+      revision: '2024-02-19',
+      editorSchema: claude37Sonnet20250219EditorSchema,
+    },
+  });
+
   const togetherProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'together',
@@ -785,9 +809,10 @@ async function main() {
     },
   });
 
-  const { default: groqDeepseekR1DistillLlama70BSpecDecEditorSchema } = await import(
-    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/groq/deepseek-r1-distill-llama-70b-specdec.js'
-  );
+  const { default: groqDeepseekR1DistillLlama70BSpecDecEditorSchema } =
+    await import(
+      '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/groq/deepseek-r1-distill-llama-70b-specdec.js'
+    );
 
   const _groqDeepseekR1DistillLlama70BSpecDec = await prisma.aIModel.upsert({
     where: {
