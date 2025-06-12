@@ -334,6 +334,15 @@ export const getInitiatorForProvisionalNoggin_OMNISCIENT = async (
   return provisionalNoggin.userInitiatorId;
 };
 
+// this is a FAMILY-FRIENDLY piece of educational technology software
+const safeAdjectives = adjectives.filter(a => ![
+  'bloody', 'drunk', 'naked', 'sexual'
+].includes(a));
+
+const safeAnimals = animals.filter(a => ![
+  'booby', 'cougar', 'beaver'
+].includes(a))
+
 const randomSlug = () => {
   const numberDictionary = NumberDictionary.generate({ min: 1000, max: 9999 });
   return uniqueNamesGenerator({
@@ -357,6 +366,8 @@ const generateFreeSlug = async () => {
     if (!noggin) {
       return slug;
     }
+
+    tries++;
   }
 
   throw new Error('Could not generate a free slug');
