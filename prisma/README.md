@@ -8,5 +8,8 @@ dev-utils/prisma-remix.sh migrate diff --from-url "postgresql://postgres:pg_dev_
 ```
 
 ```
+dev-utils/prisma-remix.sh migrate status
 dev-utils/prisma-remix.sh migrate dev
 ```
+
+In prod, need to rebuild the docker image for the migrations to be in there -- which is a little awkward because then the db is out of sync with the product, but that happens one way or another...
