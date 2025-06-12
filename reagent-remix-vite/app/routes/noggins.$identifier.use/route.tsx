@@ -40,7 +40,7 @@ export const loader = async ({
     getNogginEditorSchema_OMNISCIENT(noggin.id),
   ]);
 
-  const { runs, runCount, NOGGIN_RUN_PAGE_SIZE } = await getNogginRuns(
+  const { runs, runCount, pageSize } = await getNogginRuns(
     context,
     { nogginId: noggin.id },
     page,
@@ -55,7 +55,7 @@ export const loader = async ({
 
     page,
     runCount,
-    NOGGIN_RUN_PAGE_SIZE,
+    pageSize,
   });
 };
 
@@ -117,7 +117,7 @@ export default function UseNoggin() {
     runs,
     page,
     runCount,
-    NOGGIN_RUN_PAGE_SIZE,
+    pageSize,
   } = useLoaderData<typeof loader>();
 
   return (
@@ -134,7 +134,7 @@ export default function UseNoggin() {
         page={page}
         runs={runs}
         runCount={runCount}
-        runPageSize={NOGGIN_RUN_PAGE_SIZE}
+        runPageSize={pageSize}
       />
     </div>
   );

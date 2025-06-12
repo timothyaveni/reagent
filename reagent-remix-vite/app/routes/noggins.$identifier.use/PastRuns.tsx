@@ -27,7 +27,7 @@ type PastRunsProps = {
   page: SerializeFrom<NogginUseLoader>['page'];
   runs: SerializeFrom<NogginUseLoader>['runs'];
   runCount: SerializeFrom<NogginUseLoader>['runCount'];
-  runPageSize: SerializeFrom<NogginUseLoader>['NOGGIN_RUN_PAGE_SIZE'];
+  runPageSize: SerializeFrom<NogginUseLoader>['pageSize'];
 };
 
 function NoRuns() {
