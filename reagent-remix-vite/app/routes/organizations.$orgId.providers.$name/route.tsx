@@ -97,6 +97,19 @@ export default function Provider() {
   const actionResponse = useActionData<typeof action>();
   const submit = useSubmit();
 
+  // Added: optional extra field for OpenAI provider only
+  const extraFields =
+    provider.name === 'openai'
+      ? [
+          {
+            key: 'base_url',
+            label: 'Base URL (optional)',
+            helperText:
+              'Optional. If left blank, the default OpenAI API endpoint will be used.',
+          },
+        ]
+      : undefined;
+
   return (
     <Box mt={4}>
       <Breadcrumbs>
@@ -128,6 +141,7 @@ export default function Provider() {
           provider.credentialsSchema as any // TODO get this type outta there
         }
         currentCredentials={currentCredentials as Record<string, string>}
+        extraFields={extraFields}
         onSubmit={(credentials: any) => {
           // alert(JSON.stringify(credentials));
           submit(

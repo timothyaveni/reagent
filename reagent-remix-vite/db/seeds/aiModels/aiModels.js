@@ -18,6 +18,17 @@ async function main() {
             en_US: 'API Key',
           },
         },
+        // 新增可选 Azure 端点，保持后向兼容
+        base_url: {
+          type: 'string',
+          name: {
+            en_US: 'Base URL (Azure endpoint, optional)',
+          },
+          description: {
+            en_US:
+              'If set to an Azure domain (https://{resource}.openai.azure.com/ or https://{resource}.cognitiveservices.azure.com/), Azure OpenAI will be used automatically. Model-to-deployment mapping is derived from the selected model; you do not need to enter a deployment name.',
+          },
+        },
       },
       needsCredentials: true,
     },
