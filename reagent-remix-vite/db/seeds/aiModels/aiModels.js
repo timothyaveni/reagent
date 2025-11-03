@@ -253,6 +253,67 @@ async function main() {
     },
   });
 
+  const { default: gpt5EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/openai/gpt-5-family.js'
+  );
+
+  const _gpt5 = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'gpt-5',
+        revision: '2025-11-03',
+      },
+    },
+    update: {
+      editorSchema: gpt5EditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'gpt-5',
+      revision: '2025-11-03',
+      editorSchema: gpt5EditorSchema,
+    },
+  });
+
+  const _gpt5Mini = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'gpt-5-mini',
+        revision: '2025-11-03',
+      },
+    },
+    update: {
+      editorSchema: gpt5EditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'gpt-5-mini',
+      revision: '2025-11-03',
+      editorSchema: gpt5EditorSchema,
+    },
+  });
+
+  const _gpt5Nano = await prisma.aIModel.upsert({
+    where: {
+      modelProviderId_name_revision: {
+        modelProviderId: openAiProvider.id,
+        name: 'gpt-5-nano',
+        revision: '2025-11-03',
+      },
+    },
+    update: {
+      editorSchema: gpt5EditorSchema,
+    },
+    create: {
+      modelProviderId: openAiProvider.id,
+      name: 'gpt-5-nano',
+      revision: '2025-11-03',
+      editorSchema: gpt5EditorSchema,
+    },
+  });
+
   const replicateProvider = await prisma.modelProvider.upsert({
     where: {
       name: 'replicate',
@@ -698,10 +759,9 @@ async function main() {
     },
   });
 
-  const { default: claude37Sonnet20250219EditorSchema } =
-    await import(
-      '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/anthropic/claude-3-7-sonnet-20250219.js'
-    );
+  const { default: claude37Sonnet20250219EditorSchema } = await import(
+    '../../../../noggin-server/dist/reagent-noggin-shared/editor-schemas/anthropic/claude-3-7-sonnet-20250219.js'
+  );
 
   const _claude37Sonnet20250219 = await prisma.aIModel.upsert({
     where: {

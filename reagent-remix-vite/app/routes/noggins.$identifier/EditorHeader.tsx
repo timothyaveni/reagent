@@ -74,7 +74,7 @@ const EditorHeader: React.FC = () => {
               <Typography
                 variant="body2"
                 color="textSecondary"
-                component="p"
+                component="div"
                 display="flex"
                 alignItems="center"
                 gap={1}
